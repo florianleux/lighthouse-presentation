@@ -1,0 +1,73 @@
+/* Lighthouse Pirates - Theme */
+
+:root {
+  /* Couleurs pirate */
+  --slidev-theme-primary: #d4af37; /* Or */
+  --slidev-theme-accent: #1e3a5f; /* Bleu marine */
+
+  /* Backgrounds */
+  --pirate-bg-dark: #0f172a;
+  --pirate-bg-card: rgba(30, 58, 95, 0.3);
+
+  /* Texte */
+  --pirate-gold: #d4af37;
+  --pirate-cream: #f5f5dc;
+}
+
+/* Fond général */
+.slidev-layout {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+/* Titres en or */
+h1 {
+  color: var(--pirate-gold) !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+  color: var(--pirate-cream) !important;
+}
+
+/* Cards avec effet verre */
+.bg-blue-900\/30,
+.bg-amber-900\/30,
+.bg-green-900\/30,
+.bg-purple-900\/30,
+.bg-orange-900\/30 {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* Boutons kbd */
+kbd {
+  background: var(--pirate-bg-card);
+  border: 1px solid var(--pirate-gold);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--pirate-gold);
+}
+
+/* Animation pour les scores */
+@keyframes pulse-score {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.text-5xl.font-bold {
+  animation: pulse-score 2s ease-in-out infinite;
+}
+
+/* Scrollbar stylisée */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--pirate-bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pirate-gold);
+  border-radius: 4px;
+}

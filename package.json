@@ -1,6 +1,9 @@
 {
   "name": "lighthouse-presentation",
   "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
   "scripts": {
     "dev:presentation": "pnpm --filter @lighthouse/presentation dev",
     "dev:vote": "pnpm --filter @lighthouse/vote dev",
