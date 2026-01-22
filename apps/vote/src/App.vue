@@ -7,6 +7,7 @@ interface SavedMember {
   name: string
   odientId: string
   keynoteId: string
+  avatar: string | null
 }
 
 const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState, onVoteStarted, sendVote } = useAbly()
@@ -90,12 +91,13 @@ function loadSavedMember(): SavedMember | null {
 }
 
 // Save crew member to localStorage
-function saveMember(memberName: string, odientId: string, keynoteId: string) {
+function saveMember(memberName: string, odientId: string, keynoteId: string, avatar: string | null) {
   try {
     localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify({
       name: memberName,
       odientId,
-      keynoteId
+      keynoteId,
+      avatar
     }))
   } catch (e) {
     console.error('Failed to save member:', e)
@@ -135,25 +137,47 @@ onMounted(async () => {
     // Subscribe to session state to get keynoteId
     onSessionState((msg) => {
       const newKeynoteId = msg.keynoteId
-      console.log('[App] Received session state, keynoteId:', newKeynoteId)
-
-      // Update active keynote
+      const previousKeynoteId = activeKeynoteId.value
+      console.log('[App] Received session state, keynoteId:', newKeynoteId, 'status:', status.value)
       activeKeynoteId.value = newKeynoteId
 
-      // If we have a saved member, validate keynoteId
-      if (savedMember && status.value === 'joined') {
-        if (newKeynoteId && savedMember.keynoteId !== newKeynoteId) {
-          // Session expired - clear and go back to form
-          console.log('[App] Keynote mismatch, clearing session')
-          clearSavedMember()
-          joinedName.value = ''
+      // Only handle initial sync when in 'connecting' state
+      if (status.value === 'connecting') {
+        if (savedMember) {
+          if (newKeynoteId && savedMember.keynoteId === newKeynoteId) {
+            // Same keynote - restore session
+            status.value = 'joined'
+            console.log('[App] Same keynote, restoring session')
+          } else if (newKeynoteId) {
+            // Different keynote active - clear and show form
+            console.log('[App] Different keynote, clearing session')
+            clearSavedMember()
+            joinedName.value = ''
+            selectedEmoji.value = null
+            status.value = 'idle'
+          } else {
+            // No keynote active - clear and wait
+            console.log('[App] No keynote active, clearing session')
+            clearSavedMember()
+            joinedName.value = ''
+            selectedEmoji.value = null
+            status.value = 'waiting'
+          }
+        } else {
+          // No saved member
           status.value = newKeynoteId ? 'idle' : 'waiting'
         }
+        return
       }
 
-      // If waiting and keynote is now available, show form
-      if (status.value === 'waiting' && newKeynoteId) {
-        status.value = 'idle'
+      // Handle keynote change while already joined/idle
+      if (status.value === 'joined' && previousKeynoteId && newKeynoteId !== previousKeynoteId) {
+        // Keynote changed - kick back to form
+        console.log('[App] Keynote changed, clearing session')
+        clearSavedMember()
+        joinedName.value = ''
+        selectedEmoji.value = null
+        status.value = newKeynoteId ? 'idle' : 'waiting'
       }
     })
 
@@ -170,17 +194,14 @@ onMounted(async () => {
       }
     })
 
-    // Determine initial status
+    // After connecting, stay in 'connecting' until we receive session-state
+    // Just restore the data, don't set final status yet
     if (savedMember) {
-      // Temporarily show joined state, will validate when we receive session state
       joinedName.value = savedMember.name
-      activeKeynoteId.value = savedMember.keynoteId // Restore keynoteId from saved session
-      status.value = 'joined'
-      console.log('[App] Restored session for', savedMember.name, 'with keynoteId:', savedMember.keynoteId)
-    } else {
-      // Show waiting state until we receive a keynote
-      status.value = 'waiting'
+      selectedEmoji.value = savedMember.avatar
+      console.log('[App] Restored data for', savedMember.name, ', waiting for session-state')
     }
+    // Stay in 'connecting' - will transition when session-state is received
   } catch (err) {
     status.value = 'error'
   }
@@ -200,7 +221,7 @@ async function handleJoin() {
     // Save to localStorage with keynoteId
     const odientId = getOdientId()
     if (odientId) {
-      saveMember(name.value.trim(), odientId, activeKeynoteId.value)
+      saveMember(name.value.trim(), odientId, activeKeynoteId.value, selectedEmoji.value)
     }
   } catch (err) {
     console.error('Failed to join crew:', err)

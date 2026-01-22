@@ -14,6 +14,8 @@ const { go, currentSlideNo } = useNav()
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
     sessionStore.updateLastSlide(slide)
+    // Publish session state on every slide change so late joiners get the current state
+    publishSessionState(slide, 'intro')
   }
 
   // Auto-skip completed vote slides
@@ -26,6 +28,24 @@ watch(currentSlideNo, (slide) => {
 
 const showAdminPanel = ref(false)
 const showRecoveryModal = ref(false)
+let heartbeatInterval: ReturnType<typeof setInterval> | null = null
+
+// Heartbeat: publish session state every 3 seconds so late joiners can sync
+function startHeartbeat() {
+  if (heartbeatInterval) return
+  heartbeatInterval = setInterval(() => {
+    if (sessionStore.keynoteId && currentSlideNo.value) {
+      publishSessionState(currentSlideNo.value, 'intro')
+    }
+  }, 3000)
+}
+
+function stopHeartbeat() {
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval)
+    heartbeatInterval = null
+  }
+}
 
 function handleKeydown(e: KeyboardEvent) {
   // Toggle admin panel with K key
@@ -52,6 +72,7 @@ function resumeSession(targetSlide: number) {
   showRecoveryModal.value = false
   go(targetSlide)
   publishSessionState(targetSlide, 'intro')
+  startHeartbeat()
 }
 
 function handleContinueHere() {
@@ -70,6 +91,7 @@ function handleResetSession() {
   go(1)
   // Publish the new session state
   publishSessionState(1, 'intro')
+  startHeartbeat()
 }
 
 onMounted(() => {
@@ -83,12 +105,13 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
+  stopHeartbeat()
 })
 </script>
 
 <template>
   <NavigationBlocker />
-  <CrewPills />
+  <CrewPills :current-slide="currentSlideNo" />
   <VoteTower />
   <AdminPanel
     :visible="showAdminPanel"
