@@ -1,7 +1,7 @@
 import Ably from 'ably'
 import { ref, shallowRef } from 'vue'
 import { ABLY_CHANNELS } from '../../../../shared/constants'
-import type { AvatarCreatedMessage } from '../../../../shared/types'
+import type { AvatarCreatedMessage, SessionStateMessage } from '../../../../shared/types'
 
 interface AblyState {
   client: Ably.Realtime | null
@@ -64,7 +64,7 @@ export function useAbly() {
   /**
    * Send a join crew message with the name
    */
-  async function joinCrew(name: string): Promise<void> {
+  async function joinCrew(name: string, keynoteId: string): Promise<void> {
     const { client } = state.value
     if (!client || !odientId) {
       throw new Error('Not connected to Ably')
@@ -74,6 +74,7 @@ export function useAbly() {
 
     const message: AvatarCreatedMessage = {
       type: 'avatar-created',
+      keynoteId,
       odientId,
       name,
       avatar: null,
@@ -81,7 +82,7 @@ export function useAbly() {
     }
 
     await channel.publish('message', message)
-    console.log('[Ably] Joined crew as', name)
+    console.log('[Ably] Joined crew as', name, 'for keynote', keynoteId)
   }
 
   /**
@@ -97,6 +98,27 @@ export function useAbly() {
   function restoreSession(savedOdientId: string) {
     odientId = savedOdientId
     console.log('[Ably] Session restored for', savedOdientId)
+  }
+
+  /**
+   * Subscribe to session state messages from the presentation
+   */
+  function onSessionState(callback: (msg: SessionStateMessage) => void): void {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot subscribe to session state - not connected')
+      return
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    channel.subscribe('message', (message) => {
+      const data = message.data as SessionStateMessage
+      if (data.type === 'session-state') {
+        callback(data)
+      }
+    })
+
+    console.log('[Ably] Subscribed to session state')
   }
 
   /**
@@ -120,6 +142,7 @@ export function useAbly() {
     joinCrew,
     getOdientId,
     restoreSession,
+    onSessionState,
     disconnect,
   }
 }
