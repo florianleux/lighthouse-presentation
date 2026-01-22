@@ -9,13 +9,18 @@ interface SavedMember {
   keynoteId: string
 }
 
-const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState } = useAbly()
+const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState, onVoteStarted, sendVote } = useAbly()
 
 // Form state
 const name = ref('')
 const status = ref<'connecting' | 'waiting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
 const joinedName = ref('')
 const activeKeynoteId = ref<string | null>(null)
+
+// Voting state
+const activeVoteIndex = ref<number | null>(null)
+const selectedChoice = ref<'A' | 'B' | null>(null)
+const hasVoted = ref(false)
 
 // Validation
 const isValid = computed(() => {
@@ -115,12 +120,21 @@ onMounted(async () => {
       }
     })
 
+    // Subscribe to vote-started messages
+    onVoteStarted((msg) => {
+      console.log('[App] Vote started:', msg.voteIndex)
+      activeVoteIndex.value = msg.voteIndex
+      selectedChoice.value = null
+      hasVoted.value = false
+    })
+
     // Determine initial status
     if (savedMember) {
       // Temporarily show joined state, will validate when we receive session state
       joinedName.value = savedMember.name
+      activeKeynoteId.value = savedMember.keynoteId // Restore keynoteId from saved session
       status.value = 'joined'
-      console.log('[App] Restored session for', savedMember.name, '(awaiting keynote validation)')
+      console.log('[App] Restored session for', savedMember.name, 'with keynoteId:', savedMember.keynoteId)
     } else {
       // Show waiting state until we receive a keynote
       status.value = 'waiting'
@@ -149,6 +163,40 @@ async function handleJoin() {
   } catch (err) {
     console.error('Failed to join crew:', err)
     status.value = 'error'
+  }
+}
+
+// Submit vote
+async function submitVote() {
+  console.log('[App] submitVote called:', {
+    selectedChoice: selectedChoice.value,
+    activeVoteIndex: activeVoteIndex.value,
+    activeKeynoteId: activeKeynoteId.value
+  })
+
+  // Try to get keynoteId from localStorage if not available
+  let keynoteId = activeKeynoteId.value
+  if (!keynoteId) {
+    const saved = loadSavedMember()
+    keynoteId = saved?.keynoteId || null
+    console.log('[App] Using saved keynoteId:', keynoteId)
+  }
+
+  if (!selectedChoice.value || activeVoteIndex.value === null || !keynoteId) {
+    console.warn('[App] Cannot submit vote - missing data:', {
+      selectedChoice: selectedChoice.value,
+      activeVoteIndex: activeVoteIndex.value,
+      keynoteId
+    })
+    return
+  }
+
+  try {
+    await sendVote(activeVoteIndex.value, selectedChoice.value, keynoteId)
+    hasVoted.value = true
+    console.log('[App] Vote submitted:', selectedChoice.value)
+  } catch (err) {
+    console.error('Failed to submit vote:', err)
   }
 }
 </script>
@@ -201,12 +249,47 @@ async function handleJoin() {
         </button>
       </div>
 
-      <!-- State: Joined -->
-      <div v-else-if="status === 'joined'" class="success">
+      <!-- State: Joined - Waiting -->
+      <div v-else-if="status === 'joined' && activeVoteIndex === null" class="success">
         <div class="checkmark">✓</div>
         <h2>Welcome aboard, {{ joinedName }}!</h2>
         <p>You're now part of the crew.</p>
         <p class="hint">Wait for the captain's instructions...</p>
+      </div>
+
+      <!-- State: Joined - Voting -->
+      <div v-else-if="status === 'joined' && activeVoteIndex !== null && !hasVoted" class="voting">
+        <h2>Vote now!</h2>
+        <p class="vote-hint">Choose your option</p>
+        <div class="vote-buttons">
+          <button
+            :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
+            @click="selectedChoice = 'A'"
+          >
+            A
+          </button>
+          <button
+            :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
+            @click="selectedChoice = 'B'"
+          >
+            B
+          </button>
+        </div>
+        <button
+          class="validate-btn"
+          :disabled="!selectedChoice"
+          @click="submitVote"
+        >
+          Validate
+        </button>
+      </div>
+
+      <!-- State: Joined - Voted -->
+      <div v-else-if="status === 'joined' && hasVoted" class="success">
+        <div class="checkmark">✓</div>
+        <h2>Vote recorded!</h2>
+        <p>You voted for option {{ selectedChoice }}</p>
+        <p class="hint">Wait for the results...</p>
       </div>
     </div>
 
@@ -367,5 +450,82 @@ input::placeholder {
 
 .disconnected {
   color: #ff6b6b;
+}
+
+/* Voting styles */
+.voting {
+  padding: 20px 0;
+}
+
+.voting h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.vote-hint {
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.vote-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.vote-btn {
+  width: 80px;
+  height: 80px;
+  font-size: 32px;
+  font-weight: bold;
+  border: 3px solid;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vote-a {
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.vote-a:hover,
+.vote-a.selected {
+  background: #3b82f6;
+  color: white;
+}
+
+.vote-b {
+  border-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.vote-b:hover,
+.vote-b.selected {
+  background: #f59e0b;
+  color: white;
+}
+
+.validate-btn {
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e3a5f;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.validate-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.validate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 </style>

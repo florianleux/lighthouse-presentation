@@ -1,7 +1,7 @@
 import Ably from 'ably'
 import { ref, shallowRef } from 'vue'
 import { ABLY_CHANNELS } from '../../../../shared/constants'
-import type { AvatarCreatedMessage, SessionStateMessage } from '../../../../shared/types'
+import type { AvatarCreatedMessage, SessionStateMessage, VoteCastMessage, VoteStartedMessage } from '../../../../shared/types'
 
 interface AblyState {
   client: Ably.Realtime | null
@@ -122,6 +122,51 @@ export function useAbly() {
   }
 
   /**
+   * Subscribe to vote-started messages from the presentation
+   */
+  function onVoteStarted(callback: (msg: VoteStartedMessage) => void): void {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot subscribe to vote-started - not connected')
+      return
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    channel.subscribe('message', (message) => {
+      const data = message.data
+      if (data.type === 'vote-started') {
+        callback(data)
+      }
+    })
+
+    console.log('[Ably] Subscribed to vote-started messages')
+  }
+
+  /**
+   * Send a vote to the presentation
+   */
+  async function sendVote(voteIndex: number, choice: 'A' | 'B', keynoteId: string): Promise<void> {
+    const { client } = state.value
+    if (!client || !odientId) {
+      throw new Error('Not connected to Ably')
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.VOTES)
+
+    const message: VoteCastMessage = {
+      type: 'vote-cast',
+      keynoteId,
+      odientId,
+      voteIndex,
+      choice,
+      timestamp: Date.now(),
+    }
+
+    await channel.publish('message', message)
+    console.log('[Ably] Vote sent:', choice, 'for vote', voteIndex)
+  }
+
+  /**
    * Disconnect
    */
   function disconnect() {
@@ -143,6 +188,8 @@ export function useAbly() {
     getOdientId,
     restoreSession,
     onSessionState,
+    onVoteStarted,
+    sendVote,
     disconnect,
   }
 }
