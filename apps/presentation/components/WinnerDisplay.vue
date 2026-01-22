@@ -6,28 +6,28 @@ const props = defineProps<{
   voteIndex: number
 }>()
 
-// Données des options par vote
+// Vote options data
 const voteData = {
   0: {
     A: {
       title: 'Images & Transfer',
       fixes: [
-        'Conversion images en WebP',
-        'Ajout loading="lazy" below-fold',
-        'Ajout attributs width et height',
-        'Suppression CSS render-blocking',
-        'Activation compression gzip/brotli'
+        'Convert images to WebP',
+        'Add loading="lazy" below-fold',
+        'Add width and height attributes',
+        'Remove render-blocking CSS',
+        'Enable gzip/brotli compression'
       ]
     },
     B: {
       title: 'Fonts & JavaScript',
       fixes: [
-        'font-display: swap sur toutes les fonts',
-        'Suppression fonts render-blocking',
-        'Ajout preconnect domaines externes',
-        'Suppression lodash, moment, jQuery',
-        'Suppression third-party scripts bloquants',
-        'Suppression script inline 500ms'
+        'font-display: swap on all fonts',
+        'Remove render-blocking fonts',
+        'Add preconnect for external domains',
+        'Remove lodash, moment, jQuery',
+        'Remove blocking third-party scripts',
+        'Remove 500ms inline script'
       ]
     }
   },
@@ -35,21 +35,21 @@ const voteData = {
     A: {
       title: 'Visual',
       fixes: [
-        'Amélioration contrastes (ratio 4.5:1)',
-        'Ajout focus indicators visibles',
-        'Labels sur tous les inputs',
-        'Noms accessibles sur liens/boutons',
-        'Contrôles sur médias auto-play'
+        'Improve contrasts (4.5:1 ratio)',
+        'Add visible focus indicators',
+        'Labels on all inputs',
+        'Accessible names on links/buttons',
+        'Controls on auto-play media'
       ]
     },
     B: {
       title: 'Semantic',
       fixes: [
-        'Remplacement div cliquables par button',
-        'Ajout attribut lang sur html',
-        'Ajout skip link',
-        'Correction keyboard traps',
-        'Correction hiérarchie headings (h1→h2→h3)'
+        'Replace clickable divs with buttons',
+        'Add lang attribute to html',
+        'Add skip link',
+        'Fix keyboard traps',
+        'Fix heading hierarchy (h1→h2→h3)'
       ]
     }
   },
@@ -57,21 +57,21 @@ const voteData = {
     A: {
       title: 'Console & Security',
       fixes: [
-        'Suppression console.log en production',
-        'Ajout rel="noopener" sur liens externes',
-        'Suppression document.write()',
-        'Correction erreurs console',
-        'Mise à jour librairies vulnérables'
+        'Remove console.log in production',
+        'Add rel="noopener" on external links',
+        'Remove document.write()',
+        'Fix console errors',
+        'Update vulnerable libraries'
       ]
     },
     B: {
       title: 'Modern Standards',
       fixes: [
-        "Correction dimensions d'affichage images",
-        'Vérification doctype',
-        'Suppression demandes permissions agressives',
-        'Ajout passive listeners (scroll, touch)',
-        'Masquage source maps en production'
+        'Fix image display dimensions',
+        'Verify doctype',
+        'Remove aggressive permission requests',
+        'Add passive listeners (scroll, touch)',
+        'Hide source maps in production'
       ]
     }
   },
@@ -79,21 +79,21 @@ const voteData = {
     A: {
       title: 'Meta & Structure',
       fixes: [
-        'Ajout title unique',
-        'Ajout meta name="description"',
-        'Un seul h1 par page',
-        'Vérification viewport meta',
-        'Ajout canonical URL'
+        'Add unique title',
+        'Add meta name="description"',
+        'One h1 per page',
+        'Verify viewport meta',
+        'Add canonical URL'
       ]
     },
     B: {
       title: 'Content & Links',
       fixes: [
-        'Texte de liens descriptif (pas de "click here")',
-        'Attributs alt sur toutes les images',
-        'Suppression meta noindex',
-        'Navigation crawlable (vrais a href)',
-        'Suppression chaînes de redirections'
+        'Descriptive link text (no "click here")',
+        'Alt attributes on all images',
+        'Remove meta noindex',
+        'Crawlable navigation (real a href)',
+        'Remove redirect chains'
       ]
     }
   }
@@ -110,7 +110,7 @@ const winner = computed(() => {
 <template>
   <div v-if="choice && winner" class="mt-4">
     <div class="text-2xl mb-4">
-      L'équipage a choisi : <span class="font-bold" :class="choice === 'A' ? 'text-blue-500' : 'text-amber-500'">Option {{ choice }}</span>
+      The crew chose: <span class="font-bold" :class="choice === 'A' ? 'text-blue-500' : 'text-amber-500'">Option {{ choice }}</span>
     </div>
     <div class="p-6 border-2 rounded-lg" :class="choice === 'A' ? 'border-blue-500' : 'border-amber-500'">
       <div class="text-xl font-bold mb-4">{{ winner.title }}</div>
@@ -123,6 +123,6 @@ const winner = computed(() => {
     </div>
   </div>
   <div v-else class="mt-4 p-6 border rounded-lg text-center opacity-50">
-    Aucun vote enregistré - retournez au slide de vote
+    No vote recorded - go back to the vote slide
   </div>
 </template>

@@ -1,15 +1,15 @@
 // ===========================================
-// Types partagés pour la communication Ably
+// Shared types for Ably communication
 // ===========================================
 
-// Avatar (3 parties combinables = 729 combinaisons)
+// Avatar (3 combinable parts = 729 combinations)
 export interface Avatar {
   head: number      // 0-8
   body: number      // 0-8
   accessory: number // 0-8
 }
 
-// Participant (pirate de l'équipage)
+// Participant (crew pirate)
 export interface CrewMember {
   odientId: string
   name: string
@@ -18,7 +18,7 @@ export interface CrewMember {
 }
 
 // ===========================================
-// Messages ENTRANTS (vote app → presentation)
+// INCOMING Messages (vote app → presentation)
 // ===========================================
 
 export interface AvatarCreatedMessage {
@@ -46,7 +46,7 @@ export interface HeartbeatResponseMessage {
 }
 
 // ===========================================
-// Messages SORTANTS (presentation → vote app)
+// OUTGOING Messages (presentation → vote app)
 // ===========================================
 
 export type SessionPhase = 'intro' | 'voting' | 'results' | 'application' | 'recap'
@@ -70,7 +70,7 @@ export interface HeartbeatRequestMessage {
 export interface VoteStartedMessage {
   type: 'vote-started'
   voteIndex: number
-  duration: number // en secondes
+  duration: number // in seconds
   timestamp: number
 }
 
@@ -83,7 +83,7 @@ export interface VoteEndedMessage {
 }
 
 // ===========================================
-// Union types pour typage strict
+// Union types for strict typing
 // ===========================================
 
 export type IncomingMessage =
@@ -98,12 +98,12 @@ export type OutgoingMessage =
   | VoteEndedMessage
 
 // ===========================================
-// État de la session (stocké localement)
+// Session state (stored locally)
 // ===========================================
 
 export interface VoteResults {
-  A: string[]  // Liste des odientIds ayant voté A
-  B: string[]  // Liste des odientIds ayant voté B
+  A: string[]  // List of odientIds who voted A
+  B: string[]  // List of odientIds who voted B
   winner: 'A' | 'B' | null
 }
 
@@ -114,6 +114,6 @@ export interface SessionState {
   currentSlide: number
   path: (string | null)[]
   crew: CrewMember[]
-  activeCrew: string[]  // odientIds des participants actifs (heartbeat récent)
+  activeCrew: string[]  // odientIds of active participants (recent heartbeat)
   votes: Record<number, VoteResults>  // voteIndex → résultats
 }
