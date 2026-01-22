@@ -51,3 +51,12 @@ export const AVATAR_CONFIG = {
   ACCESSORIES_COUNT: 9,
   TOTAL_COMBINATIONS: 9 * 9 * 9,  // 729
 } as const
+
+// LocalStorage keys
+export const STORAGE_KEYS = {
+  // Presentation app
+  KEYNOTE_ID: 'lighthouse-keynote-id',
+
+  // Vote app
+  CREW_MEMBER: 'lighthouse-pirates-crew',
+} as const

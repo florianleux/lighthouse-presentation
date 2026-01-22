@@ -1,13 +1,30 @@
 import { reactive, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { useAbly } from '../composables/useAbly'
-import { VOTE_CONFIG, ABLY_CHANNELS } from '../../../shared/constants'
+import { VOTE_CONFIG, ABLY_CHANNELS, STORAGE_KEYS } from '../../../shared/constants'
 import type {
   CrewMember,
   VoteResults,
   SessionStateMessage,
   SessionPhase,
 } from '../../../shared/types'
+
+// Keynote ID persistence
+function loadKeynoteId(): string | null {
+  if (typeof localStorage === 'undefined') return null
+  return localStorage.getItem(STORAGE_KEYS.KEYNOTE_ID)
+}
+
+function saveKeynoteId(id: string) {
+  if (typeof localStorage === 'undefined') return
+  localStorage.setItem(STORAGE_KEYS.KEYNOTE_ID, id)
+}
+
+function generateKeynoteId(): string {
+  const id = 'keynote-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
+  saveKeynoteId(id)
+  return id
+}
 
 // Slides de vote (navigation bloquée)
 export const VOTE_SLIDES = VOTE_CONFIG.SLIDES as unknown as number[]
@@ -31,6 +48,7 @@ export const voteStore = reactive({
 
 // Store de session (équipage, votes, état)
 export const sessionStore = reactive({
+  keynoteId: loadKeynoteId(),
   sessionId: generateSessionId(),
   startedAt: Date.now(),
   isAblyConnected: false,
@@ -90,6 +108,22 @@ export const sessionStore = reactive({
     this.activeVoteIndex = null
     this.votePhase = 'waiting'
     voteStore.reset()
+  },
+
+  // Start a new session with a new keynoteId (called from admin panel)
+  startNewSession() {
+    this.keynoteId = generateKeynoteId()
+    this.resetSession()
+    console.log('[Session] New session started:', this.keynoteId)
+  },
+
+  // Generate keynoteId without resetting (first time setup)
+  initKeynote() {
+    if (!this.keynoteId) {
+      this.keynoteId = generateKeynoteId()
+      console.log('[Session] Keynote initialized:', this.keynoteId)
+    }
+    return this.keynoteId
   }
 })
 
@@ -154,6 +188,7 @@ export function publishSessionState(currentSlide: number, phase: SessionPhase) {
 
   const message: SessionStateMessage = {
     type: 'session-state',
+    keynoteId: sessionStore.keynoteId,
     sessionId: sessionStore.sessionId,
     currentSlide,
     path: voteStore.path,

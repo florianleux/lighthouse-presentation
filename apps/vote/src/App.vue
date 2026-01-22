@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAbly } from './composables/useAbly'
+import { STORAGE_KEYS } from '../../../shared/constants'
 
-const STORAGE_KEY = 'lighthouse-pirates-crew'
+interface SavedMember {
+  name: string
+  odientId: string
+  keynoteId: string
+}
 
-const { isConnected, error, connect, joinCrew, getOdientId, restoreSession } = useAbly()
+const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState } = useAbly()
 
 // Form state
 const name = ref('')
-const status = ref<'connecting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
+const status = ref<'connecting' | 'waiting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
 const joinedName = ref('')
+const activeKeynoteId = ref<string | null>(null)
 
 // Validation
 const isValid = computed(() => {
@@ -25,10 +31,13 @@ const validationMessage = computed(() => {
   return ''
 })
 
+// Can join only if we have an active keynote
+const canJoin = computed(() => isValid.value && activeKeynoteId.value !== null)
+
 // Load saved crew member from localStorage
-function loadSavedMember(): { name: string; odientId: string } | null {
+function loadSavedMember(): SavedMember | null {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY)
+    const saved = localStorage.getItem(STORAGE_KEYS.CREW_MEMBER)
     if (saved) {
       return JSON.parse(saved)
     }
@@ -39,11 +48,24 @@ function loadSavedMember(): { name: string; odientId: string } | null {
 }
 
 // Save crew member to localStorage
-function saveMember(memberName: string, odientId: string) {
+function saveMember(memberName: string, odientId: string, keynoteId: string) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: memberName, odientId }))
+    localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify({
+      name: memberName,
+      odientId,
+      keynoteId
+    }))
   } catch (e) {
     console.error('Failed to save member:', e)
+  }
+}
+
+// Clear saved member from localStorage
+function clearSavedMember() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER)
+  } catch (e) {
+    console.error('Failed to clear saved member:', e)
   }
 }
 
@@ -61,16 +83,47 @@ onMounted(async () => {
   const savedMember = loadSavedMember()
 
   try {
+    // Connect (with saved odientId if available)
+    await connect(apiKey, savedMember?.odientId)
+
     if (savedMember) {
-      // Restore session with saved odientId
-      await connect(apiKey, savedMember.odientId)
       restoreSession(savedMember.odientId)
+    }
+
+    // Subscribe to session state to get keynoteId
+    onSessionState((msg) => {
+      const newKeynoteId = msg.keynoteId
+      console.log('[App] Received session state, keynoteId:', newKeynoteId)
+
+      // Update active keynote
+      activeKeynoteId.value = newKeynoteId
+
+      // If we have a saved member, validate keynoteId
+      if (savedMember && status.value === 'joined') {
+        if (newKeynoteId && savedMember.keynoteId !== newKeynoteId) {
+          // Session expired - clear and go back to form
+          console.log('[App] Keynote mismatch, clearing session')
+          clearSavedMember()
+          joinedName.value = ''
+          status.value = newKeynoteId ? 'idle' : 'waiting'
+        }
+      }
+
+      // If waiting and keynote is now available, show form
+      if (status.value === 'waiting' && newKeynoteId) {
+        status.value = 'idle'
+      }
+    })
+
+    // Determine initial status
+    if (savedMember) {
+      // Temporarily show joined state, will validate when we receive session state
       joinedName.value = savedMember.name
       status.value = 'joined'
-      console.log('[App] Restored session for', savedMember.name)
+      console.log('[App] Restored session for', savedMember.name, '(awaiting keynote validation)')
     } else {
-      await connect(apiKey)
-      status.value = 'idle'
+      // Show waiting state until we receive a keynote
+      status.value = 'waiting'
     }
   } catch (err) {
     status.value = 'error'
@@ -79,19 +132,19 @@ onMounted(async () => {
 
 // Join the crew
 async function handleJoin() {
-  if (!isValid.value || status.value !== 'idle') return
+  if (!canJoin.value || status.value !== 'idle' || !activeKeynoteId.value) return
 
   status.value = 'joining'
 
   try {
-    await joinCrew(name.value.trim())
+    await joinCrew(name.value.trim(), activeKeynoteId.value)
     joinedName.value = name.value.trim()
     status.value = 'joined'
 
-    // Save to localStorage
+    // Save to localStorage with keynoteId
     const odientId = getOdientId()
     if (odientId) {
-      saveMember(name.value.trim(), odientId)
+      saveMember(name.value.trim(), odientId, activeKeynoteId.value)
     }
   } catch (err) {
     console.error('Failed to join crew:', err)
@@ -109,6 +162,13 @@ async function handleJoin() {
       <div v-if="status === 'connecting'" class="status">
         <div class="spinner"></div>
         <p>Connecting...</p>
+      </div>
+
+      <!-- State: Waiting for presentation -->
+      <div v-else-if="status === 'waiting'" class="status">
+        <div class="spinner"></div>
+        <p>Waiting for the captain...</p>
+        <p class="hint">The presentation hasn't started yet</p>
       </div>
 
       <!-- State: Error -->
@@ -133,7 +193,7 @@ async function handleJoin() {
 
         <button
           @click="handleJoin"
-          :disabled="!isValid || status === 'joining'"
+          :disabled="!canJoin || status === 'joining'"
           class="join-btn"
         >
           <span v-if="status === 'joining'">Boarding...</span>

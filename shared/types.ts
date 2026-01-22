@@ -23,6 +23,7 @@ export interface CrewMember {
 
 export interface AvatarCreatedMessage {
   type: 'avatar-created'
+  keynoteId: string
   odientId: string
   name: string
   avatar: Avatar | null
@@ -31,6 +32,7 @@ export interface AvatarCreatedMessage {
 
 export interface VoteCastMessage {
   type: 'vote-cast'
+  keynoteId: string
   odientId: string
   voteIndex: number
   choice: 'A' | 'B'
@@ -51,6 +53,7 @@ export type SessionPhase = 'intro' | 'voting' | 'results' | 'application' | 'rec
 
 export interface SessionStateMessage {
   type: 'session-state'
+  keynoteId: string | null
   sessionId: string
   currentSlide: number
   path: (string | null)[]
@@ -105,6 +108,7 @@ export interface VoteResults {
 }
 
 export interface SessionState {
+  keynoteId: string | null
   sessionId: string
   startedAt: number
   currentSlide: number
