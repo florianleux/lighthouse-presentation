@@ -44,10 +44,10 @@ function generateKeynoteId(): string {
 // Load initial session data
 const initialSessionData = loadSessionData()
 
-// Slides de vote (navigation bloquée)
+// Vote slides (navigation blocked)
 export const VOTE_SLIDES = VOTE_CONFIG.SLIDES as unknown as number[]
 
-// Store global pour les votes
+// Global vote store
 export const voteStore = reactive({
   path: initialSessionData?.votePath ?? [null, null, null, null] as (string | null)[],
 
@@ -66,7 +66,7 @@ export const voteStore = reactive({
   }
 })
 
-// Store de session (équipage, votes, état)
+// Session store (crew, votes, state)
 export const sessionStore = reactive({
   keynoteId: initialSessionData?.keynoteId ?? null,
   createdAt: initialSessionData?.createdAt ?? null,
@@ -75,11 +75,11 @@ export const sessionStore = reactive({
   startedAt: Date.now(),
   isAblyConnected: false,
 
-  // Équipage
+  // Crew
   crew: [] as CrewMember[],
   activeCrew: [] as string[],
 
-  // Résultats des votes
+  // Vote results
   voteResults: {
     0: { A: [], B: [], winner: null },
     1: { A: [], B: [], winner: null },
@@ -87,7 +87,7 @@ export const sessionStore = reactive({
     3: { A: [], B: [], winner: null },
   } as Record<number, VoteResults>,
 
-  // État du vote en cours
+  // Current vote state
   activeVoteIndex: null as number | null,
   votePhase: 'waiting' as 'waiting' | 'voting' | 'ended',
 
@@ -102,7 +102,7 @@ export const sessionStore = reactive({
     const results = this.voteResults[voteIndex]
     if (!results) return
 
-    // Éviter les doublons
+    // Avoid duplicates
     if (results.A.includes(odientId) || results.B.includes(odientId)) {
       return
     }
@@ -197,7 +197,7 @@ function generateSessionId(): string {
   return 'session-' + Math.random().toString(36).substring(2, 9)
 }
 
-// Instance Ably (initialisée au setup)
+// Ably instance (initialized at setup)
 let ablyInstance: ReturnType<typeof useAbly> | null = null
 
 export function getAbly() {
@@ -205,11 +205,11 @@ export function getAbly() {
 }
 
 export default defineAppSetup(({ app }) => {
-  // Rendre les stores accessibles globalement
+  // Make stores globally accessible
   app.provide('voteStore', voteStore)
   app.provide('sessionStore', sessionStore)
 
-  // Initialiser Ably si la clé est disponible
+  // Initialize Ably if API key is available
   const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
 
   if (apiKey) {
@@ -220,7 +220,7 @@ export default defineAppSetup(({ app }) => {
         sessionStore.isAblyConnected = true
         console.log('[Session] Ably connected, session:', sessionStore.sessionId)
 
-        // Écouter les avatars créés
+        // Listen for avatar creation
         ablyInstance!.onAvatarCreated((msg) => {
           sessionStore.addCrewMember({
             odientId: msg.odientId,
@@ -230,12 +230,12 @@ export default defineAppSetup(({ app }) => {
           })
         })
 
-        // Écouter les votes
+        // Listen for votes
         ablyInstance!.onVoteCast((msg) => {
           sessionStore.recordVote(msg.odientId, msg.voteIndex, msg.choice)
         })
 
-        // Écouter les heartbeats
+        // Listen for heartbeats
         ablyInstance!.onHeartbeatResponse((msg) => {
           sessionStore.updateActiveCrew(msg.odientId)
         })
@@ -248,7 +248,7 @@ export default defineAppSetup(({ app }) => {
   }
 })
 
-// Helper pour publier l'état de session
+// Helper to publish session state
 export function publishSessionState(currentSlide: number, phase: SessionPhase) {
   if (!ablyInstance || !sessionStore.isAblyConnected) return
 

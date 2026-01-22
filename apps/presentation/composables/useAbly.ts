@@ -17,14 +17,14 @@ interface AblyState {
   channels: Map<string, Ably.RealtimeChannel>
 }
 
-// Singleton state pour partager la connexion
+// Singleton state to share the connection
 const state = shallowRef<AblyState>({
   client: null,
   isConnected: false,
   channels: new Map(),
 })
 
-// Callbacks par type de message
+// Callbacks by message type
 const callbacks = {
   'avatar-created': [] as MessageCallback<AvatarCreatedMessage>[],
   'vote-cast': [] as MessageCallback<VoteCastMessage>[],
@@ -36,7 +36,7 @@ export function useAbly() {
   const error = ref<Error | null>(null)
 
   /**
-   * Connecte au serveur Ably
+   * Connect to Ably server
    */
   async function connect(apiKey: string): Promise<void> {
     if (state.value.client) {
@@ -50,7 +50,7 @@ export function useAbly() {
         clientId: 'presentation-' + Date.now(),
       })
 
-      // Attendre la connexion
+      // Wait for connection
       await new Promise<void>((resolve, reject) => {
         client.connection.on('connected', () => {
           console.log('[Ably] Connected successfully')
@@ -66,7 +66,7 @@ export function useAbly() {
         })
       })
 
-      // Setup listeners sur les channels entrants
+      // Setup listeners on incoming channels
       setupIncomingChannels()
     } catch (err) {
       console.error('[Ably] Connection error', err)
@@ -76,7 +76,7 @@ export function useAbly() {
   }
 
   /**
-   * Configure les listeners sur les channels entrants
+   * Configure listeners on incoming channels
    */
   function setupIncomingChannels() {
     const { client } = state.value
@@ -114,7 +114,7 @@ export function useAbly() {
   }
 
   /**
-   * Publie un message sur un channel
+   * Publish a message to a channel
    */
   async function publish(channel: string, data: OutgoingMessage): Promise<void> {
     const { client } = state.value
@@ -134,7 +134,7 @@ export function useAbly() {
   }
 
   /**
-   * S'abonner à un type de message
+   * Subscribe to a message type
    */
   function onAvatarCreated(callback: MessageCallback<AvatarCreatedMessage>): () => void {
     callbacks['avatar-created'].push(callback)
@@ -161,7 +161,7 @@ export function useAbly() {
   }
 
   /**
-   * Déconnexion
+   * Disconnect from Ably
    */
   function disconnect() {
     const { client } = state.value
