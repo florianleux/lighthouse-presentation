@@ -9,32 +9,52 @@ import type {
   SessionPhase,
 } from '../../../shared/types'
 
-// Keynote ID persistence
-function loadKeynoteId(): string | null {
-  if (typeof localStorage === 'undefined') return null
-  return localStorage.getItem(STORAGE_KEYS.KEYNOTE_ID)
+// Session data persistence
+interface SessionData {
+  keynoteId: string
+  createdAt: number
+  lastSlide: number
+  votePath: (string | null)[]
 }
 
-function saveKeynoteId(id: string) {
+function loadSessionData(): SessionData | null {
+  if (typeof localStorage === 'undefined') return null
+  try {
+    const data = localStorage.getItem(STORAGE_KEYS.SESSION_DATA)
+    return data ? JSON.parse(data) : null
+  } catch {
+    return null
+  }
+}
+
+function saveSessionData(data: SessionData) {
   if (typeof localStorage === 'undefined') return
-  localStorage.setItem(STORAGE_KEYS.KEYNOTE_ID, id)
+  localStorage.setItem(STORAGE_KEYS.SESSION_DATA, JSON.stringify(data))
+}
+
+function clearSessionData() {
+  if (typeof localStorage === 'undefined') return
+  localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
 }
 
 function generateKeynoteId(): string {
-  const id = 'keynote-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
-  saveKeynoteId(id)
-  return id
+  return 'keynote-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
 }
+
+// Load initial session data
+const initialSessionData = loadSessionData()
 
 // Slides de vote (navigation bloquée)
 export const VOTE_SLIDES = VOTE_CONFIG.SLIDES as unknown as number[]
 
 // Store global pour les votes
 export const voteStore = reactive({
-  path: [null, null, null, null] as (string | null)[],
+  path: initialSessionData?.votePath ?? [null, null, null, null] as (string | null)[],
 
   vote(index: number, choice: 'A' | 'B') {
     this.path[index] = choice
+    // Persist immediately
+    sessionStore.saveVotePath()
   },
 
   getChoice(index: number) {
@@ -48,7 +68,9 @@ export const voteStore = reactive({
 
 // Store de session (équipage, votes, état)
 export const sessionStore = reactive({
-  keynoteId: loadKeynoteId(),
+  keynoteId: initialSessionData?.keynoteId ?? null,
+  createdAt: initialSessionData?.createdAt ?? null,
+  lastSlide: initialSessionData?.lastSlide ?? 1,
   sessionId: generateSessionId(),
   startedAt: Date.now(),
   isAblyConnected: false,
@@ -94,6 +116,31 @@ export const sessionStore = reactive({
     }
   },
 
+  // Update last slide and persist
+  updateLastSlide(slide: number) {
+    this.lastSlide = slide
+    if (this.keynoteId && this.createdAt) {
+      saveSessionData({
+        keynoteId: this.keynoteId,
+        createdAt: this.createdAt,
+        lastSlide: slide,
+        votePath: voteStore.path,
+      })
+    }
+  },
+
+  // Save vote path to session data
+  saveVotePath() {
+    if (this.keynoteId && this.createdAt) {
+      saveSessionData({
+        keynoteId: this.keynoteId,
+        createdAt: this.createdAt,
+        lastSlide: this.lastSlide,
+        votePath: voteStore.path,
+      })
+    }
+  },
+
   resetSession() {
     this.sessionId = generateSessionId()
     this.startedAt = Date.now()
@@ -112,7 +159,17 @@ export const sessionStore = reactive({
 
   // Start a new session with a new keynoteId (called from admin panel)
   startNewSession() {
+    const now = Date.now()
     this.keynoteId = generateKeynoteId()
+    this.createdAt = now
+    this.lastSlide = 1
+    voteStore.reset()
+    saveSessionData({
+      keynoteId: this.keynoteId,
+      createdAt: now,
+      lastSlide: 1,
+      votePath: [null, null, null, null],
+    })
     this.resetSession()
     console.log('[Session] New session started:', this.keynoteId)
   },
@@ -120,7 +177,16 @@ export const sessionStore = reactive({
   // Generate keynoteId without resetting (first time setup)
   initKeynote() {
     if (!this.keynoteId) {
+      const now = Date.now()
       this.keynoteId = generateKeynoteId()
+      this.createdAt = now
+      this.lastSlide = 1
+      saveSessionData({
+        keynoteId: this.keynoteId,
+        createdAt: now,
+        lastSlide: 1,
+        votePath: voteStore.path,
+      })
       console.log('[Session] Keynote initialized:', this.keynoteId)
     }
     return this.keynoteId

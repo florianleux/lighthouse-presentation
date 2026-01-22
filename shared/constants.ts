@@ -55,7 +55,7 @@ export const AVATAR_CONFIG = {
 // LocalStorage keys
 export const STORAGE_KEYS = {
   // Presentation app
-  KEYNOTE_ID: 'lighthouse-keynote-id',
+  SESSION_DATA: 'lighthouse-session-data',
 
   // Vote app
   CREW_MEMBER: 'lighthouse-pirates-crew',

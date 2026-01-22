@@ -1,13 +1,27 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import NavigationBlocker from './components/NavigationBlocker.vue'
 import VoteTower from './components/VoteTower.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import SessionRecoveryModal from './components/SessionRecoveryModal.vue'
-import { sessionStore, publishSessionState } from './setup/main'
+import { sessionStore, voteStore, VOTE_SLIDES, publishSessionState } from './setup/main'
 
-const { go } = useNav()
+const { go, currentSlideNo } = useNav()
+
+// Track slide changes to persist last slide and auto-skip completed votes
+watch(currentSlideNo, (slide) => {
+  if (sessionStore.keynoteId && slide) {
+    sessionStore.updateLastSlide(slide)
+  }
+
+  // Auto-skip completed vote slides
+  const voteIndex = VOTE_SLIDES.indexOf(slide)
+  if (voteIndex !== -1 && voteStore.path[voteIndex] !== null) {
+    // Vote already done, skip forward
+    nextTick(() => go(slide + 1))
+  }
+})
 
 const showAdminPanel = ref(false)
 const showRecoveryModal = ref(false)
@@ -33,10 +47,20 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleContinueSession() {
+function handleContinueHere() {
   showRecoveryModal.value = false
-  // Publish session state so vote apps receive the keynoteId
-  publishSessionState(1, 'intro')
+  // Resume at current URL slide
+  const targetSlide = currentSlideNo.value
+  go(targetSlide)
+  publishSessionState(targetSlide, 'intro')
+}
+
+function handleContinueAtLast() {
+  showRecoveryModal.value = false
+  // Resume at last recorded slide
+  const targetSlide = sessionStore.lastSlide
+  go(targetSlide)
+  publishSessionState(targetSlide, 'intro')
 }
 
 function handleResetSession() {
@@ -73,7 +97,11 @@ onUnmounted(() => {
   <SessionRecoveryModal
     :visible="showRecoveryModal"
     :keynote-id="sessionStore.keynoteId || ''"
-    @continue="handleContinueSession"
+    :created-at="sessionStore.createdAt || 0"
+    :last-slide="sessionStore.lastSlide"
+    :current-slide="currentSlideNo"
+    @continue-here="handleContinueHere"
+    @continue-at-last="handleContinueAtLast"
     @reset="handleResetSession"
   />
 </template>

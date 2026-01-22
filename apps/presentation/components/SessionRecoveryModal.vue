@@ -1,13 +1,33 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   visible: boolean
   keynoteId: string
+  createdAt: number
+  lastSlide: number
+  currentSlide: number
 }>()
 
 defineEmits<{
-  continue: []
+  continueHere: []
+  continueAtLast: []
   reset: []
 }>()
+
+const formattedDate = computed(() => {
+  if (!props.createdAt) return ''
+  return new Date(props.createdAt).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+})
+
+// Show two resume options when URL slide is earlier than last slide
+const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
 </script>
 
 <template>
@@ -20,10 +40,37 @@ defineEmits<{
           <p>A previous presentation session was detected:</p>
           <code class="keynote-id">{{ keynoteId }}</code>
 
+          <div class="session-info">
+            <div class="info-row">
+              <span class="info-label">Created:</span>
+              <span class="info-value">{{ formattedDate }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Last slide:</span>
+              <span class="info-value">{{ lastSlide }}</span>
+            </div>
+            <div v-if="showTwoOptions" class="info-row">
+              <span class="info-label">Current URL:</span>
+              <span class="info-value highlight">Slide {{ currentSlide }}</span>
+            </div>
+          </div>
+
           <div class="actions">
-            <button @click="$emit('continue')" class="btn primary">
-              Continue Session
-            </button>
+            <!-- Two options when URL slide < lastSlide -->
+            <template v-if="showTwoOptions">
+              <button @click="$emit('continueHere')" class="btn primary">
+                Resume here (slide {{ currentSlide }})
+              </button>
+              <button @click="$emit('continueAtLast')" class="btn outline">
+                Resume at last (slide {{ lastSlide }})
+              </button>
+            </template>
+            <!-- Single option otherwise -->
+            <template v-else>
+              <button @click="$emit('continueAtLast')" class="btn primary">
+                Continue Session
+              </button>
+            </template>
             <button @click="$emit('reset')" class="btn secondary">
               Start Fresh
             </button>
@@ -82,8 +129,37 @@ defineEmits<{
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   word-break: break-all;
+}
+
+.session-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.info-label {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.info-value {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.info-value.highlight {
+  color: #ffd700;
 }
 
 .actions {
@@ -110,6 +186,16 @@ defineEmits<{
 .btn.primary:hover {
   background: #ffc700;
   transform: scale(1.02);
+}
+
+.btn.outline {
+  background: transparent;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+}
+
+.btn.outline:hover {
+  background: rgba(255, 215, 0, 0.1);
 }
 
 .btn.secondary {
