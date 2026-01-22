@@ -13,7 +13,7 @@ const crewCount = computed(() => sessionStore.crew.length)
   <div class="crew-display">
     <div class="crew-header">
       <span class="crew-icon">&#9875;</span>
-      <span class="crew-count">{{ crewCount }} pirate{{ crewCount !== 1 ? 's' : '' }} à bord</span>
+      <span class="crew-count">{{ crewCount }} pirate{{ crewCount !== 1 ? 's' : '' }} aboard</span>
     </div>
 
     <TransitionGroup name="crew" tag="div" class="crew-list">
@@ -27,7 +27,7 @@ const crewCount = computed(() => sessionStore.crew.length)
     </TransitionGroup>
 
     <div v-if="crewCount === 0" class="crew-empty">
-      En attente de l'équipage...
+      Waiting for the crew...
     </div>
   </div>
 </template>
