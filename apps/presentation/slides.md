@@ -25,6 +25,8 @@ Scannez le QR code pour rejoindre l'équipage
   vote.lighthouse-pirates.com
 </div>
 
+<CrewDisplay />
+
 ---
 
 # Présentation personnelle
