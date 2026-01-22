@@ -5,6 +5,7 @@ import NavigationBlocker from './components/NavigationBlocker.vue'
 import VoteTower from './components/VoteTower.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import SessionRecoveryModal from './components/SessionRecoveryModal.vue'
+import CrewPills from './components/CrewPills.vue'
 import { sessionStore, voteStore, VOTE_SLIDES, publishSessionState } from './setup/main'
 
 const { go, currentSlideNo } = useNav()
@@ -87,6 +88,7 @@ onUnmounted(() => {
 
 <template>
   <NavigationBlocker />
+  <CrewPills />
   <VoteTower />
   <AdminPanel
     :visible="showAdminPanel"

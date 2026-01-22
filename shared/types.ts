@@ -2,12 +2,8 @@
 // Shared types for Ably communication
 // ===========================================
 
-// Avatar (3 combinable parts = 729 combinations)
-export interface Avatar {
-  head: number      // 0-8
-  body: number      // 0-8
-  accessory: number // 0-8
-}
+// Avatar - simple emoji string
+export type Avatar = string
 
 // Participant (crew pirate)
 export interface CrewMember {
