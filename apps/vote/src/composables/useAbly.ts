@@ -22,16 +22,18 @@ export function useAbly() {
 
   /**
    * Connect to Ably server
+   * @param apiKey - Ably API key
+   * @param savedOdientId - Optional saved ID to restore session
    */
-  async function connect(apiKey: string): Promise<void> {
+  async function connect(apiKey: string, savedOdientId?: string): Promise<void> {
     if (state.value.client) {
       console.log('[Ably] Already connected')
       return
     }
 
     try {
-      // Generate unique ID for this participant
-      odientId = 'pirate-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)
+      // Use saved ID or generate a new one
+      odientId = savedOdientId || 'pirate-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)
 
       const client = new Ably.Realtime({
         key: apiKey,
@@ -90,6 +92,14 @@ export function useAbly() {
   }
 
   /**
+   * Restore session with a saved odientId (called after connect with savedOdientId)
+   */
+  function restoreSession(savedOdientId: string) {
+    odientId = savedOdientId
+    console.log('[Ably] Session restored for', savedOdientId)
+  }
+
+  /**
    * Disconnect
    */
   function disconnect() {
@@ -109,6 +119,7 @@ export function useAbly() {
     connect,
     joinCrew,
     getOdientId,
+    restoreSession,
     disconnect,
   }
 }

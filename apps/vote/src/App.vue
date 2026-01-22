@@ -2,7 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAbly } from './composables/useAbly'
 
-const { isConnected, error, connect, joinCrew } = useAbly()
+const STORAGE_KEY = 'lighthouse-pirates-crew'
+
+const { isConnected, error, connect, joinCrew, getOdientId, restoreSession } = useAbly()
 
 // Form state
 const name = ref('')
@@ -23,6 +25,28 @@ const validationMessage = computed(() => {
   return ''
 })
 
+// Load saved crew member from localStorage
+function loadSavedMember(): { name: string; odientId: string } | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('Failed to load saved member:', e)
+  }
+  return null
+}
+
+// Save crew member to localStorage
+function saveMember(memberName: string, odientId: string) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ name: memberName, odientId }))
+  } catch (e) {
+    console.error('Failed to save member:', e)
+  }
+}
+
 // Connect on mount
 onMounted(async () => {
   const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
@@ -33,9 +57,21 @@ onMounted(async () => {
     return
   }
 
+  // Check for saved member
+  const savedMember = loadSavedMember()
+
   try {
-    await connect(apiKey)
-    status.value = 'idle'
+    if (savedMember) {
+      // Restore session with saved odientId
+      await connect(apiKey, savedMember.odientId)
+      restoreSession(savedMember.odientId)
+      joinedName.value = savedMember.name
+      status.value = 'joined'
+      console.log('[App] Restored session for', savedMember.name)
+    } else {
+      await connect(apiKey)
+      status.value = 'idle'
+    }
   } catch (err) {
     status.value = 'error'
   }
@@ -51,6 +87,12 @@ async function handleJoin() {
     await joinCrew(name.value.trim())
     joinedName.value = name.value.trim()
     status.value = 'joined'
+
+    // Save to localStorage
+    const odientId = getOdientId()
+    if (odientId) {
+      saveMember(name.value.trim(), odientId)
+    }
   } catch (err) {
     console.error('Failed to join crew:', err)
     status.value = 'error'
