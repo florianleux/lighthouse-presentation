@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { sessionStore, publishSessionState } from '../setup/main'
+import '../styles/modals.css'
 
 defineProps<{
   visible: boolean
@@ -32,9 +33,9 @@ function startNewSession() {
 
 <template>
   <Teleport to="body">
-    <Transition name="panel">
-      <div v-if="visible" class="admin-overlay" @click.self="$emit('close')">
-        <div class="admin-panel">
+    <Transition name="modal-fade">
+      <div v-if="visible" class="modal-overlay" @click.self="$emit('close')">
+        <div class="modal-panel">
           <div class="panel-header">
             <h2>Admin Panel</h2>
             <button class="close-btn" @click="$emit('close')">x</button>
@@ -50,7 +51,7 @@ function startNewSession() {
               </div>
               <button
                 v-if="!keynoteId"
-                class="action-btn primary"
+                class="modal-btn primary full-width"
                 @click="initKeynote"
               >
                 Initialize Keynote
@@ -95,7 +96,7 @@ function startNewSession() {
             <!-- Actions Section -->
             <div class="section actions">
               <button
-                class="action-btn danger"
+                class="modal-btn danger full-width"
                 :disabled="!keynoteId"
                 @click="startNewSession"
               >
@@ -114,25 +115,6 @@ function startNewSession() {
 </template>
 
 <style scoped>
-.admin-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.admin-panel {
-  background: #1e293b;
-  border-radius: 12px;
-  width: 400px;
-  max-height: 80vh;
-  overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -261,38 +243,8 @@ function startNewSession() {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.action-btn {
+.full-width {
   width: 100%;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.action-btn.primary {
-  background: #ffd700;
-  color: #1e293b;
-}
-
-.action-btn.primary:hover {
-  background: #ffc700;
-}
-
-.action-btn.danger {
-  background: #dc2626;
-  color: white;
-}
-
-.action-btn.danger:hover:not(:disabled) {
-  background: #ef4444;
-}
-
-.action-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .panel-footer {
@@ -308,29 +260,5 @@ function startNewSession() {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: inherit;
-}
-
-/* Transitions */
-.panel-enter-active,
-.panel-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.panel-enter-active .admin-panel,
-.panel-leave-active .admin-panel {
-  transition: transform 0.2s ease;
-}
-
-.panel-enter-from,
-.panel-leave-to {
-  opacity: 0;
-}
-
-.panel-enter-from .admin-panel {
-  transform: scale(0.95);
-}
-
-.panel-leave-to .admin-panel {
-  transform: scale(0.95);
 }
 </style>
