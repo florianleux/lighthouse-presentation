@@ -27,7 +27,7 @@ export const VOTE_PHASES = {
 // Vote configuration
 export const VOTE_CONFIG = {
   DURATION_SECONDS: 20,  // Duration of a vote in seconds
-  SLIDES: [11, 16, 21, 26] as const,  // Vote slide numbers
+  SLIDES: [12, 17, 22, 27] as const,  // Vote slide numbers (after Base Cleanup slide)
 } as const
 
 // Heartbeat configuration

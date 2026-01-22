@@ -145,6 +145,36 @@ The 4 starting Lighthouse scores
 
 ---
 
+# Base Cleanup
+
+## Proactive Design Matters
+
+Before diving into optimizations, let's remove obvious UX anti-patterns that hurt scores.
+
+<div class="grid grid-cols-2 gap-8 pt-4">
+  <div class="p-4 border border-red-500/50 rounded bg-red-500/10">
+    <div class="text-lg font-bold mb-2 text-red-400">Removed</div>
+    <ul class="text-sm space-y-1">
+      <li>6 spam popup modals</li>
+      <li>8 promotional banners</li>
+      <li>Dynamic layout shifts</li>
+      <li>Font size changes</li>
+    </ul>
+  </div>
+  <div class="p-4 border border-green-500/50 rounded bg-green-500/10">
+    <div class="text-lg font-bold mb-2 text-green-400">Impact</div>
+    <div class="text-3xl font-bold">+25 points</div>
+    <div class="text-sm opacity-70">Performance: 31 → 56</div>
+    <div class="text-sm opacity-70">CLS: 1.08 → 0.025</div>
+  </div>
+</div>
+
+<div class="pt-6 text-center text-sm opacity-60">
+  Good design is the first optimization. No code change needed - just remove bad patterns.
+</div>
+
+---
+
 # Day 1: Performance
 
 ## Lighthouse Performance Criteria
@@ -199,7 +229,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="0" label-a="Images & Transfer" label-b="Fonts & JS" :next-slide="12" />
+<VoteButtons :vote-index="0" label-a="Images & Transfer" label-b="Fonts & JS" :next-slide="13" />
 
 ---
 
@@ -270,7 +300,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Visual" label-b="Semantic" :next-slide="17" />
+<VoteButtons :vote-index="1" label-a="Visual" label-b="Semantic" :next-slide="18" />
 
 ---
 
@@ -341,7 +371,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="Console & Security" label-b="Modern Standards" :next-slide="22" />
+<VoteButtons :vote-index="2" label-a="Console & Security" label-b="Modern Standards" :next-slide="23" />
 
 ---
 
@@ -412,7 +442,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Meta & Structure" label-b="Content & Links" :next-slide="27" />
+<VoteButtons :vote-index="3" label-a="Meta & Structure" label-b="Content & Links" :next-slide="28" />
 
 ---
 
