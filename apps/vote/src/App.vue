@@ -4,7 +4,7 @@ import { useAbly } from './composables/useAbly'
 
 const { isConnected, error, connect, joinCrew } = useAbly()
 
-// État du formulaire
+// Form state
 const name = ref('')
 const status = ref<'connecting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
 const joinedName = ref('')
@@ -18,12 +18,12 @@ const isValid = computed(() => {
 const validationMessage = computed(() => {
   const trimmed = name.value.trim()
   if (trimmed.length === 0) return ''
-  if (trimmed.length < 2) return 'Minimum 2 caractères'
-  if (trimmed.length > 20) return 'Maximum 20 caractères'
+  if (trimmed.length < 2) return 'Minimum 2 characters'
+  if (trimmed.length > 20) return 'Maximum 20 characters'
   return ''
 })
 
-// Connexion au démarrage
+// Connect on mount
 onMounted(async () => {
   const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
 
@@ -41,7 +41,7 @@ onMounted(async () => {
   }
 })
 
-// Rejoindre l'équipage
+// Join the crew
 async function handleJoin() {
   if (!isValid.value || status.value !== 'idle') return
 
@@ -63,26 +63,26 @@ async function handleJoin() {
     <div class="card">
       <h1>Lighthouse Pirates</h1>
 
-      <!-- État: Connexion -->
+      <!-- State: Connecting -->
       <div v-if="status === 'connecting'" class="status">
         <div class="spinner"></div>
-        <p>Connexion en cours...</p>
+        <p>Connecting...</p>
       </div>
 
-      <!-- État: Erreur -->
+      <!-- State: Error -->
       <div v-else-if="status === 'error'" class="status error">
-        <p>Erreur de connexion</p>
-        <p class="hint">Vérifiez votre connexion internet</p>
+        <p>Connection error</p>
+        <p class="hint">Check your internet connection</p>
       </div>
 
-      <!-- État: Formulaire -->
+      <!-- State: Form -->
       <div v-else-if="status === 'idle' || status === 'joining'" class="form">
-        <label for="name">Votre nom de pirate</label>
+        <label for="name">Your pirate name</label>
         <input
           id="name"
           v-model="name"
           type="text"
-          placeholder="Capitaine Crochet"
+          placeholder="Captain Hook"
           maxlength="20"
           :disabled="status === 'joining'"
           @keyup.enter="handleJoin"
@@ -94,24 +94,24 @@ async function handleJoin() {
           :disabled="!isValid || status === 'joining'"
           class="join-btn"
         >
-          <span v-if="status === 'joining'">Embarquement...</span>
-          <span v-else>Rejoindre l'équipage</span>
+          <span v-if="status === 'joining'">Boarding...</span>
+          <span v-else>Join the crew</span>
         </button>
       </div>
 
-      <!-- État: Rejoint -->
+      <!-- State: Joined -->
       <div v-else-if="status === 'joined'" class="success">
         <div class="checkmark">✓</div>
-        <h2>Bienvenue à bord, {{ joinedName }} !</h2>
-        <p>Vous êtes maintenant dans l'équipage.</p>
-        <p class="hint">Attendez les instructions du capitaine...</p>
+        <h2>Welcome aboard, {{ joinedName }}!</h2>
+        <p>You're now part of the crew.</p>
+        <p class="hint">Wait for the captain's instructions...</p>
       </div>
     </div>
 
     <!-- Debug info -->
     <div class="debug">
       <span :class="isConnected ? 'connected' : 'disconnected'">
-        {{ isConnected ? 'Connecté' : 'Déconnecté' }}
+        {{ isConnected ? 'Connected' : 'Disconnected' }}
       </span>
     </div>
   </div>

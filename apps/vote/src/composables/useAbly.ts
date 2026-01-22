@@ -13,7 +13,7 @@ const state = shallowRef<AblyState>({
   isConnected: false,
 })
 
-// ID unique pour ce participant
+// Unique ID for this participant
 let odientId: string | null = null
 
 export function useAbly() {
@@ -21,7 +21,7 @@ export function useAbly() {
   const error = ref<Error | null>(null)
 
   /**
-   * Connecte au serveur Ably
+   * Connect to Ably server
    */
   async function connect(apiKey: string): Promise<void> {
     if (state.value.client) {
@@ -30,7 +30,7 @@ export function useAbly() {
     }
 
     try {
-      // Générer un ID unique pour ce participant
+      // Generate unique ID for this participant
       odientId = 'pirate-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)
 
       const client = new Ably.Realtime({
@@ -60,7 +60,7 @@ export function useAbly() {
   }
 
   /**
-   * Envoie un message de join crew avec le nom
+   * Send a join crew message with the name
    */
   async function joinCrew(name: string): Promise<void> {
     const { client } = state.value
@@ -83,14 +83,14 @@ export function useAbly() {
   }
 
   /**
-   * Retourne l'ID du participant
+   * Returns the participant's ID
    */
   function getOdientId(): string | null {
     return odientId
   }
 
   /**
-   * Déconnexion
+   * Disconnect
    */
   function disconnect() {
     const { client } = state.value
