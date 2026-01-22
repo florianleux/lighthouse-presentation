@@ -62,9 +62,9 @@ export function useAbly() {
   }
 
   /**
-   * Send a join crew message with the name
+   * Send a join crew message with the name and avatar
    */
-  async function joinCrew(name: string, keynoteId: string): Promise<void> {
+  async function joinCrew(name: string, keynoteId: string, avatar: string | null): Promise<void> {
     const { client } = state.value
     if (!client || !odientId) {
       throw new Error('Not connected to Ably')
@@ -77,12 +77,12 @@ export function useAbly() {
       keynoteId,
       odientId,
       name,
-      avatar: null,
+      avatar,
       timestamp: Date.now(),
     }
 
     await channel.publish('message', message)
-    console.log('[Ably] Joined crew as', name, 'for keynote', keynoteId)
+    console.log('[Ably] Joined crew as', name, 'with avatar', avatar, 'for keynote', keynoteId)
   }
 
   /**

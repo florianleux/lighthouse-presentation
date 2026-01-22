@@ -17,6 +17,10 @@ const status = ref<'connecting' | 'waiting' | 'idle' | 'joining' | 'joined' | 'e
 const joinedName = ref('')
 const activeKeynoteId = ref<string | null>(null)
 
+// Avatar emojis
+const AVATAR_EMOJIS = ['😀', '😎', '🤠']
+const selectedEmoji = ref<string | null>(null)
+
 // Voting state
 const activeVoteIndex = ref<number | null>(null)
 const selectedChoice = ref<'A' | 'B' | null>(null)
@@ -69,8 +73,8 @@ const validationMessage = computed(() => {
   return ''
 })
 
-// Can join only if we have an active keynote
-const canJoin = computed(() => isValid.value && activeKeynoteId.value !== null)
+// Can join only if we have an active keynote and selected an emoji
+const canJoin = computed(() => isValid.value && activeKeynoteId.value !== null && selectedEmoji.value !== null)
 
 // Load saved crew member from localStorage
 function loadSavedMember(): SavedMember | null {
@@ -189,7 +193,7 @@ async function handleJoin() {
   status.value = 'joining'
 
   try {
-    await joinCrew(name.value.trim(), activeKeynoteId.value)
+    await joinCrew(name.value.trim(), activeKeynoteId.value, selectedEmoji.value)
     joinedName.value = name.value.trim()
     status.value = 'joined'
 
@@ -266,6 +270,22 @@ async function submitVote() {
 
       <!-- State: Form -->
       <div v-else-if="status === 'idle' || status === 'joining'" class="form">
+        <!-- Emoji selection -->
+        <div class="emoji-selector">
+          <p class="emoji-label">Choose your avatar</p>
+          <div class="emoji-buttons">
+            <button
+              v-for="emoji in AVATAR_EMOJIS"
+              :key="emoji"
+              :class="['emoji-btn', { selected: selectedEmoji === emoji }]"
+              :disabled="status === 'joining'"
+              @click="selectedEmoji = emoji"
+            >
+              {{ emoji }}
+            </button>
+          </div>
+        </div>
+
         <label for="name">Your pirate name</label>
         <input
           id="name"
@@ -289,10 +309,9 @@ async function submitVote() {
       </div>
 
       <!-- State: Joined - Waiting -->
-      <div v-else-if="status === 'joined' && activeVoteIndex === null" class="success">
-        <div class="checkmark">✓</div>
-        <h2>Welcome aboard, {{ joinedName }}!</h2>
-        <p>You're now part of the crew.</p>
+      <div v-else-if="status === 'joined' && activeVoteIndex === null" class="joined-waiting">
+        <div class="name-pill">{{ joinedName }}</div>
+        <div class="avatar-square">{{ selectedEmoji }}</div>
         <p class="hint">Wait for the captain's instructions...</p>
       </div>
 
@@ -398,10 +417,83 @@ h1 {
   to { transform: rotate(360deg); }
 }
 
+.joined-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.name-pill {
+  padding: 8px 20px;
+  background: rgba(255, 215, 0, 0.2);
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  color: #ffd700;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.avatar-square {
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+
 .form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.emoji-selector {
+  margin-bottom: 8px;
+}
+
+.emoji-label {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+
+.emoji-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.emoji-btn {
+  width: 64px;
+  height: 64px;
+  font-size: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emoji-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.emoji-btn.selected {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.emoji-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 label {
