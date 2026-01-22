@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import { voteStore, sessionStore, getAbly } from '../setup/main'
 import { ABLY_CHANNELS } from '../../../shared/constants'
@@ -44,17 +44,42 @@ const winnerLabel = computed(() =>
   winner.value === 'A' ? props.labelA : props.labelB
 )
 
+// Timer
+const VOTE_DURATION = 20 // seconds
+const timeRemaining = ref(0)
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function startTimer() {
+  timeRemaining.value = VOTE_DURATION
+  timerInterval = setInterval(() => {
+    timeRemaining.value--
+    if (timeRemaining.value <= 0) {
+      stopVoteSession()
+    }
+  }, 1000)
+}
+
+function clearTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+onUnmounted(() => clearTimer())
+
 // Start vote session
 async function startVoteSession() {
   sessionStore.activeVoteIndex = props.voteIndex
   sessionStore.votePhase = 'voting'
+  startTimer()
 
   const ably = getAbly()
   if (ably) {
     const message: VoteStartedMessage = {
       type: 'vote-started',
       voteIndex: props.voteIndex,
-      duration: 0,
+      duration: VOTE_DURATION,
       timestamp: Date.now()
     }
     await ably.publish(ABLY_CHANNELS.SESSION, message)
@@ -64,6 +89,7 @@ async function startVoteSession() {
 
 // Stop vote session and show results
 function stopVoteSession() {
+  clearTimer()
   sessionStore.votePhase = 'ended'
   console.log('[VoteButtons] Vote session stopped for vote', props.voteIndex)
 }
@@ -96,8 +122,9 @@ function vote(choice: 'A' | 'B') {
       </button>
     </div>
 
-    <!-- Voting in progress + Stop button -->
+    <!-- Voting in progress + Timer + Stop button -->
     <div v-else-if="isVoteActive" class="mb-4 text-center flex items-center justify-center gap-4">
+      <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
       <span class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse">
         Voting in progress...
       </span>

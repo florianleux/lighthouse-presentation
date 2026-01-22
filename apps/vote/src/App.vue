@@ -21,6 +21,39 @@ const activeKeynoteId = ref<string | null>(null)
 const activeVoteIndex = ref<number | null>(null)
 const selectedChoice = ref<'A' | 'B' | null>(null)
 const hasVoted = ref(false)
+const voteMissed = ref(false)
+
+// Timer state
+const timeRemaining = ref(0)
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function startCountdown(duration: number) {
+  timeRemaining.value = duration
+
+  if (timerInterval) clearInterval(timerInterval)
+
+  timerInterval = setInterval(() => {
+    timeRemaining.value--
+    if (timeRemaining.value <= 0) {
+      clearInterval(timerInterval!)
+      timerInterval = null
+      // Auto-submit if a choice is selected, otherwise mark as missed
+      if (selectedChoice.value && !hasVoted.value) {
+        submitVote()
+      } else if (!hasVoted.value) {
+        voteMissed.value = true
+      }
+    }
+  }, 1000)
+}
+
+function clearCountdown() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+  timeRemaining.value = 0
+}
 
 // Validation
 const isValid = computed(() => {
@@ -122,10 +155,15 @@ onMounted(async () => {
 
     // Subscribe to vote-started messages
     onVoteStarted((msg) => {
-      console.log('[App] Vote started:', msg.voteIndex)
+      console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
       activeVoteIndex.value = msg.voteIndex
       selectedChoice.value = null
       hasVoted.value = false
+      voteMissed.value = false
+      // Start countdown if duration is provided
+      if (msg.duration > 0) {
+        startCountdown(msg.duration)
+      }
     })
 
     // Determine initial status
@@ -194,6 +232,7 @@ async function submitVote() {
   try {
     await sendVote(activeVoteIndex.value, selectedChoice.value, keynoteId)
     hasVoted.value = true
+    clearCountdown()
     console.log('[App] Vote submitted:', selectedChoice.value)
   } catch (err) {
     console.error('Failed to submit vote:', err)
@@ -260,6 +299,7 @@ async function submitVote() {
       <!-- State: Joined - Voting -->
       <div v-else-if="status === 'joined' && activeVoteIndex !== null && !hasVoted" class="voting">
         <h2>Vote now!</h2>
+        <div v-if="timeRemaining > 0" class="countdown">{{ timeRemaining }}s</div>
         <p class="vote-hint">Choose your option</p>
         <div class="vote-buttons">
           <button
@@ -290,6 +330,14 @@ async function submitVote() {
         <h2>Vote recorded!</h2>
         <p>You voted for option {{ selectedChoice }}</p>
         <p class="hint">Wait for the results...</p>
+      </div>
+
+      <!-- State: Joined - Missed vote -->
+      <div v-else-if="status === 'joined' && voteMissed" class="missed">
+        <div class="missed-icon">X</div>
+        <h2>Too late!</h2>
+        <p>You missed the vote</p>
+        <p class="hint">Wait for the next one...</p>
       </div>
     </div>
 
@@ -430,6 +478,29 @@ input::placeholder {
   margin-bottom: 8px;
 }
 
+.missed {
+  padding: 20px 0;
+}
+
+.missed-icon {
+  width: 60px;
+  height: 60px;
+  background: #ef4444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  margin: 0 auto 16px;
+}
+
+.missed h2 {
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
 .hint {
   font-size: 14px;
   opacity: 0.6;
@@ -458,6 +529,13 @@ input::placeholder {
 }
 
 .voting h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.countdown {
+  font-size: 48px;
+  font-weight: bold;
   color: #ffd700;
   margin-bottom: 8px;
 }
