@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { sessionStore } from '../setup/main'
+import { sessionStore, VOTE_SLIDES } from '../setup/main'
+
+const props = defineProps<{
+  currentSlide: number
+}>()
 
 const crew = computed(() => sessionStore.crew)
+
+// Show only on slide 1 or vote slides
+const isVisible = computed(() => {
+  return props.currentSlide === 1 || VOTE_SLIDES.includes(props.currentSlide)
+})
 </script>
 
 <template>
   <div
-    v-if="crew.length > 0"
+    v-if="isVisible && crew.length > 0"
     class="crew-container"
   >
     <TransitionGroup name="pill">
