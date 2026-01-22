@@ -32,11 +32,6 @@ function saveSessionData(data: SessionData) {
   localStorage.setItem(STORAGE_KEYS.SESSION_DATA, JSON.stringify(data))
 }
 
-function clearSessionData() {
-  if (typeof localStorage === 'undefined') return
-  localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
-}
-
 function generateKeynoteId(): string {
   return 'keynote-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
 }
@@ -119,26 +114,12 @@ export const sessionStore = reactive({
   // Update last slide and persist
   updateLastSlide(slide: number) {
     this.lastSlide = slide
-    if (this.keynoteId && this.createdAt) {
-      saveSessionData({
-        keynoteId: this.keynoteId,
-        createdAt: this.createdAt,
-        lastSlide: slide,
-        votePath: voteStore.path,
-      })
-    }
+    persistSession()
   },
 
   // Save vote path to session data
   saveVotePath() {
-    if (this.keynoteId && this.createdAt) {
-      saveSessionData({
-        keynoteId: this.keynoteId,
-        createdAt: this.createdAt,
-        lastSlide: this.lastSlide,
-        votePath: voteStore.path,
-      })
-    }
+    persistSession()
   },
 
   resetSession() {
@@ -159,39 +140,37 @@ export const sessionStore = reactive({
 
   // Start a new session with a new keynoteId (called from admin panel)
   startNewSession() {
-    const now = Date.now()
-    this.keynoteId = generateKeynoteId()
-    this.createdAt = now
-    this.lastSlide = 1
+    // Reset vote path and force new keynote
     voteStore.reset()
-    saveSessionData({
-      keynoteId: this.keynoteId,
-      createdAt: now,
-      lastSlide: 1,
-      votePath: [null, null, null, null],
-    })
+    this.keynoteId = null
+    this.initKeynote()
     this.resetSession()
     console.log('[Session] New session started:', this.keynoteId)
   },
 
   // Generate keynoteId without resetting (first time setup)
   initKeynote() {
-    if (!this.keynoteId) {
-      const now = Date.now()
-      this.keynoteId = generateKeynoteId()
-      this.createdAt = now
-      this.lastSlide = 1
-      saveSessionData({
-        keynoteId: this.keynoteId,
-        createdAt: now,
-        lastSlide: 1,
-        votePath: voteStore.path,
-      })
-      console.log('[Session] Keynote initialized:', this.keynoteId)
-    }
+    if (this.keynoteId) return this.keynoteId
+
+    this.keynoteId = generateKeynoteId()
+    this.createdAt = Date.now()
+    this.lastSlide = 1
+    persistSession()
+    console.log('[Session] Keynote initialized:', this.keynoteId)
     return this.keynoteId
   }
 })
+
+// Persist current session state to localStorage
+function persistSession() {
+  if (!sessionStore.keynoteId || !sessionStore.createdAt) return
+  saveSessionData({
+    keynoteId: sessionStore.keynoteId,
+    createdAt: sessionStore.createdAt,
+    lastSlide: sessionStore.lastSlide,
+    votePath: voteStore.path,
+  })
+}
 
 function generateSessionId(): string {
   return 'session-' + Math.random().toString(36).substring(2, 9)

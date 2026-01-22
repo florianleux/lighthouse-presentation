@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import '../styles/modals.css'
 
 const props = defineProps<{
   visible: boolean
@@ -32,9 +33,9 @@ const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
 
 <template>
   <Teleport to="body">
-    <Transition name="modal">
-      <div v-if="visible" class="modal-overlay">
-        <div class="modal">
+    <Transition name="modal-fade">
+      <div v-if="visible" class="modal-overlay modal-overlay--dark">
+        <div class="modal-panel modal-panel--centered">
           <div class="modal-icon">&#9875;</div>
           <h2>Session Found</h2>
           <p>A previous presentation session was detected:</p>
@@ -58,20 +59,20 @@ const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
           <div class="actions">
             <!-- Two options when URL slide < lastSlide -->
             <template v-if="showTwoOptions">
-              <button @click="$emit('continueHere')" class="btn primary">
+              <button @click="$emit('continueHere')" class="modal-btn primary full-width">
                 Resume here (slide {{ currentSlide }})
               </button>
-              <button @click="$emit('continueAtLast')" class="btn outline">
+              <button @click="$emit('continueAtLast')" class="modal-btn outline full-width">
                 Resume at last (slide {{ lastSlide }})
               </button>
             </template>
             <!-- Single option otherwise -->
             <template v-else>
-              <button @click="$emit('continueAtLast')" class="btn primary">
+              <button @click="$emit('continueAtLast')" class="modal-btn primary full-width">
                 Continue Session
               </button>
             </template>
-            <button @click="$emit('reset')" class="btn secondary">
+            <button @click="$emit('reset')" class="modal-btn secondary full-width">
               Start Fresh
             </button>
           </div>
@@ -86,23 +87,17 @@ const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
 </template>
 
 <style scoped>
-.modal-overlay {
-  position: fixed;
-  inset: 0;
+.modal-overlay--dark {
   background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   z-index: 10000;
 }
 
-.modal {
-  background: #1e293b;
+.modal-panel--centered {
   border-radius: 16px;
   padding: 32px;
-  width: 400px;
   text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .modal-icon {
@@ -110,13 +105,13 @@ const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
   margin-bottom: 16px;
 }
 
-.modal h2 {
+h2 {
   margin: 0 0 8px;
   font-size: 24px;
   color: #ffd700;
 }
 
-.modal p {
+p {
   margin: 0 0 16px;
   color: #94a3b8;
   font-size: 14px;
@@ -168,73 +163,19 @@ const showTwoOptions = computed(() => props.currentSlide < props.lastSlide)
   gap: 12px;
 }
 
-.btn {
+.full-width {
+  width: 100%;
   padding: 14px 24px;
   font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
 }
 
-.btn.primary {
-  background: #ffd700;
-  color: #1e293b;
-}
-
-.btn.primary:hover {
-  background: #ffc700;
+.modal-btn.primary:hover {
   transform: scale(1.02);
-}
-
-.btn.outline {
-  background: transparent;
-  color: #ffd700;
-  border: 2px solid #ffd700;
-}
-
-.btn.outline:hover {
-  background: rgba(255, 215, 0, 0.1);
-}
-
-.btn.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.btn.secondary:hover {
-  background: rgba(255, 255, 255, 0.15);
 }
 
 .hint {
   margin-top: 16px;
   font-size: 12px;
   opacity: 0.5;
-}
-
-/* Transitions */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.modal-enter-active .modal,
-.modal-leave-active .modal {
-  transition: transform 0.2s ease;
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal {
-  transform: scale(0.95);
-}
-
-.modal-leave-to .modal {
-  transform: scale(0.95);
 }
 </style>

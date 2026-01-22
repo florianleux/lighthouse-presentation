@@ -1,0 +1,100 @@
+/* Shared modal/overlay styles */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-panel {
+  background: #1e293b;
+  border-radius: 12px;
+  width: 400px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Shared button styles */
+.modal-btn {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn.primary {
+  background: #ffd700;
+  color: #1e293b;
+}
+
+.modal-btn.primary:hover {
+  background: #ffc700;
+}
+
+.modal-btn.outline {
+  background: transparent;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+}
+
+.modal-btn.outline:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.modal-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modal-btn.danger {
+  background: #dc2626;
+  color: white;
+}
+
+.modal-btn.danger:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+.modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Shared transition animations */
+.modal-fade-enter-active,
+.modal-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.modal-fade-enter-active .modal-panel,
+.modal-fade-leave-active .modal-panel {
+  transition: transform 0.2s ease;
+}
+
+.modal-fade-enter-from,
+.modal-fade-leave-to {
+  opacity: 0;
+}
+
+.modal-fade-enter-from .modal-panel {
+  transform: scale(0.95);
+}
+
+.modal-fade-leave-to .modal-panel {
+  transform: scale(0.95);
+}

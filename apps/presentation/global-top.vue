@@ -47,20 +47,18 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-function handleContinueHere() {
+function resumeSession(targetSlide: number) {
   showRecoveryModal.value = false
-  // Resume at current URL slide
-  const targetSlide = currentSlideNo.value
   go(targetSlide)
   publishSessionState(targetSlide, 'intro')
 }
 
+function handleContinueHere() {
+  resumeSession(currentSlideNo.value)
+}
+
 function handleContinueAtLast() {
-  showRecoveryModal.value = false
-  // Resume at last recorded slide
-  const targetSlide = sessionStore.lastSlide
-  go(targetSlide)
-  publishSessionState(targetSlide, 'intro')
+  resumeSession(sessionStore.lastSlide)
 }
 
 function handleResetSession() {
