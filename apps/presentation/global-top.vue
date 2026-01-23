@@ -28,9 +28,12 @@ watch(currentSlideNo, (slide) => {
 
 const showAdminPanel = ref(false)
 const showRecoveryModal = ref(false)
-let heartbeatInterval: ReturnType<typeof setInterval> | null = null
 
-// Heartbeat: publish session state every 3 seconds so late joiners can sync
+// Join session with timed heartbeat
+let heartbeatInterval: ReturnType<typeof setInterval> | null = null
+let countdownInterval: ReturnType<typeof setInterval> | null = null
+const joinSessionRemaining = ref(0)
+
 function startHeartbeat() {
   if (heartbeatInterval) return
   heartbeatInterval = setInterval(() => {
@@ -44,6 +47,43 @@ function stopHeartbeat() {
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval)
     heartbeatInterval = null
+  }
+}
+
+function stopCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval)
+    countdownInterval = null
+  }
+  joinSessionRemaining.value = 0
+}
+
+function handleStartJoinSession(durationMinutes: number) {
+  // Stop any existing session
+  stopHeartbeat()
+  stopCountdown()
+
+  // Start countdown
+  joinSessionRemaining.value = durationMinutes * 60
+  countdownInterval = setInterval(() => {
+    joinSessionRemaining.value--
+    if (joinSessionRemaining.value <= 0) {
+      stopHeartbeat()
+      stopCountdown()
+    }
+  }, 1000)
+
+  // Start heartbeat
+  startHeartbeat()
+  // Send immediate heartbeat
+  if (sessionStore.keynoteId && currentSlideNo.value) {
+    publishSessionState(currentSlideNo.value, 'intro')
+  }
+}
+
+function handleSendHeartbeat() {
+  if (sessionStore.keynoteId && currentSlideNo.value) {
+    publishSessionState(currentSlideNo.value, 'intro')
   }
 }
 
@@ -72,7 +112,6 @@ function resumeSession(targetSlide: number) {
   showRecoveryModal.value = false
   go(targetSlide)
   publishSessionState(targetSlide, 'intro')
-  startHeartbeat()
 }
 
 function handleContinueHere() {
@@ -91,7 +130,6 @@ function handleResetSession() {
   go(1)
   // Publish the new session state
   publishSessionState(1, 'intro')
-  startHeartbeat()
 }
 
 onMounted(() => {
@@ -106,6 +144,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
   stopHeartbeat()
+  stopCountdown()
 })
 </script>
 
@@ -115,7 +154,10 @@ onUnmounted(() => {
   <VoteTower />
   <AdminPanel
     :visible="showAdminPanel"
+    :join-session-remaining="joinSessionRemaining"
     @close="showAdminPanel = false"
+    @start-join-session="handleStartJoinSession"
+    @send-heartbeat="handleSendHeartbeat"
   />
   <SessionRecoveryModal
     :visible="showRecoveryModal"

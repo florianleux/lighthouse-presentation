@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { sessionStore, publishSessionState } from '../setup/main'
 import '../styles/modals.css'
 
-defineProps<{
+const props = defineProps<{
   visible: boolean
+  joinSessionRemaining: number
 }>()
 
 const emit = defineEmits<{
   close: []
+  startJoinSession: [duration: number]
+  sendHeartbeat: []
 }>()
 
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
 const activeCrewCount = computed(() => sessionStore.activeCrew.length)
+
+// Join session controls
+const selectedDuration = ref(5)
+const isJoinSessionActive = computed(() => props.joinSessionRemaining > 0)
 
 function initKeynote() {
   sessionStore.initKeynote()
@@ -91,6 +98,36 @@ function startNewSession() {
                   </span>
                 </div>
               </div>
+            </div>
+
+            <!-- Join Session Section -->
+            <div class="section">
+              <label>Join Session</label>
+              <div class="join-controls">
+                <input
+                  v-model.number="selectedDuration"
+                  type="number"
+                  min="1"
+                  max="60"
+                  :disabled="isJoinSessionActive"
+                  class="duration-input"
+                />
+                <span class="duration-unit">min</span>
+                <button
+                  class="modal-btn primary"
+                  :disabled="!keynoteId || isJoinSessionActive"
+                  @click="emit('startJoinSession', selectedDuration)"
+                >
+                  {{ isJoinSessionActive ? `${joinSessionRemaining}s` : 'Start' }}
+                </button>
+              </div>
+              <button
+                class="modal-btn secondary full-width"
+                :disabled="!keynoteId"
+                @click="emit('sendHeartbeat')"
+              >
+                Send Heartbeat (sync all)
+              </button>
             </div>
 
             <!-- Actions Section -->
@@ -236,6 +273,42 @@ function startNewSession() {
   color: #22c55e;
   font-weight: 500;
   margin-left: auto;
+}
+
+.join-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.duration-input {
+  width: 60px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.duration-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.duration-unit {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.modal-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.modal-btn.secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .actions {
