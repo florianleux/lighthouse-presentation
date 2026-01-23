@@ -76,13 +76,12 @@ Scan the QR code to join the crew
 
 ---
 
-# About me
+# About your captain
 
-## Florian Leux
+## Flo
 
 - Senior Frontend Engineer
-- Seller Experience
-- Your captain for the day 
+- Sailing on the Seller Experience Ship 
 
 ---
 
@@ -92,16 +91,16 @@ What's your knowledge level of Lighthouse?
 
 <div class="grid grid-cols-3 gap-4 pt-8 text-center">
   <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">🌱</div>
-    <div>Beginner</div>
+    <div class="text-4xl mb-2">🪣</div>
+    <div>Cabin Boy</div>
   </div>
   <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">🌿</div>
-    <div>Intermediate</div>
+    <div class="text-4xl mb-2">⚓</div>
+    <div>Quartermaster</div>
   </div>
   <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">🌳</div>
-    <div>Expert</div>
+    <div class="text-4xl mb-2">🏴‍☠️</div>
+    <div>Captain</div>
   </div>
 </div>
 
@@ -138,6 +137,12 @@ Our pirate test shop
     <div class="text-2xl mb-4">🏪 BlackMarket</div>
     <div class="text-sm opacity-70">Nuxt 3 app with 40 anti-patterns</div>
   </div>
+</div>
+
+---
+
+<div class="absolute inset-0">
+  <iframe src="https://blackmarket.florianleux.fr" class="w-full h-full border-0" style="transform: scale(0.6); transform-origin: top left; width: 166.67%; height: 166.67%;" />
 </div>
 
 ---
