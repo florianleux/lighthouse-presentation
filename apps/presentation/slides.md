@@ -276,7 +276,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="13" />
+<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="16" />
 
 ---
 
@@ -285,6 +285,24 @@ layout: center
 ## Applied fixes details
 
 <WinnerDisplay :vote-index="0" />
+
+---
+
+# Day 1: Patch 1
+
+<PatchExplanation :vote-index="0" :patch-index="0" />
+
+---
+
+# Day 1: Patch 2
+
+<PatchExplanation :vote-index="0" :patch-index="1" />
+
+---
+
+# Day 1: Patch 3
+
+<PatchExplanation :vote-index="0" :patch-index="2" />
 
 ---
 
@@ -343,7 +361,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Visual Cues" label-b="Semantic HTML" :next-slide="18" />
+<VoteButtons :vote-index="1" label-a="Visual Cues" label-b="Semantic HTML" :next-slide="24" />
 
 ---
 
@@ -352,6 +370,24 @@ layout: center
 ## Applied fixes details
 
 <WinnerDisplay :vote-index="1" />
+
+---
+
+# Day 2: Patch 1
+
+<PatchExplanation :vote-index="1" :patch-index="0" />
+
+---
+
+# Day 2: Patch 2
+
+<PatchExplanation :vote-index="1" :patch-index="1" />
+
+---
+
+# Day 2: Patch 3
+
+<PatchExplanation :vote-index="1" :patch-index="2" />
 
 ---
 
@@ -410,7 +446,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="Console" label-b="Browser APIs" :next-slide="23" />
+<VoteButtons :vote-index="2" label-a="Console" label-b="Browser APIs" :next-slide="32" />
 
 ---
 
@@ -419,6 +455,24 @@ layout: center
 ## Applied fixes details
 
 <WinnerDisplay :vote-index="2" />
+
+---
+
+# Day 3: Patch 1
+
+<PatchExplanation :vote-index="2" :patch-index="0" />
+
+---
+
+# Day 3: Patch 2
+
+<PatchExplanation :vote-index="2" :patch-index="1" />
+
+---
+
+# Day 3: Patch 3
+
+<PatchExplanation :vote-index="2" :patch-index="2" />
 
 ---
 
@@ -477,7 +531,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Meta Tags" label-b="Content" :next-slide="28" />
+<VoteButtons :vote-index="3" label-a="Meta Tags" label-b="Content" :next-slide="40" />
 
 ---
 
@@ -486,6 +540,24 @@ layout: center
 ## Applied fixes details
 
 <WinnerDisplay :vote-index="3" />
+
+---
+
+# Day 4: Patch 1
+
+<PatchExplanation :vote-index="3" :patch-index="0" />
+
+---
+
+# Day 4: Patch 2
+
+<PatchExplanation :vote-index="3" :patch-index="1" />
+
+---
+
+# Day 4: Patch 3
+
+<PatchExplanation :vote-index="3" :patch-index="2" />
 
 ---
 
