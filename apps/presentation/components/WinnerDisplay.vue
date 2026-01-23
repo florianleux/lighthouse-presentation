@@ -10,65 +10,52 @@ const props = defineProps<{
 const voteData = {
   0: {
     A: {
-      title: 'Images & Transfer',
+      title: 'Images',
       fixes: [
         'Convert images to WebP',
         'Add loading="lazy" below-fold',
-        'Add width and height attributes',
-        'Remove render-blocking CSS',
-        'Enable gzip/brotli compression'
+        'Add width/height attributes'
       ]
     },
     B: {
-      title: 'Fonts & JavaScript',
+      title: 'Scripts',
       fixes: [
-        'font-display: swap on all fonts',
-        'Remove render-blocking fonts',
-        'Add preconnect for external domains',
-        'Remove lodash, moment, jQuery',
-        'Remove blocking third-party scripts',
-        'Remove 500ms inline script'
+        'Remove heavy libraries (jQuery, Lodash, Moment)',
+        'Remove third-party scripts',
+        'Remove blocking inline script'
       ]
     }
   },
   1: {
     A: {
-      title: 'Visual',
+      title: 'Visual Cues',
       fixes: [
         'Improve contrasts (4.5:1 ratio)',
         'Add visible focus indicators',
-        'Labels on all inputs',
-        'Accessible names on links/buttons',
-        'Controls on auto-play media'
+        'Labels on all inputs'
       ]
     },
     B: {
-      title: 'Semantic',
+      title: 'Semantic HTML',
       fixes: [
         'Replace clickable divs with buttons',
         'Add lang attribute to html',
-        'Add skip link',
-        'Fix keyboard traps',
         'Fix heading hierarchy (h1→h2→h3)'
       ]
     }
   },
   2: {
     A: {
-      title: 'Console & Security',
+      title: 'Console',
       fixes: [
         'Remove console.log in production',
-        'Add rel="noopener" on external links',
         'Remove document.write()',
-        'Fix console errors',
-        'Update vulnerable libraries'
+        'Fix console errors'
       ]
     },
     B: {
-      title: 'Modern Standards',
+      title: 'Browser APIs',
       fixes: [
-        'Fix image display dimensions',
-        'Verify doctype',
         'Remove aggressive permission requests',
         'Add passive listeners (scroll, touch)',
         'Hide source maps in production'
@@ -77,23 +64,19 @@ const voteData = {
   },
   3: {
     A: {
-      title: 'Meta & Structure',
+      title: 'Meta Tags',
       fixes: [
         'Add unique title',
-        'Add meta name="description"',
-        'One h1 per page',
-        'Verify viewport meta',
-        'Add canonical URL'
+        'Add meta description',
+        'One h1 per page'
       ]
     },
     B: {
-      title: 'Content & Links',
+      title: 'Content',
       fixes: [
-        'Descriptive link text (no "click here")',
-        'Alt attributes on all images',
-        'Remove meta noindex',
-        'Crawlable navigation (real a href)',
-        'Remove redirect chains'
+        'Descriptive link text',
+        'Alt attributes on images',
+        'Crawlable navigation'
       ]
     }
   }

@@ -11,20 +11,20 @@ const props = defineProps<{
 // Scores selon le choix A ou B pour chaque vote
 const scoreData = {
   0: { // Performance
-    A: { score: 72, label: 'Images & Transfer' },
-    B: { score: 78, label: 'Fonts & JS' }
+    A: { score: 72, label: 'Images' },
+    B: { score: 78, label: 'Scripts' }
   },
   1: { // Accessibility
-    A: { score: 82, label: 'Visual' },
-    B: { score: 88, label: 'Semantic' }
+    A: { score: 82, label: 'Visual Cues' },
+    B: { score: 88, label: 'Semantic HTML' }
   },
   2: { // Best Practices
-    A: { score: 92, label: 'Console & Security' },
-    B: { score: 89, label: 'Modern Standards' }
+    A: { score: 92, label: 'Console' },
+    B: { score: 89, label: 'Browser APIs' }
   },
   3: { // SEO
-    A: { score: 91, label: 'Meta & Structure' },
-    B: { score: 95, label: 'Content & Links' }
+    A: { score: 91, label: 'Meta Tags' },
+    B: { score: 95, label: 'Content' }
   }
 }
 

@@ -16,16 +16,63 @@ mdc: true
 Scan the QR code to join the crew
 
 <div class="flex justify-center pt-8">
-  <div class="w-64 h-64 bg-gray-200 flex items-center justify-center">
-    QR Code
+  <img src="/qr-code.png" alt="Scan to join" class="w-64 h-64" />
+</div>
+
+
+---
+
+# Why Lighthouse?
+
+<div class="grid grid-cols-2 gap-6 pt-4">
+  <div class="p-4 border rounded">
+    <div class="text-4xl font-bold text-orange-500 mb-1">53%</div>
+    <div class="text-xs opacity-70">of users leave if page loads > 3s</div>
+  </div>
+  <div class="p-4 border rounded">
+    <div class="text-4xl font-bold text-blue-500 mb-1">15%</div>
+    <div class="text-xs opacity-70">of users have a disability</div>
+  </div>
+  <div class="p-4 border rounded">
+    <div class="text-4xl font-bold text-green-500 mb-1">82%</div>
+    <div class="text-xs opacity-70">of users won't buy from an unsecure site</div>
+  </div>
+  <div class="p-4 border rounded">
+    <div class="text-4xl font-bold text-purple-500 mb-1">68%</div>
+    <div class="text-xs opacity-70">of online experiences begin with search</div>
   </div>
 </div>
 
-<div class="text-center pt-4">
-  vote.lighthouse-pirates.com
+---
+
+# Lighthouse measures what matters
+
+<div class="grid grid-cols-4 gap-4 pt-8 text-center">
+  <div class="p-4">
+    <div class="text-4xl mb-2">⚡</div>
+    <div class="font-bold">Performance</div>
+    <div class="text-xs opacity-70">Speed & efficiency</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">♿</div>
+    <div class="font-bold">Accessibility</div>
+    <div class="text-xs opacity-70">Usable by everyone</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">✅</div>
+    <div class="font-bold">Best Practices</div>
+    <div class="text-xs opacity-70">Modern standards</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">🔍</div>
+    <div class="font-bold">SEO</div>
+    <div class="text-xs opacity-70">Search visibility</div>
+  </div>
 </div>
 
-<CrewDisplay />
+<div class="pt-8 text-center text-lg opacity-70">
+  4 scores · 4 votes · 1 lighthouse to build
+</div>
 
 ---
 
@@ -33,9 +80,9 @@ Scan the QR code to join the crew
 
 ## Florian Leux
 
-- Web Developer
-- Performance Expert
-- Lighthouse Pirate
+- Senior Frontend Engineer
+- Seller Experience
+- Your captain for the day 
 
 ---
 
@@ -196,25 +243,20 @@ Before diving into optimizations, let's remove obvious UX anti-patterns that hur
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Images & Transfer</div>
+    <div class="text-lg mb-4">Images</div>
     <ul class="text-sm">
       <li>Convert images to WebP</li>
       <li>Add loading="lazy" below-fold</li>
-      <li>Add width and height attributes</li>
-      <li>Remove render-blocking CSS</li>
-      <li>Enable gzip/brotli compression</li>
+      <li>Add width/height attributes</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Fonts & JavaScript</div>
+    <div class="text-lg mb-4">Scripts</div>
     <ul class="text-sm">
-      <li>font-display: swap on all fonts</li>
-      <li>Remove render-blocking fonts</li>
-      <li>Add preconnect for external domains</li>
-      <li>Remove lodash, moment, jQuery</li>
-      <li>Remove blocking third-party scripts</li>
-      <li>Remove 500ms inline script</li>
+      <li>Remove heavy libraries (jQuery, Lodash, Moment)</li>
+      <li>Remove third-party scripts</li>
+      <li>Remove blocking inline script</li>
     </ul>
   </div>
 </div>
@@ -229,7 +271,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="0" label-a="Images & Transfer" label-b="Fonts & JS" :next-slide="13" />
+<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="13" />
 
 ---
 
@@ -268,23 +310,19 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Visual</div>
+    <div class="text-lg mb-4">Visual Cues</div>
     <ul class="text-sm">
       <li>Improve contrasts (4.5:1 ratio)</li>
       <li>Add visible focus indicators</li>
       <li>Labels on all inputs</li>
-      <li>Accessible names on links/buttons</li>
-      <li>Controls on auto-play media</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Semantic</div>
+    <div class="text-lg mb-4">Semantic HTML</div>
     <ul class="text-sm">
       <li>Replace clickable divs with buttons</li>
       <li>Add lang attribute to html</li>
-      <li>Add skip link</li>
-      <li>Fix keyboard traps</li>
       <li>Fix heading hierarchy (h1→h2→h3)</li>
     </ul>
   </div>
@@ -300,7 +338,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Visual" label-b="Semantic" :next-slide="18" />
+<VoteButtons :vote-index="1" label-a="Visual Cues" label-b="Semantic HTML" :next-slide="18" />
 
 ---
 
@@ -339,21 +377,17 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Console & Security</div>
+    <div class="text-lg mb-4">Console</div>
     <ul class="text-sm">
       <li>Remove console.log in production</li>
-      <li>Add rel="noopener" on external links</li>
       <li>Remove document.write()</li>
       <li>Fix console errors</li>
-      <li>Update vulnerable libraries</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Modern Standards</div>
+    <div class="text-lg mb-4">Browser APIs</div>
     <ul class="text-sm">
-      <li>Fix image display dimensions</li>
-      <li>Verify doctype</li>
       <li>Remove aggressive permission requests</li>
       <li>Add passive listeners (scroll, touch)</li>
       <li>Hide source maps in production</li>
@@ -371,7 +405,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="Console & Security" label-b="Modern Standards" :next-slide="23" />
+<VoteButtons :vote-index="2" label-a="Console" label-b="Browser APIs" :next-slide="23" />
 
 ---
 
@@ -410,24 +444,20 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Meta & Structure</div>
+    <div class="text-lg mb-4">Meta Tags</div>
     <ul class="text-sm">
       <li>Add unique title</li>
-      <li>Add meta name="description"</li>
+      <li>Add meta description</li>
       <li>One h1 per page</li>
-      <li>Verify viewport meta</li>
-      <li>Add canonical URL</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Content & Links</div>
+    <div class="text-lg mb-4">Content</div>
     <ul class="text-sm">
-      <li>Descriptive link text (no "click here")</li>
-      <li>Alt attributes on all images</li>
-      <li>Remove meta noindex</li>
-      <li>Crawlable navigation (real a href)</li>
-      <li>Remove redirect chains</li>
+      <li>Descriptive link text</li>
+      <li>Alt attributes on images</li>
+      <li>Crawlable navigation</li>
     </ul>
   </div>
 </div>
@@ -442,7 +472,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Meta & Structure" label-b="Content & Links" :next-slide="28" />
+<VoteButtons :vote-index="3" label-a="Meta Tags" label-b="Content" :next-slide="28" />
 
 ---
 
