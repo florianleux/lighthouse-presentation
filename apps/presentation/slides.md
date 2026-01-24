@@ -434,7 +434,7 @@ layout: center
 ## Audits covered by our patches (6 of ~20 audits)
 
 <div class="text-sm opacity-70 mb-3">
-  <strong>~20 audits:</strong> deprecations (5) · third-party-cookies (5) · paste-preventing-inputs (3) · errors-in-console (1) · notification-on-start (1) · geolocation-on-start (1) · ...
+  <strong>~20 audits:</strong> deprecations (5) · inspector-issues (1) · paste-preventing-inputs (3) · errors-in-console (1) · notification-on-start (1) · geolocation-on-start (1) · ...
 </div>
 
 <div class="grid grid-cols-2 gap-4">
@@ -442,7 +442,7 @@ layout: center
     <div class="text-blue-400 text-sm mb-1">Option A - General</div>
     <ul class="text-sm">
       <li><code>deprecations</code></li>
-      <li><code>third-party-cookies</code></li>
+      <li><code>inspector-issues</code></li>
       <li><code>errors-in-console</code></li>
     </ul>
   </div>
@@ -470,7 +470,7 @@ layout: center
     <div class="text-lg mb-4">General</div>
     <ul class="text-sm">
       <li>Remove document.write()</li>
-      <li>Remove third-party cookie trackers</li>
+      <li>Fix DevTools Issues warnings</li>
       <li>Fix console errors</li>
     </ul>
   </div>
