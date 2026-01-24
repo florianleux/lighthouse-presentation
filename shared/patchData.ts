@@ -1,5 +1,44 @@
-// Lighthouse metrics that can be impacted
-export type LighthouseMetric = 'FCP' | 'LCP' | 'TBT' | 'CLS' | 'SI' | 'TTI'
+// Performance metrics (Core Web Vitals)
+export type PerformanceMetric = 'FCP' | 'LCP' | 'TBT' | 'CLS' | 'SI' | 'TTI'
+
+// Accessibility audits (all weight 10 - Critical)
+export type AccessibilityMetric =
+  // a11y-names-labels group (Option A)
+  | 'button-name'
+  | 'image-alt'
+  | 'label'
+  // a11y-aria group (Option B)
+  | 'aria-roles'
+  | 'aria-required-attr'
+  | 'aria-valid-attr-value'
+
+// Best Practices audits (weight 5, 3, 1)
+export type BestPracticesMetric =
+  // best-practices-general group (Option A)
+  | 'deprecations'
+  | 'third-party-cookies'
+  | 'errors-in-console'
+  // best-practices-trust-safety + ux groups (Option B)
+  | 'geolocation-on-start'
+  | 'notification-on-start'
+  | 'paste-preventing-inputs'
+
+// SEO audits (is-crawlable weight ~4.04, others weight 1)
+export type SEOMetric =
+  // seo-crawl group (Option A)
+  | 'is-crawlable'
+  | 'crawlable-anchors'
+  | 'robots-txt'
+  // seo-content group (Option B)
+  | 'document-title'
+  | 'meta-description'
+  | 'link-text'
+
+// Union of all category metrics
+export type CategoryMetric = PerformanceMetric | AccessibilityMetric | BestPracticesMetric | SEOMetric
+
+// Keep backward compatibility alias
+export type LighthouseMetric = CategoryMetric
 
 export interface CodeSnippet {
   language: string // 'html', 'javascript', 'css', 'vue'
@@ -206,61 +245,68 @@ export const PATCH_DATA: Record<number, VotePatchData> = {
   // Vote 1: Accessibility
   1: {
     A: {
-      title: 'Visual Cues',
+      title: 'Names & Labels',
       patches: [
         {
-          title: 'Improve contrasts (4.5:1 ratio)',
-          summary: 'Ensure text is readable for everyone',
+          title: 'Replace divs with buttons',
+          summary: 'Use proper interactive elements',
           before: {
-            language: 'css',
-            code: `.product-title {
-  color: #999999; /* Gray on white */
-  /* Contrast ratio: 2.5:1 (FAIL) */
-}`
+            language: 'html',
+            code: `<!-- TheHeader.vue - non-semantic buttons -->
+<div role="button" class="cursor-pointer">
+  Sell
+</div>
+<div role="button" class="cursor-pointer">
+  Need help?
+</div>
+<!-- Missing keyboard support -->`
           },
           after: {
-            language: 'css',
-            code: `.product-title {
-  color: #595959; /* Darker gray */
-  /* Contrast ratio: 7:1 (PASS AA & AAA) */
-}`
+            language: 'html',
+            code: `<!-- TheHeader.vue - semantic buttons -->
+<button type="button" class="cursor-pointer">
+  Sell
+</button>
+<button type="button" class="cursor-pointer">
+  Need help?
+</button>
+<!-- Keyboard accessible by default -->`
           },
           whyMatters: [
-            'WCAG requires 4.5:1 contrast for normal text',
-            'Low contrast affects users with low vision',
-            '~8% of men have color vision deficiency'
+            'Divs are not keyboard accessible by default',
+            'Buttons work with Enter and Space keys',
+            'Screen readers announce buttons correctly'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'button-name', impact: 'high', description: 'Interactive elements are accessible' }
           ]
         },
         {
-          title: 'Add visible focus indicators',
-          summary: 'Show where keyboard focus is',
+          title: 'Add alt text to images',
+          summary: 'Describe images for screen readers',
           before: {
-            language: 'css',
-            code: `button:focus,
-a:focus,
-input:focus {
-  outline: none; /* WCAG violation */
-}`
+            language: 'html',
+            code: `<!-- ProductCard.vue -->
+<img :src="product.image" />
+
+<!-- TheHeader.vue -->
+<img src="/images/logo.png" alt="image" />`
           },
           after: {
-            language: 'css',
-            code: `button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 3px solid #4A90D9;
-  outline-offset: 2px;
-}`
+            language: 'html',
+            code: `<!-- ProductCard.vue -->
+<img :src="product.image" :alt="product.name" />
+
+<!-- TheHeader.vue -->
+<img src="/images/logo.png" alt="BlackMarket logo" />`
           },
           whyMatters: [
-            'Keyboard users need to see where focus is',
-            'outline: none removes the only indicator',
-            ':focus-visible shows outline only for keyboard'
+            'Screen readers need alt to describe images',
+            'Required by WCAG 1.1.1 (Level A)',
+            'Also helps SEO image indexing'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'image-alt', impact: 'high', description: 'All images have descriptive alt' }
           ]
         },
         {
@@ -269,8 +315,7 @@ input:focus-visible {
           before: {
             language: 'html',
             code: `<input
-  type="text"
-  placeholder="Search..."
+  placeholder="Search for pirate gear..."
 />
 <!-- No label - screen readers can't identify -->`
           },
@@ -281,8 +326,7 @@ input:focus-visible {
 </label>
 <input
   id="search"
-  type="text"
-  placeholder="Search..."
+  placeholder="Search for pirate gear..."
 />`
           },
           whyMatters: [
@@ -291,97 +335,95 @@ input:focus-visible {
             'Labels also increase click target area'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'label', impact: 'high', description: 'All form fields have labels' }
           ]
         }
       ]
     },
     B: {
-      title: 'Semantic HTML',
+      title: 'ARIA',
       patches: [
         {
-          title: 'Replace divs with buttons',
-          summary: 'Use proper interactive elements',
+          title: 'Use valid ARIA roles',
+          summary: 'Replace invalid role values with standard ones',
           before: {
             language: 'html',
-            code: `<div
-  role="button"
-  onclick="addToCart()"
-  class="btn"
->
-  Add to Cart
-</div>
-<!-- Missing keyboard support -->`
+            code: `<!-- app.vue - invalid custom roles -->
+<div role="pirate-button">Click me</div>
+<div role="treasure-chest">Content here</div>
+<span role="gold-counter">5 coins</span>
+<!-- Invalid roles are ignored by AT -->`
           },
           after: {
             language: 'html',
-            code: `<button
-  type="button"
-  onclick="addToCart()"
-  class="btn"
->
-  Add to Cart
-</button>
-<!-- Keyboard accessible by default -->`
+            code: `<!-- app.vue - valid ARIA roles -->
+<button type="button">Click me</button>
+<div role="region" aria-label="Treasure">Content here</div>
+<span role="status">5 coins</span>
+<!-- Semantic elements or valid roles -->`
           },
           whyMatters: [
-            'Divs are not keyboard accessible by default',
-            'Buttons work with Enter and Space keys',
-            'Screen readers announce buttons correctly'
+            'Invalid roles are ignored by assistive tech',
+            'Screen readers can\'t identify custom roles',
+            'Use standard roles from WAI-ARIA spec'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'aria-roles', impact: 'high', description: 'All ARIA roles are valid' }
           ]
         },
         {
-          title: 'Add lang attribute to html',
-          summary: 'Declare the page language',
+          title: 'Add required ARIA attributes',
+          summary: 'Provide missing ARIA state attributes',
           before: {
             language: 'html',
-            code: `<html>
-  <head>...</head>
-  <!-- No language declared -->
-</html>`
+            code: `<!-- app.vue - missing required attributes -->
+<div role="checkbox">Remember me</div>
+<div role="slider">Volume</div>
+<div role="combobox">Select option</div>
+<!-- AT cannot determine state -->`
           },
           after: {
             language: 'html',
-            code: `<html lang="en">
-  <head>...</head>
-  <!-- Language declared for screen readers -->
-</html>`
+            code: `<!-- app.vue - complete ARIA attributes -->
+<div role="checkbox" aria-checked="false">Remember me</div>
+<div role="slider" aria-valuenow="50"
+     aria-valuemin="0" aria-valuemax="100">Volume</div>
+<div role="combobox" aria-expanded="false">Select</div>
+<!-- AT can announce current state -->`
           },
           whyMatters: [
-            'Screen readers use lang to select voice',
-            'Without lang, pronunciation may be wrong',
-            'Required by WCAG 3.1.1 (Level A)'
+            'ARIA roles require specific attributes',
+            'checkbox needs aria-checked state',
+            'slider needs aria-valuenow/min/max'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'aria-required-attr', impact: 'high', description: 'ARIA roles have required attributes' }
           ]
         },
         {
-          title: 'Fix heading hierarchy',
-          summary: 'Use headings in order (h1→h2→h3)',
+          title: 'Fix invalid ARIA attribute values',
+          summary: 'Use valid values for ARIA attributes',
           before: {
             language: 'html',
-            code: `<h1>BlackMarket</h1>
-<h4>Products</h4>  <!-- Skipped h2, h3 -->
-<h6>Sword</h6>     <!-- Skipped h5 -->`
+            code: `<!-- app.vue - invalid ARIA values -->
+<div role="slider" aria-valuenow="invalid">Volume</div>
+<div role="progressbar" aria-valuenow="fifty">Loading</div>
+<!-- aria-valuenow must be a number -->`
           },
           after: {
             language: 'html',
-            code: `<h1>BlackMarket</h1>
-<h2>Products</h2>
-<h3>Sword</h3>
-<!-- Proper hierarchy for navigation -->`
+            code: `<!-- app.vue - valid ARIA values -->
+<div role="slider" aria-valuenow="50">Volume</div>
+<div role="progressbar" aria-valuenow="50">Loading</div>
+<!-- aria-valuenow is now a valid number -->`
           },
           whyMatters: [
-            'Screen reader users navigate by headings',
-            'Skipping levels breaks document outline',
-            'Headings should reflect content structure'
+            'aria-valuenow requires a numeric value',
+            'Invalid values are ignored by assistive tech',
+            'Users cannot determine slider/progress state'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'aria-valid-attr-value', impact: 'high', description: 'ARIA attributes have valid values' }
           ]
         }
       ]
@@ -391,35 +433,40 @@ input:focus-visible {
   // Vote 2: Best Practices
   2: {
     A: {
-      title: 'Console',
+      title: 'General',
       patches: [
         {
-          title: 'Remove console.log in production',
-          summary: 'Clean up debugging statements',
+          title: 'Remove third-party cookie trackers',
+          summary: 'Avoid tracking users without consent',
           before: {
-            language: 'javascript',
-            code: `function addToCart(item) {
-  console.log('Adding to cart:', item);
-  console.log('Current cart:', cart);
-  console.log('User:', currentUser);
-  // Logs sensitive data in production
-}`
+            language: 'html',
+            code: `<!-- app.vue - hidden tracking iframe -->
+<iframe
+  src="https://youtube.com/embed/..."
+  style="display:none"
+></iframe>
+
+// Insecure cookie
+document.cookie = 'tracker=value; path=/'`
           },
           after: {
-            language: 'javascript',
-            code: `function addToCart(item) {
-  // Use proper logging service
-  // or remove in production build
-  cart.add(item);
-}`
+            language: 'html',
+            code: `<!-- Load third-party only with consent -->
+<iframe
+  v-if="hasConsent"
+  src="https://youtube.com/embed/..."
+></iframe>
+
+// Secure cookie with SameSite
+document.cookie = 'session=value; SameSite=Strict; Secure'`
           },
           whyMatters: [
-            'Console logs expose internal data publicly',
-            'Performance cost from serializing objects',
-            'Clutters browser console for debugging'
+            'Third-party cookies track users across sites',
+            'Hidden iframes can set tracking cookies',
+            'GDPR/CCPA require consent for tracking'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'low', description: 'Minor performance gain' }
+            { metric: 'third-party-cookies', impact: 'high', description: 'No tracking without consent' }
           ]
         },
         {
@@ -427,16 +474,18 @@ input:focus-visible {
           summary: 'Avoid deprecated DOM API',
           before: {
             language: 'javascript',
-            code: `// In page load
-document.write('<p>Loading...</p>');
+            code: `// nuxt.config.ts - head script
+innerHTML: \`document.write(
+  '<div>Injected via document.write</div>'
+);\`
 // Blocks parsing and can wipe page`
           },
           after: {
             language: 'javascript',
-            code: `// Use modern DOM methods
-const p = document.createElement('p');
-p.textContent = 'Loading...';
-document.body.appendChild(p);`
+            code: `// Removed - use modern DOM methods
+const div = document.createElement('div')
+div.textContent = 'Injected content'
+document.body.appendChild(div)`
           },
           whyMatters: [
             'document.write() blocks HTML parsing',
@@ -444,7 +493,7 @@ document.body.appendChild(p);`
             'Deprecated and flagged by Lighthouse'
           ],
           metrics: [
-            { metric: 'FCP', impact: 'medium', description: 'Removes parsing block' }
+            { metric: 'deprecations', impact: 'high', description: 'No deprecated APIs used' }
           ]
         },
         {
@@ -452,22 +501,21 @@ document.body.appendChild(p);`
           summary: 'Handle undefined functions and errors',
           before: {
             language: 'javascript',
-            code: `// Calling undefined function
-undefinedFunction();
+            code: `// app.vue - causes console errors
+undefinedFunction()
 
 // Unhandled promise rejection
-Promise.reject('Error');
+Promise.reject('Error')
 
-// Results in console errors`
+// Results in red errors in console`
           },
           after: {
             language: 'javascript',
-            code: `// Remove or define the function
-// definedFunction();
+            code: `// Removed undefined function call
 
 // Handle promise rejections
 Promise.reject('Error')
-  .catch(err => handleError(err));`
+  .catch(err => handleError(err))`
           },
           whyMatters: [
             'Console errors indicate broken functionality',
@@ -475,25 +523,24 @@ Promise.reject('Error')
             'Errors can break subsequent scripts'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'low', description: 'Prevents error handling overhead' }
+            { metric: 'errors-in-console', impact: 'high', description: 'No JS errors in console' }
           ]
         }
       ]
     },
     B: {
-      title: 'Browser APIs',
+      title: 'Trust & Safety',
       patches: [
         {
-          title: 'Remove aggressive permission requests',
-          summary: 'Only request permissions on user gesture',
+          title: 'Remove geolocation on page load',
+          summary: 'Only request location on user gesture',
           before: {
             language: 'javascript',
-            code: `// On page load (bad practice)
+            code: `// app.vue - onMounted() (bad practice)
 navigator.geolocation.getCurrentPosition(
-  pos => console.log(pos)
-);
-Notification.requestPermission();
-// Browser may block these`
+  () => console.log('Location obtained')
+)
+// Requests location immediately on load`
           },
           after: {
             language: 'javascript',
@@ -501,8 +548,8 @@ Notification.requestPermission();
 button.addEventListener('click', () => {
   navigator.geolocation.getCurrentPosition(
     pos => showNearbyStores(pos)
-  );
-});
+  )
+})
 // User understands why`
           },
           whyMatters: [
@@ -511,69 +558,67 @@ button.addEventListener('click', () => {
             'Users more likely to accept with context'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'low', description: 'Removes blocking API calls' }
+            { metric: 'geolocation-on-start', impact: 'high', description: 'Geolocation only on user action' }
           ]
         },
         {
-          title: 'Add passive listeners',
-          summary: 'Improve scroll performance',
+          title: 'Remove notification on page load',
+          summary: 'Only request notifications on user gesture',
           before: {
             language: 'javascript',
-            code: `document.addEventListener(
-  'touchstart',
-  handleTouch,
-  { passive: false }
-);
-// Browser waits to see if preventDefault`
+            code: `// app.vue - onMounted() (bad practice)
+Notification.requestPermission()
+// Requests notification immediately on load
+// Users don't understand why`
           },
           after: {
             language: 'javascript',
-            code: `document.addEventListener(
-  'touchstart',
-  handleTouch,
-  { passive: true }
-);
-// Browser scrolls immediately`
+            code: `// Only on user interaction
+button.addEventListener('click', () => {
+  Notification.requestPermission()
+    .then(showNotificationPrefs)
+})
+// User requested notifications`
           },
           whyMatters: [
-            'Non-passive listeners block scrolling',
-            'Browser waits to see if preventDefault called',
-            'Passive listeners allow immediate scroll'
+            'Auto-requests without context are intrusive',
+            'Browsers may auto-deny repeated requests',
+            'Users more likely to accept with context'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'medium', description: 'Smoother scrolling' }
+            { metric: 'notification-on-start', impact: 'high', description: 'No intrusive notification prompts' }
           ]
         },
         {
-          title: 'Hide source maps in production',
-          summary: 'Protect source code from exposure',
+          title: 'Allow paste in input fields',
+          summary: 'Don\'t block password managers',
           before: {
-            language: 'javascript',
-            code: `// nuxt.config.ts
-export default {
-  sourcemap: {
-    client: true,  // Exposes source code
-    server: true
-  }
-}`
+            language: 'html',
+            code: `<!-- app.vue - blocking paste -->
+<input type="password" onpaste="return false" />
+
+// JavaScript paste blocking
+input.addEventListener('paste', e => {
+  e.preventDefault()
+  console.log('Paste blocked!')
+})`
           },
           after: {
-            language: 'javascript',
-            code: `// nuxt.config.ts
-export default {
-  sourcemap: {
-    client: false, // Hidden in production
-    server: false
-  }
-}`
+            language: 'html',
+            code: `<!-- app.vue - allow paste -->
+<input type="password" />
+
+// Paste allowed for password managers
+// and accessibility
+// (removed paste prevention)`
           },
           whyMatters: [
-            'Source maps expose original source code',
-            'Competitors can see your implementation',
-            'Security: easier to find vulnerabilities'
+            'Blocking paste breaks password managers',
+            'Users rely on pasting strong passwords',
+            'Forces manual typing which is error-prone'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'Smaller download (no .map files)' }
+            { metric: 'paste-preventing-inputs', impact: 'high', description: 'Users can paste in inputs' }
           ]
         }
       ]
@@ -583,183 +628,55 @@ export default {
   // Vote 3: SEO
   3: {
     A: {
-      title: 'Meta Tags',
+      title: 'Crawlability',
       patches: [
         {
-          title: 'Add unique title',
-          summary: 'Set descriptive page title',
+          title: 'Remove noindex meta tag',
+          summary: 'Allow search engines to index the page',
           before: {
             language: 'html',
-            code: `<head>
-  <!-- No title tag -->
-</head>
-<!-- Browser shows URL in tab -->`
+            code: `<!-- nuxt.config.ts head meta -->
+<meta name="robots" content="noindex, nofollow">
+<!-- Page hidden from search engines -->`
           },
           after: {
             language: 'html',
-            code: `<head>
-  <title>
-    BlackMarket - Pirate Gear & Accessories
-  </title>
-</head>
-<!-- Descriptive title in search results -->`
+            code: `<!-- nuxt.config.ts head meta -->
+<meta name="robots" content="index, follow">
+<!-- Page visible in search results -->`
           },
           whyMatters: [
-            'Title appears in search results',
-            'Used for browser tabs and bookmarks',
-            'Most important on-page SEO element'
+            'noindex prevents page from appearing in search',
+            'nofollow prevents crawlers from following links',
+            'Often left accidentally from staging'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'is-crawlable', impact: 'high', description: 'Page is indexable by search engines' }
           ]
         },
         {
-          title: 'Add meta description',
-          summary: 'Control search result snippet',
-          before: {
-            language: 'html',
-            code: `<head>
-  <title>BlackMarket</title>
-  <!-- No meta description -->
-</head>
-<!-- Google generates random snippet -->`
-          },
-          after: {
-            language: 'html',
-            code: `<head>
-  <title>BlackMarket</title>
-  <meta
-    name="description"
-    content="Premium pirate gear and accessories.
-    Swords, hats, and more for your adventures."
-  />
-</head>`
-          },
-          whyMatters: [
-            'Description appears in search results',
-            'Good descriptions improve click-through',
-            'Without it, Google picks random text'
-          ],
-          metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
-          ]
-        },
-        {
-          title: 'One h1 per page',
-          summary: 'Single main heading for clarity',
-          before: {
-            language: 'html',
-            code: `<h1>BlackMarket</h1>
-<h1>Best Deals!</h1>
-<h1>Contact Us</h1>
-<!-- Multiple h1 tags confuse crawlers -->`
-          },
-          after: {
-            language: 'html',
-            code: `<h1>BlackMarket - Pirate Gear Shop</h1>
-<h2>Best Deals!</h2>
-<h2>Contact Us</h2>
-<!-- Clear hierarchy, one main heading -->`
-          },
-          whyMatters: [
-            'h1 should identify the main topic',
-            'Multiple h1s dilute importance signal',
-            'Better structure helps crawlers understand'
-          ],
-          metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
-          ]
-        }
-      ]
-    },
-    B: {
-      title: 'Content',
-      patches: [
-        {
-          title: 'Descriptive link text',
-          summary: 'Replace "click here" with meaningful text',
-          before: {
-            language: 'html',
-            code: `<p>
-  To see our products,
-  <a href="/products">click here</a>.
-</p>
-<p>
-  <a href="/about">Read more</a>
-</p>
-<!-- "click here" and "read more" are useless -->`
-          },
-          after: {
-            language: 'html',
-            code: `<p>
-  Browse our
-  <a href="/products">pirate gear collection</a>.
-</p>
-<p>
-  <a href="/about">Learn about BlackMarket</a>
-</p>
-<!-- Links describe their destination -->`
-          },
-          whyMatters: [
-            'Screen readers list links by text',
-            '"Click here" provides no context',
-            'Descriptive links help SEO and accessibility'
-          ],
-          metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
-          ]
-        },
-        {
-          title: 'Alt attributes on images',
-          summary: 'Describe images for SEO and accessibility',
-          before: {
-            language: 'html',
-            code: `<img src="/sword.webp" alt="image" />
-<img src="/hat.webp" alt="" />
-<img src="/flag.webp" />
-<!-- Generic or missing alt text -->`
-          },
-          after: {
-            language: 'html',
-            code: `<img
-  src="/sword.webp"
-  alt="Steel pirate cutlass with leather grip"
-/>
-<img
-  src="/hat.webp"
-  alt="Black tricorn captain's hat"
-/>`
-          },
-          whyMatters: [
-            'Alt text helps image search ranking',
-            'Screen readers read alt to users',
-            'Displayed if image fails to load'
-          ],
-          metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
-          ]
-        },
-        {
-          title: 'Crawlable navigation',
+          title: 'Make navigation crawlable',
           summary: 'Use real links instead of JavaScript',
           before: {
             language: 'html',
-            code: `<nav>
-  <span @click="goTo('products')">
-    Products
-  </span>
-  <span @click="goTo('about')">
-    About
-  </span>
-</nav>
+            code: `<!-- TheHeader.vue -->
+<div
+  v-for="category in categories"
+  @click="navigateToCategory(category.id)"
+>
+  {{ category.name }}
+</div>
 <!-- Crawlers can't follow JS clicks -->`
           },
           after: {
             language: 'html',
-            code: `<nav>
-  <a href="/products">Products</a>
-  <a href="/about">About</a>
-</nav>
+            code: `<!-- TheHeader.vue -->
+<a
+  v-for="category in categories"
+  :href="\`/category/\${category.id}\`"
+>
+  {{ category.name }}
+</a>
 <!-- Real links that crawlers can follow -->`
           },
           whyMatters: [
@@ -768,7 +685,125 @@ export default {
             'Proper links also help keyboard users'
           ],
           metrics: [
-            { metric: 'LCP', impact: 'low', description: 'No performance impact' }
+            { metric: 'crawlable-anchors', impact: 'high', description: 'Navigation links are crawlable' }
+          ]
+        },
+        {
+          title: 'Fix robots.txt blocking crawlers',
+          summary: 'Allow search engines to access the site',
+          before: {
+            language: 'text',
+            code: `# public/robots.txt
+User-agent: *
+Disallow: /
+# Blocks ALL crawlers from entire site`
+          },
+          after: {
+            language: 'text',
+            code: `# public/robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+# Only block sensitive paths`
+          },
+          whyMatters: [
+            'Disallow: / blocks all pages from indexing',
+            'Site will not appear in search results',
+            'Only block admin/api paths'
+          ],
+          metrics: [
+            { metric: 'robots-txt', impact: 'high', description: 'robots.txt allows crawling' }
+          ]
+        }
+      ]
+    },
+    B: {
+      title: 'Content',
+      patches: [
+        {
+          title: 'Add unique page title',
+          summary: 'Set descriptive page title',
+          before: {
+            language: 'javascript',
+            code: `// pages/index.vue
+// No useHead() or title configuration
+export default {
+  // Page lacks any title definition
+}`
+          },
+          after: {
+            language: 'javascript',
+            code: `// pages/index.vue
+useHead({
+  title: 'BlackMarket - Pirate Gear & Accessories'
+})
+// Descriptive title in search results`
+          },
+          whyMatters: [
+            'Title appears in search results',
+            'Used for browser tabs and bookmarks',
+            'Most important on-page SEO element'
+          ],
+          metrics: [
+            { metric: 'document-title', impact: 'high', description: 'Page has descriptive title' }
+          ]
+        },
+        {
+          title: 'Add meta description',
+          summary: 'Control search result snippet',
+          before: {
+            language: 'javascript',
+            code: `// pages/index.vue
+// No meta description defined
+useHead({
+  title: 'BlackMarket'
+})
+// Google generates random snippet`
+          },
+          after: {
+            language: 'javascript',
+            code: `// pages/index.vue
+useSeoMeta({
+  title: 'BlackMarket',
+  description: 'Premium pirate gear and accessories. Swords, hats, and more.'
+})
+// Controlled search snippet`
+          },
+          whyMatters: [
+            'Description appears in search results',
+            'Good descriptions improve click-through',
+            'Without it, Google picks random text'
+          ],
+          metrics: [
+            { metric: 'meta-description', impact: 'high', description: 'Search snippet is controlled' }
+          ]
+        },
+        {
+          title: 'Descriptive link text',
+          summary: 'Replace "click here" with meaningful text',
+          before: {
+            language: 'html',
+            code: `<!-- TheFooter.vue -->
+<a href="#">Click here</a>
+<a href="#">Read more</a>
+<a href="#">Learn more</a>
+<!-- Generic link text is useless -->`
+          },
+          after: {
+            language: 'html',
+            code: `<!-- TheFooter.vue -->
+<a href="/products">Browse our collection</a>
+<a href="/about">Learn about BlackMarket</a>
+<a href="/contact">Contact our crew</a>
+<!-- Links describe their destination -->`
+          },
+          whyMatters: [
+            'Screen readers list links by text',
+            '"Click here" provides no context',
+            'Descriptive links help SEO and accessibility'
+          ],
+          metrics: [
+            { metric: 'link-text', impact: 'high', description: 'Links describe destination' }
           ]
         }
       ]
