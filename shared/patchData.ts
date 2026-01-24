@@ -16,7 +16,7 @@ export type AccessibilityMetric =
 export type BestPracticesMetric =
   // best-practices-general group (Option A)
   | 'deprecations'
-  | 'third-party-cookies'
+  | 'inspector-issues'
   | 'errors-in-console'
   // best-practices-trust-safety + ux groups (Option B)
   | 'geolocation-on-start'
@@ -436,22 +436,22 @@ export const PATCH_DATA: Record<number, VotePatchData> = {
       title: 'General',
       patches: [
         {
-          title: 'Remove third-party cookie trackers',
-          summary: 'Avoid tracking users without consent',
+          title: 'Fix DevTools Issues panel warnings',
+          summary: 'Resolve browser-flagged problems',
           before: {
             language: 'html',
-            code: `<!-- app.vue - hidden tracking iframe -->
+            code: `<!-- app.vue - causes DevTools Issues -->
 <iframe
   src="https://youtube.com/embed/..."
   style="display:none"
 ></iframe>
 
-// Insecure cookie
-document.cookie = 'tracker=value; path=/'`
+// Cookie without SameSite attribute
+document.cookie = 'session=value; path=/'`
           },
           after: {
             language: 'html',
-            code: `<!-- Load third-party only with consent -->
+            code: `<!-- Load third-party with consent -->
 <iframe
   v-if="hasConsent"
   src="https://youtube.com/embed/..."
@@ -461,12 +461,12 @@ document.cookie = 'tracker=value; path=/'`
 document.cookie = 'session=value; SameSite=Strict; Secure'`
           },
           whyMatters: [
-            'Third-party cookies track users across sites',
-            'Hidden iframes can set tracking cookies',
-            'GDPR/CCPA require consent for tracking'
+            'DevTools Issues panel flags browser warnings',
+            'Cookie warnings indicate security problems',
+            'Unresolved issues affect user trust'
           ],
           metrics: [
-            { metric: 'third-party-cookies', impact: 'high', description: 'No tracking without consent' }
+            { metric: 'inspector-issues', impact: 'high', description: 'No browser warnings in Issues panel' }
           ]
         },
         {
