@@ -229,13 +229,28 @@ Before diving into optimizations, let's remove obvious UX anti-patterns that hur
 
 # Day 1: Performance
 
-## Lighthouse Performance Criteria
+## Audits covered by our patches (4 of 6 metrics)
 
-- First Contentful Paint (FCP)
-- Largest Contentful Paint (LCP)
-- Total Blocking Time (TBT)
-- Cumulative Layout Shift (CLS)
-- Speed Index
+<div class="text-sm opacity-70 mb-3">
+  <strong>6 Core Web Vitals:</strong> FCP · LCP · TBT · CLS · SI · TTI
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <div class="text-blue-400 text-sm mb-1">Option A - Images</div>
+    <ul class="text-sm">
+      <li><code>LCP</code> - Largest Contentful Paint</li>
+      <li><code>CLS</code> - Cumulative Layout Shift</li>
+    </ul>
+  </div>
+  <div>
+    <div class="text-amber-400 text-sm mb-1">Option B - Scripts</div>
+    <ul class="text-sm">
+      <li><code>FCP</code> - First Contentful Paint</li>
+      <li><code>TBT</code> - Total Blocking Time</li>
+    </ul>
+  </div>
+</div>
 
 <div class="pt-4">
   Current score: <span class="text-red-500 font-bold text-2xl">32</span>
@@ -314,13 +329,30 @@ layout: center
 
 # Day 2: Accessibility
 
-## Lighthouse Accessibility Criteria
+## Audits covered by our patches (6 of ~60 audits)
 
-- Color Contrast
-- Interactive Elements
-- ARIA Attributes
-- Semantic HTML
-- Keyboard Navigation
+<div class="text-sm opacity-70 mb-3">
+  <strong>Critical audits (weight 10):</strong> button-name · image-alt · label · aria-roles · aria-required-attr · aria-valid-attr-value
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <div class="text-blue-400 text-sm mb-1">Option A - Names & Labels</div>
+    <ul class="text-sm">
+      <li><code>button-name</code></li>
+      <li><code>image-alt</code></li>
+      <li><code>label</code></li>
+    </ul>
+  </div>
+  <div>
+    <div class="text-amber-400 text-sm mb-1">Option B - ARIA</div>
+    <ul class="text-sm">
+      <li><code>aria-roles</code></li>
+      <li><code>aria-required-attr</code></li>
+      <li><code>aria-valid-attr-value</code></li>
+    </ul>
+  </div>
+</div>
 
 <div class="pt-4">
   Current score: <span class="text-red-500 font-bold text-2xl">45</span>
@@ -333,20 +365,20 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Visual Cues</div>
+    <div class="text-lg mb-4">Names & Labels</div>
     <ul class="text-sm">
-      <li>Improve contrasts (4.5:1 ratio)</li>
-      <li>Add visible focus indicators</li>
+      <li>Replace divs with buttons</li>
+      <li>Add alt text to images</li>
       <li>Labels on all inputs</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Semantic HTML</div>
+    <div class="text-lg mb-4">ARIA</div>
     <ul class="text-sm">
-      <li>Replace clickable divs with buttons</li>
-      <li>Add lang attribute to html</li>
-      <li>Fix heading hierarchy (h1→h2→h3)</li>
+      <li>Use valid ARIA roles</li>
+      <li>Add required ARIA attributes</li>
+      <li>Fix invalid ARIA attribute values</li>
     </ul>
   </div>
 </div>
@@ -361,7 +393,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Visual Cues" label-b="Semantic HTML" :next-slide="24" />
+<VoteButtons :vote-index="1" label-a="Names & Labels" label-b="ARIA" :next-slide="24" />
 
 ---
 
@@ -399,13 +431,30 @@ layout: center
 
 # Day 3: Best Practices
 
-## Lighthouse Best Practices Criteria
+## Audits covered by our patches (6 of ~20 audits)
 
-- Console Errors
-- HTTPS
-- Deprecated APIs
-- Browser Compatibility
-- Security Issues
+<div class="text-sm opacity-70 mb-3">
+  <strong>~20 audits:</strong> deprecations (5) · third-party-cookies (5) · paste-preventing-inputs (3) · errors-in-console (1) · notification-on-start (1) · geolocation-on-start (1) · ...
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <div class="text-blue-400 text-sm mb-1">Option A - General</div>
+    <ul class="text-sm">
+      <li><code>deprecations</code></li>
+      <li><code>third-party-cookies</code></li>
+      <li><code>errors-in-console</code></li>
+    </ul>
+  </div>
+  <div>
+    <div class="text-amber-400 text-sm mb-1">Option B - Trust & Safety</div>
+    <ul class="text-sm">
+      <li><code>geolocation-on-start</code></li>
+      <li><code>notification-on-start</code></li>
+      <li><code>paste-preventing-inputs</code></li>
+    </ul>
+  </div>
+</div>
 
 <div class="pt-4">
   Current score: <span class="text-orange-500 font-bold text-2xl">58</span>
@@ -418,20 +467,20 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Console</div>
+    <div class="text-lg mb-4">General</div>
     <ul class="text-sm">
-      <li>Remove console.log in production</li>
       <li>Remove document.write()</li>
+      <li>Remove third-party cookie trackers</li>
       <li>Fix console errors</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Browser APIs</div>
+    <div class="text-lg mb-4">Trust & Safety</div>
     <ul class="text-sm">
-      <li>Remove aggressive permission requests</li>
-      <li>Add passive listeners (scroll, touch)</li>
-      <li>Hide source maps in production</li>
+      <li>Remove geolocation on page load</li>
+      <li>Remove notification on page load</li>
+      <li>Allow paste in input fields</li>
     </ul>
   </div>
 </div>
@@ -446,7 +495,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="Console" label-b="Browser APIs" :next-slide="32" />
+<VoteButtons :vote-index="2" label-a="General" label-b="Trust & Safety" :next-slide="32" />
 
 ---
 
@@ -484,13 +533,30 @@ layout: center
 
 # Day 4: SEO
 
-## Lighthouse SEO Criteria
+## Audits covered by our patches (6 of 10 audits)
 
-- Meta Tags
-- Crawlability
-- Mobile Friendly
-- Structured Data
-- Link Text
+<div class="text-sm opacity-70 mb-3">
+  <strong>10 audits:</strong> is-crawlable (~4) · document-title (1) · meta-description (1) · http-status-code (1) · link-text (1) · crawlable-anchors (1) · hreflang (1) · canonical (1) · robots-txt (1)
+</div>
+
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <div class="text-blue-400 text-sm mb-1">Option A - Crawlability</div>
+    <ul class="text-sm">
+      <li><code>is-crawlable</code></li>
+      <li><code>crawlable-anchors</code></li>
+      <li><code>robots-txt</code></li>
+    </ul>
+  </div>
+  <div>
+    <div class="text-amber-400 text-sm mb-1">Option B - Content</div>
+    <ul class="text-sm">
+      <li><code>document-title</code></li>
+      <li><code>meta-description</code></li>
+      <li><code>link-text</code></li>
+    </ul>
+  </div>
+</div>
 
 <div class="pt-4">
   Current score: <span class="text-red-500 font-bold text-2xl">41</span>
@@ -503,20 +569,20 @@ layout: center
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
     <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Meta Tags</div>
+    <div class="text-lg mb-4">Crawlability</div>
     <ul class="text-sm">
-      <li>Add unique title</li>
-      <li>Add meta description</li>
-      <li>One h1 per page</li>
+      <li>Remove noindex meta tag</li>
+      <li>Make navigation crawlable</li>
+      <li>Fix robots.txt blocking crawlers</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
     <div class="text-2xl font-bold mb-4">Option B</div>
     <div class="text-lg mb-4">Content</div>
     <ul class="text-sm">
+      <li>Add unique page title</li>
+      <li>Add meta description</li>
       <li>Descriptive link text</li>
-      <li>Alt attributes on images</li>
-      <li>Crawlable navigation</li>
     </ul>
   </div>
 </div>
@@ -531,7 +597,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Meta Tags" label-b="Content" :next-slide="40" />
+<VoteButtons :vote-index="3" label-a="Crawlability" label-b="Content" :next-slide="40" />
 
 ---
 
