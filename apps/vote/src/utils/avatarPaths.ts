@@ -1,37 +1,39 @@
-import type { PirateAvatar, SkinTone } from '../../../../shared/types'
+import type { Gender, PirateAvatar, SkinTone } from '../../../../shared/types'
 
-const BASE_PATH = '/avatars/male'
-
-export function getFacePath(skinTone: SkinTone): string {
-  return `${BASE_PATH}/${skinTone}_tone/face.png`
+function getBasePath(gender: Gender): string {
+  return `/avatars/${gender}`
 }
 
-export function getMouthPath(skinTone: SkinTone, option: number): string {
-  return `${BASE_PATH}/${skinTone}_tone/mouth/mouth_${option}.png`
+export function getFacePath(gender: Gender, skinTone: SkinTone): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/face.png`
 }
 
-export function getEyesPath(skinTone: SkinTone, option: number, color: number): string {
-  return `${BASE_PATH}/${skinTone}_tone/eyes/option_${option}/color_${color}.png`
+export function getMouthPath(gender: Gender, skinTone: SkinTone, option: number): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/mouth/mouth_${option}.png`
 }
 
-export function getNosePath(skinTone: SkinTone, option: number): string {
-  return `${BASE_PATH}/${skinTone}_tone/nose/nose_${option}.png`
+export function getEyesPath(gender: Gender, skinTone: SkinTone, option: number, color: number): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/eyes/option_${option}/color_${color}.png`
 }
 
-export function getAccessoryPath(skinTone: SkinTone, option: number): string {
-  return `${BASE_PATH}/${skinTone}_tone/accessories/accessory_${option}.png`
+export function getNosePath(gender: Gender, skinTone: SkinTone, option: number): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/nose/nose_${option}.png`
 }
 
-export function getEyePatchPath(skinTone: SkinTone, side: 'left' | 'right'): string {
-  return `${BASE_PATH}/${skinTone}_tone/accessories/eye_patch_${side}.png`
+export function getAccessoryPath(gender: Gender, skinTone: SkinTone, option: number): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/accessories/accessory_${option}.png`
 }
 
-export function getHairPath(option: number, color: number): string {
-  return `${BASE_PATH}/hair/option_${option}/color_${color}.png`
+export function getEyePatchPath(gender: Gender, skinTone: SkinTone, side: 'left' | 'right'): string {
+  return `${getBasePath(gender)}/${skinTone}_tone/accessories/eye_patch_${side}.png`
 }
 
-export function getHatPath(option: number, color: number): string {
-  return `${BASE_PATH}/hats/option_${option}/color_${color}.png`
+export function getHairPath(gender: Gender, option: number, color: number): string {
+  return `${getBasePath(gender)}/hair/option_${option}/color_${color}.png`
+}
+
+export function getHatPath(gender: Gender, option: number, color: number): string {
+  return `${getBasePath(gender)}/hats/option_${option}/color_${color}.png`
 }
 
 export interface AvatarLayer {
@@ -41,27 +43,27 @@ export interface AvatarLayer {
 }
 
 export function getAllLayerPaths(avatar: PirateAvatar): AvatarLayer[] {
-  const { skinTone } = avatar
+  const { gender, skinTone } = avatar
   const layers: AvatarLayer[] = []
 
   // 1. Face (z-index: 1)
   layers.push({
     name: 'face',
-    path: getFacePath(skinTone),
+    path: getFacePath(gender, skinTone),
     zIndex: 1,
   })
 
   // 2. Mouth (z-index: 2)
   layers.push({
     name: 'mouth',
-    path: getMouthPath(skinTone, avatar.mouth),
+    path: getMouthPath(gender, skinTone, avatar.mouth),
     zIndex: 2,
   })
 
   // 3. Eyes (z-index: 3)
   layers.push({
     name: 'eyes',
-    path: getEyesPath(skinTone, avatar.eyes.option, avatar.eyes.color),
+    path: getEyesPath(gender, skinTone, avatar.eyes.option, avatar.eyes.color),
     zIndex: 3,
   })
 
@@ -70,14 +72,14 @@ export function getAllLayerPaths(avatar: PirateAvatar): AvatarLayer[] {
   for (const accessoryOption of avatar.accessories.regular) {
     layers.push({
       name: `accessory_${accessoryOption}`,
-      path: getAccessoryPath(skinTone, accessoryOption),
+      path: getAccessoryPath(gender, skinTone, accessoryOption),
       zIndex: accessoryZIndex++,
     })
   }
   if (avatar.accessories.eyePatch) {
     layers.push({
       name: `eye_patch_${avatar.accessories.eyePatch}`,
-      path: getEyePatchPath(skinTone, avatar.accessories.eyePatch),
+      path: getEyePatchPath(gender, skinTone, avatar.accessories.eyePatch),
       zIndex: accessoryZIndex++,
     })
   }
@@ -85,7 +87,7 @@ export function getAllLayerPaths(avatar: PirateAvatar): AvatarLayer[] {
   // 5. Nose (z-index: 10)
   layers.push({
     name: 'nose',
-    path: getNosePath(skinTone, avatar.nose),
+    path: getNosePath(gender, skinTone, avatar.nose),
     zIndex: 10,
   })
 
@@ -93,7 +95,7 @@ export function getAllLayerPaths(avatar: PirateAvatar): AvatarLayer[] {
   if (avatar.hair) {
     layers.push({
       name: 'hair',
-      path: getHairPath(avatar.hair.option, avatar.hair.color),
+      path: getHairPath(gender, avatar.hair.option, avatar.hair.color),
       zIndex: 11,
     })
   }
@@ -102,7 +104,7 @@ export function getAllLayerPaths(avatar: PirateAvatar): AvatarLayer[] {
   if (avatar.hat) {
     layers.push({
       name: 'hat',
-      path: getHatPath(avatar.hat.option, avatar.hat.color),
+      path: getHatPath(gender, avatar.hat.option, avatar.hat.color),
       zIndex: 12,
     })
   }

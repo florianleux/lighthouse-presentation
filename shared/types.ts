@@ -7,14 +7,16 @@
 // ===========================================
 
 export type SkinTone = 'dark' | 'mid' | 'light'
+export type Gender = 'male' | 'female'
 
 export interface PirateAvatar {
+  gender: Gender             // male or female
   skinTone: SkinTone
   mouth: number              // 1-3
   eyes: { option: number; color: number }  // option: 1-3, color: 1-4
   nose: number               // 1-4
   accessories: {
-    regular: number[]        // subset of [1,2,3,4]
+    regular: number[]        // subset of [1,2,3,4] for male, [1,2,3] for female (no accessory 4)
     eyePatch: 'left' | 'right' | null
   }
   hair: { option: number; color: number } | null  // option: 1-3, color: 1-5

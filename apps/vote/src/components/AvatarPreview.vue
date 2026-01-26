@@ -13,10 +13,16 @@ const props = withDefaults(defineProps<{
 const parsedAvatar = computed<PirateAvatar>(() => {
   if (typeof props.avatar === 'string') {
     try {
-      return JSON.parse(props.avatar)
+      const parsed = JSON.parse(props.avatar)
+      // Handle legacy avatars without gender field
+      if (!parsed.gender) {
+        parsed.gender = 'male'
+      }
+      return parsed
     } catch {
       // Return a default avatar if parsing fails
       return {
+        gender: 'male',
         skinTone: 'mid',
         mouth: 1,
         eyes: { option: 1, color: 1 },

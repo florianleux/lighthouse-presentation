@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { PirateAvatar, SkinTone } from '../../../../shared/types'
+import type { Gender, PirateAvatar, SkinTone } from '../../../../shared/types'
 import { AVATAR_CONFIG } from '../../../../shared/constants'
 
 function randomInt(min: number, max: number): number {
@@ -10,11 +10,12 @@ function randomBoolean(probability = 0.5): boolean {
   return Math.random() < probability
 }
 
-function generateRandomAvatar(skinTone: SkinTone): PirateAvatar {
-  // Random accessories (0-4 regular items)
-  const numAccessories = randomInt(0, AVATAR_CONFIG.ACCESSORY_COUNT)
+function generateRandomAvatar(gender: Gender, skinTone: SkinTone): PirateAvatar {
+  // Random accessories (0-3 for female, 0-4 for male)
+  const maxAccessories = gender === 'female' ? AVATAR_CONFIG.ACCESSORY_COUNT_FEMALE : AVATAR_CONFIG.ACCESSORY_COUNT
+  const numAccessories = randomInt(0, maxAccessories)
   const regular: number[] = []
-  const availableAccessories = [1, 2, 3, 4]
+  const availableAccessories = gender === 'female' ? [1, 2, 3] : [1, 2, 3, 4]
   for (let i = 0; i < numAccessories; i++) {
     const idx = randomInt(0, availableAccessories.length - 1)
     regular.push(availableAccessories.splice(idx, 1)[0])
@@ -27,6 +28,7 @@ function generateRandomAvatar(skinTone: SkinTone): PirateAvatar {
   }
 
   return {
+    gender,
     skinTone,
     mouth: randomInt(1, AVATAR_CONFIG.MOUTH_COUNT),
     eyes: {
@@ -50,12 +52,12 @@ function generateRandomAvatar(skinTone: SkinTone): PirateAvatar {
   }
 }
 
-export function useAvatar(initialSkinTone: SkinTone = 'mid') {
-  const avatar = ref<PirateAvatar>(generateRandomAvatar(initialSkinTone))
+export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinTone = 'mid') {
+  const avatar = ref<PirateAvatar>(generateRandomAvatar(initialGender, initialSkinTone))
   const isSpinning = ref(false)
 
-  function randomize(skinTone?: SkinTone) {
-    avatar.value = generateRandomAvatar(skinTone || avatar.value.skinTone)
+  function randomize(gender?: Gender, skinTone?: SkinTone) {
+    avatar.value = generateRandomAvatar(gender || avatar.value.gender, skinTone || avatar.value.skinTone)
   }
 
   // Slot machine effect: rapidly cycle through random avatars before settling
@@ -63,8 +65,9 @@ export function useAvatar(initialSkinTone: SkinTone = 'mid') {
     if (isSpinning.value) return
 
     isSpinning.value = true
+    const currentGender = avatar.value.gender
     const currentSkinTone = avatar.value.skinTone
-    const targetAvatar = generateRandomAvatar(currentSkinTone)
+    const targetAvatar = generateRandomAvatar(currentGender, currentSkinTone)
 
     // Spin phases: fast → medium → slow → settle
     const phases = [
@@ -76,7 +79,7 @@ export function useAvatar(initialSkinTone: SkinTone = 'mid') {
 
     for (const phase of phases) {
       for (let i = 0; i < phase.iterations; i++) {
-        avatar.value = generateRandomAvatar(currentSkinTone)
+        avatar.value = generateRandomAvatar(currentGender, currentSkinTone)
         await new Promise(resolve => setTimeout(resolve, phase.delay))
       }
     }
@@ -91,6 +94,27 @@ export function useAvatar(initialSkinTone: SkinTone = 'mid') {
     avatar.value = {
       ...avatar.value,
       skinTone,
+    }
+  }
+
+  // Change gender while keeping the same combination
+  // If switching to female and accessory 4 is present, remove it
+  function setGender(gender: Gender) {
+    const current = avatar.value
+    let accessories = { ...current.accessories }
+
+    // Female doesn't have accessory 4, so remove it if present
+    if (gender === 'female' && accessories.regular.includes(4)) {
+      accessories = {
+        ...accessories,
+        regular: accessories.regular.filter(a => a !== 4),
+      }
+    }
+
+    avatar.value = {
+      ...current,
+      gender,
+      accessories,
     }
   }
 
@@ -112,6 +136,7 @@ export function useAvatar(initialSkinTone: SkinTone = 'mid') {
     randomize,
     spinAndRandomize,
     setSkinTone,
+    setGender,
     serialize,
     deserialize,
     load,

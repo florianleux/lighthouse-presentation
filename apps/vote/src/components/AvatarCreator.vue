@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import AvatarPreview from './AvatarPreview.vue'
+import GenderSelector from './GenderSelector.vue'
 import SkinToneSelector from './SkinToneSelector.vue'
 import { useAvatar } from '../composables/useAvatar'
-import type { SkinTone } from '../../../../shared/types'
+import type { Gender, SkinTone } from '../../../../shared/types'
 
 const emit = defineEmits<{
   join: [string]
 }>()
 
-const { avatar, isSpinning, spinAndRandomize, setSkinTone, serialize } = useAvatar()
+const { avatar, isSpinning, spinAndRandomize, setSkinTone, setGender, serialize } = useAvatar()
+
+function handleGenderChange(gender: Gender) {
+  setGender(gender)
+}
 
 function handleSkinToneChange(skinTone: SkinTone) {
   setSkinTone(skinTone)
@@ -27,11 +32,19 @@ function handleJoin() {
       <AvatarPreview :avatar="avatar" :size="200" />
     </div>
 
-    <SkinToneSelector
-      :model-value="avatar.skinTone"
-      :disabled="isSpinning"
-      @update:model-value="handleSkinToneChange"
-    />
+    <div class="selectors">
+      <GenderSelector
+        :model-value="avatar.gender"
+        :disabled="isSpinning"
+        @update:model-value="handleGenderChange"
+      />
+
+      <SkinToneSelector
+        :model-value="avatar.skinTone"
+        :disabled="isSpinning"
+        @update:model-value="handleSkinToneChange"
+      />
+    </div>
 
     <div class="actions">
       <button class="random-btn" type="button" :disabled="isSpinning" @click="spinAndRandomize()">
@@ -74,6 +87,13 @@ h2 {
 
 .preview-wrapper.spinning {
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
 }
 
 .actions {
