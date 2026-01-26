@@ -2,7 +2,26 @@
 // Shared types for Ably communication
 // ===========================================
 
-// Avatar - simple emoji string
+// ===========================================
+// Pirate Avatar types
+// ===========================================
+
+export type SkinTone = 'dark' | 'mid' | 'light'
+
+export interface PirateAvatar {
+  skinTone: SkinTone
+  mouth: number              // 1-3
+  eyes: { option: number; color: number }  // option: 1-3, color: 1-4
+  nose: number               // 1-4
+  accessories: {
+    regular: number[]        // subset of [1,2,3,4]
+    eyePatch: 'left' | 'right' | null
+  }
+  hair: { option: number; color: number } | null  // option: 1-3, color: 1-5
+  hat: { option: number; color: number } | null   // option: 1-2, color: 1-4
+}
+
+// Avatar - JSON-serialized PirateAvatar string (backward compatible)
 export type Avatar = string
 
 // Participant (crew pirate)

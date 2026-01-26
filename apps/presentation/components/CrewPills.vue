@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { sessionStore, VOTE_SLIDES } from '../setup/main'
+import AvatarPreview from './AvatarPreview.vue'
 
 const props = defineProps<{
   currentSlide: number
@@ -26,7 +27,7 @@ const isVisible = computed(() => {
         class="crew-member"
       >
         <div class="name-pill">{{ member.name }}</div>
-        <div class="avatar-square">{{ member.avatar || '👤' }}</div>
+        <AvatarPreview :avatar="member.avatar || ''" :size="60" />
       </div>
     </TransitionGroup>
   </div>
@@ -64,14 +65,6 @@ const isVisible = computed(() => {
   border: 1px solid white
 }
 
-.avatar-square {
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-}
 
 /* Animations */
 .pill-enter-active {
