@@ -6,77 +6,77 @@ const props = defineProps<{
   voteIndex: number
 }>()
 
-// Vote options data
+// Vote options data - format: "audit_name: patch description"
 const voteData = {
   0: {
     A: {
       title: 'Images',
       fixes: [
-        'Convert images to WebP',
-        'Add loading="lazy" below-fold',
-        'Add width/height attributes'
+        'LCP: Convert images to WebP',
+        'LCP: Add loading="lazy" below-fold',
+        'CLS: Add width/height attributes'
       ]
     },
     B: {
       title: 'Scripts',
       fixes: [
-        'Remove heavy libraries (jQuery, Lodash, Moment)',
-        'Remove third-party scripts',
-        'Remove blocking inline script'
+        'TBT: Remove heavy libraries (jQuery, Lodash, Moment)',
+        'TBT: Remove third-party scripts',
+        'TBT: Remove blocking inline script'
       ]
     }
   },
   1: {
     A: {
-      title: 'Visual Cues',
+      title: 'Names & Labels',
       fixes: [
-        'Improve contrasts (4.5:1 ratio)',
-        'Add visible focus indicators',
-        'Labels on all inputs'
+        'button-name: Replace divs with semantic buttons',
+        'image-alt: Add alt text to images',
+        'label: Add labels to form inputs'
       ]
     },
     B: {
-      title: 'Semantic HTML',
+      title: 'ARIA',
       fixes: [
-        'Replace clickable divs with buttons',
-        'Add lang attribute to html',
-        'Fix heading hierarchy (h1→h2→h3)'
+        'aria-roles: Use valid ARIA roles',
+        'aria-required-attr: Add required ARIA attributes',
+        'aria-valid-attr-value: Fix invalid ARIA values'
       ]
     }
   },
   2: {
     A: {
-      title: 'Console',
+      title: 'General',
       fixes: [
-        'Remove console.log in production',
-        'Remove document.write()',
-        'Fix console errors'
+        'deprecations: Remove document.write()',
+        'inspector-issues: Fix DevTools issues',
+        'errors-in-console: Fix console errors'
       ]
     },
     B: {
-      title: 'Browser APIs',
+      title: 'Trust & Safety',
       fixes: [
-        'Remove aggressive permission requests',
-        'Add passive listeners (scroll, touch)',
-        'Hide source maps in production'
+        'geolocation-on-start: Remove auto geolocation request',
+        'notification-on-start: Remove auto notification request',
+        'paste-preventing-inputs: Allow paste in inputs'
       ]
     }
   },
   3: {
     A: {
-      title: 'Meta Tags',
+      title: 'Crawlability',
       fixes: [
-        'Add unique title',
-        'Add meta description',
-        'One h1 per page'
+        'is-crawlable: Remove noindex meta tag',
+        'crawlable-anchors: Make navigation crawlable',
+        'robots-txt: Fix robots.txt blocking'
       ]
     },
     B: {
       title: 'Content',
       fixes: [
-        'Descriptive link text',
-        'Alt attributes on images',
-        'Crawlable navigation'
+        'document-title: Add unique page title',
+        'meta-description: Add meta description',
+        'link-text: Use descriptive link text'
       ]
     }
   }
