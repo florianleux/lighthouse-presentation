@@ -46,12 +46,14 @@ export const LIGHTHOUSE_CATEGORIES = [
 
 // Avatar configuration
 export const AVATAR_CONFIG = {
+  GENDERS: ['male', 'female'] as const,
   SKIN_TONES: ['dark', 'mid', 'light'] as const,
   MOUTH_COUNT: 3,
   NOSE_COUNT: 4,
   EYE_OPTIONS: 3,
   EYE_COLORS: 4,
   ACCESSORY_COUNT: 4,
+  ACCESSORY_COUNT_FEMALE: 3,  // accessory 4 doesn't exist for female
   HAIR_OPTIONS: 3,
   HAIR_COLORS: 5,
   HAT_OPTIONS: 2,
