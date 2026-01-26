@@ -69,40 +69,13 @@ Scan the QR code to join the crew
     <div class="text-xs opacity-70">Search visibility</div>
   </div>
 </div>
-
-<div class="pt-8 text-center text-lg opacity-70">
-  4 scores · 4 votes · 1 lighthouse to build
-</div>
-
----
-
-# About your captain
-
-## Flo
-
-- Senior Frontend Engineer
-- Sailing on the Seller Experience Ship 
-
 ---
 
 # Audience question
 
 What's your knowledge level of Lighthouse?
 
-<div class="grid grid-cols-3 gap-4 pt-8 text-center">
-  <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">🪣</div>
-    <div>Cabin Boy</div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">⚓</div>
-    <div>Quartermaster</div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-4xl mb-2">🏴‍☠️</div>
-    <div>Captain</div>
-  </div>
-</div>
+<PollButtons pollId="knowledge-level" />
 
 ---
 

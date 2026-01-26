@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
+import type { PollChoice } from '../../../shared/types'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
 
@@ -12,7 +13,7 @@ interface SavedMember {
   avatar: string | null
 }
 
-const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState, onVoteStarted, sendVote } = useAbly()
+const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState, onVoteStarted, onPollStarted, sendVote, sendPoll } = useAbly()
 
 // Form state
 const name = ref('')
@@ -29,6 +30,10 @@ const activeVoteIndex = ref<number | null>(null)
 const selectedChoice = ref<'A' | 'B' | null>(null)
 const hasVoted = ref(false)
 const voteMissed = ref(false)
+
+// Poll state
+const activePollId = ref<string | null>(null)
+const hasPollVoted = ref(false)
 
 // Timer state
 const timeRemaining = ref(0)
@@ -199,6 +204,17 @@ onMounted(async () => {
       }
     })
 
+    // Subscribe to poll-started messages
+    onPollStarted((msg) => {
+      console.log('[App] Poll started:', msg.pollId, 'duration:', msg.duration)
+      activePollId.value = msg.pollId
+      hasPollVoted.value = false
+      // Start countdown if duration is provided
+      if (msg.duration > 0) {
+        startCountdown(msg.duration)
+      }
+    })
+
     // After connecting, stay in 'connecting' until we receive session-state
     // Just restore the data, don't set final status yet
     if (savedMember) {
@@ -278,6 +294,40 @@ async function submitVote() {
     console.log('[App] Vote submitted:', selectedChoice.value)
   } catch (err) {
     console.error('Failed to submit vote:', err)
+  }
+}
+
+// Submit poll (auto-submit on click)
+async function submitPoll(choice: PollChoice) {
+  console.log('[App] submitPoll called:', {
+    choice,
+    activePollId: activePollId.value
+  })
+
+  if (hasPollVoted.value || !activePollId.value) {
+    console.warn('[App] Cannot submit poll - already voted or no active poll')
+    return
+  }
+
+  // Try to get keynoteId from localStorage if not available
+  let keynoteId = activeKeynoteId.value
+  if (!keynoteId) {
+    const saved = loadSavedMember()
+    keynoteId = saved?.keynoteId || null
+  }
+
+  if (!keynoteId) {
+    console.warn('[App] Cannot submit poll - no keynoteId')
+    return
+  }
+
+  try {
+    await sendPoll(activePollId.value, choice, keynoteId)
+    hasPollVoted.value = true
+    clearCountdown()
+    console.log('[App] Poll submitted:', choice)
+  } catch (err) {
+    console.error('Failed to submit poll:', err)
   }
 }
 </script>
@@ -369,7 +419,7 @@ async function submitVote() {
 
       <!-- State: Joined - Waiting -->
       <div
-        v-else-if="status === 'joined' && activeVoteIndex === null"
+        v-else-if="status === 'joined' && activeVoteIndex === null && activePollId === null"
         class="joined-waiting"
       >
         <div class="avatar-wrapper-large">
@@ -382,6 +432,52 @@ async function submitVote() {
         </div>
         <div class="name-pill">{{ joinedName }}</div>
         <p class="hint">Wait for the captain's instructions...</p>
+      </div>
+
+      <!-- State: Joined - Poll Active -->
+      <div
+        v-else-if="status === 'joined' && activePollId !== null && !hasPollVoted"
+        class="polling"
+      >
+        <h2>Quick question!</h2>
+        <div
+          v-if="timeRemaining > 0"
+          class="countdown"
+        >{{ timeRemaining }}s</div>
+        <p class="poll-hint">What's your Lighthouse knowledge level?</p>
+        <div class="poll-buttons">
+          <button
+            class="poll-btn poll-cabin"
+            @click="submitPoll('cabin_boy')"
+          >
+            <span class="poll-emoji">🪣</span>
+            <span class="poll-label">Cabin Boy</span>
+          </button>
+          <button
+            class="poll-btn poll-quarter"
+            @click="submitPoll('quartermaster')"
+          >
+            <span class="poll-emoji">⚓</span>
+            <span class="poll-label">Quartermaster</span>
+          </button>
+          <button
+            class="poll-btn poll-captain"
+            @click="submitPoll('captain')"
+          >
+            <span class="poll-emoji">🏴‍☠️</span>
+            <span class="poll-label">Captain</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- State: Joined - Poll Submitted -->
+      <div
+        v-else-if="status === 'joined' && hasPollVoted"
+        class="success"
+      >
+        <div class="checkmark">✓</div>
+        <h2>Thanks!</h2>
+        <p class="hint">Your response has been recorded</p>
       </div>
 
       <!-- State: Joined - Voting -->
@@ -819,5 +915,74 @@ input::placeholder {
 .validate-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Poll styles */
+.polling {
+  padding: 20px 0;
+}
+
+.polling h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.poll-hint {
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.poll-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.poll-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  border: 3px solid;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.poll-emoji {
+  font-size: 32px;
+}
+
+.poll-label {
+  flex: 1;
+  text-align: left;
+}
+
+.poll-cabin {
+  border-color: #3b82f6;
+}
+
+.poll-cabin:hover {
+  background: #3b82f6;
+}
+
+.poll-quarter {
+  border-color: #f59e0b;
+}
+
+.poll-quarter:hover {
+  background: #f59e0b;
+}
+
+.poll-captain {
+  border-color: #a855f7;
+}
+
+.poll-captain:hover {
+  background: #a855f7;
 }
 </style>

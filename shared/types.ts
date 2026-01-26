@@ -56,6 +56,18 @@ export interface VoteCastMessage {
   timestamp: number
 }
 
+// Poll types
+export type PollChoice = 'cabin_boy' | 'quartermaster' | 'captain'
+
+export interface PollCastMessage {
+  type: 'poll-cast'
+  keynoteId: string
+  odientId: string
+  pollId: string
+  choice: PollChoice
+  timestamp: number
+}
+
 export interface HeartbeatResponseMessage {
   type: 'heartbeat-response'
   odientId: string
@@ -99,6 +111,13 @@ export interface VoteEndedMessage {
   timestamp: number
 }
 
+export interface PollStartedMessage {
+  type: 'poll-started'
+  pollId: string
+  duration: number // in seconds
+  timestamp: number
+}
+
 // ===========================================
 // Union types for strict typing
 // ===========================================
@@ -106,6 +125,7 @@ export interface VoteEndedMessage {
 export type IncomingMessage =
   | AvatarCreatedMessage
   | VoteCastMessage
+  | PollCastMessage
   | HeartbeatResponseMessage
 
 export type OutgoingMessage =
@@ -113,6 +133,7 @@ export type OutgoingMessage =
   | HeartbeatRequestMessage
   | VoteStartedMessage
   | VoteEndedMessage
+  | PollStartedMessage
 
 // ===========================================
 // Session state (stored locally)
@@ -122,6 +143,12 @@ export interface VoteResults {
   A: string[]  // List of odientIds who voted A
   B: string[]  // List of odientIds who voted B
   winner: 'A' | 'B' | null
+}
+
+export interface PollResults {
+  cabin_boy: string[]
+  quartermaster: string[]
+  captain: string[]
 }
 
 export interface SessionState {

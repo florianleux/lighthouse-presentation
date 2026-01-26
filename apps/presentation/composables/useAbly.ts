@@ -6,6 +6,7 @@ import type {
   OutgoingMessage,
   AvatarCreatedMessage,
   VoteCastMessage,
+  PollCastMessage,
   HeartbeatResponseMessage,
 } from '../../../shared/types'
 
@@ -28,6 +29,7 @@ const state = shallowRef<AblyState>({
 const callbacks = {
   'avatar-created': [] as MessageCallback<AvatarCreatedMessage>[],
   'vote-cast': [] as MessageCallback<VoteCastMessage>[],
+  'poll-cast': [] as MessageCallback<PollCastMessage>[],
   'heartbeat-response': [] as MessageCallback<HeartbeatResponseMessage>[],
 }
 
@@ -91,12 +93,17 @@ export function useAbly() {
     })
     state.value.channels.set(ABLY_CHANNELS.AVATARS, avatarsChannel)
 
-    // Channel VOTES
+    // Channel VOTES (handles both vote-cast and poll-cast)
     const votesChannel = client.channels.get(ABLY_CHANNELS.VOTES)
     votesChannel.subscribe((message) => {
-      const data = message.data as VoteCastMessage
-      console.log('[Ably] Vote cast:', data)
-      callbacks['vote-cast'].forEach((cb) => cb(data))
+      const data = message.data as VoteCastMessage | PollCastMessage
+      if (data.type === 'vote-cast') {
+        console.log('[Ably] Vote cast:', data)
+        callbacks['vote-cast'].forEach((cb) => cb(data))
+      } else if (data.type === 'poll-cast') {
+        console.log('[Ably] Poll cast:', data)
+        callbacks['poll-cast'].forEach((cb) => cb(data))
+      }
     })
     state.value.channels.set(ABLY_CHANNELS.VOTES, votesChannel)
 
@@ -152,6 +159,14 @@ export function useAbly() {
     }
   }
 
+  function onPollCast(callback: MessageCallback<PollCastMessage>): () => void {
+    callbacks['poll-cast'].push(callback)
+    return () => {
+      const idx = callbacks['poll-cast'].indexOf(callback)
+      if (idx > -1) callbacks['poll-cast'].splice(idx, 1)
+    }
+  }
+
   function onHeartbeatResponse(callback: MessageCallback<HeartbeatResponseMessage>): () => void {
     callbacks['heartbeat-response'].push(callback)
     return () => {
@@ -190,6 +205,7 @@ export function useAbly() {
     // Subscriptions
     onAvatarCreated,
     onVoteCast,
+    onPollCast,
     onHeartbeatResponse,
 
     // Channels constants (for convenience)

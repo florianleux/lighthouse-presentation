@@ -1,10 +1,12 @@
 import { reactive, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { useAbly } from '../composables/useAbly'
-import { VOTE_CONFIG, ABLY_CHANNELS, STORAGE_KEYS } from '../../../shared/constants'
+import { VOTE_CONFIG, ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
 import type {
   CrewMember,
   VoteResults,
+  PollResults,
+  PollChoice,
   SessionStateMessage,
   SessionPhase,
 } from '../../../shared/types'
@@ -86,6 +88,15 @@ export const sessionStore = reactive({
   activeVoteIndex: null as number | null,
   votePhase: 'waiting' as 'waiting' | 'voting' | 'ended',
 
+  // Poll results
+  pollResults: {
+    [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
+  } as Record<string, PollResults>,
+
+  // Current poll state
+  activePollId: null as string | null,
+  pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
+
   // Actions
   addCrewMember(member: CrewMember) {
     if (!this.crew.find(m => m.odientId === member.odientId)) {
@@ -99,6 +110,23 @@ export const sessionStore = reactive({
 
     // Avoid duplicates
     if (results.A.includes(odientId) || results.B.includes(odientId)) {
+      return
+    }
+
+    results[choice].push(odientId)
+  },
+
+  recordPollVote(odientId: string, pollId: string, choice: PollChoice) {
+    let results = this.pollResults[pollId]
+    if (!results) {
+      results = { cabin_boy: [], quartermaster: [], captain: [] }
+      this.pollResults[pollId] = results
+    }
+
+    // Avoid duplicates
+    if (results.cabin_boy.includes(odientId) ||
+        results.quartermaster.includes(odientId) ||
+        results.captain.includes(odientId)) {
       return
     }
 
@@ -135,6 +163,11 @@ export const sessionStore = reactive({
     }
     this.activeVoteIndex = null
     this.votePhase = 'waiting'
+    this.pollResults = {
+      [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
+    }
+    this.activePollId = null
+    this.pollPhase = 'waiting'
     voteStore.reset()
   },
 
@@ -212,6 +245,11 @@ export default defineAppSetup(({ app }) => {
         // Listen for votes
         ablyInstance!.onVoteCast((msg) => {
           sessionStore.recordVote(msg.odientId, msg.voteIndex, msg.choice)
+        })
+
+        // Listen for polls
+        ablyInstance!.onPollCast((msg) => {
+          sessionStore.recordPollVote(msg.odientId, msg.pollId, msg.choice)
         })
 
         // Listen for heartbeats
