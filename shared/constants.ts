@@ -30,6 +30,13 @@ export const VOTE_CONFIG = {
   SLIDES: [15, 23, 31, 39] as const,  // Vote slide numbers (Day 1-4 vote slides)
 } as const
 
+// Poll configuration
+export const POLL_CONFIG = {
+  DURATION_SECONDS: 20,
+  KNOWLEDGE_POLL_ID: 'knowledge-level',
+  CHOICES: ['cabin_boy', 'quartermaster', 'captain'] as const,
+} as const
+
 // Heartbeat configuration
 export const HEARTBEAT_CONFIG = {
   INTERVAL_MS: 10000,     // Interval between requests (10s)

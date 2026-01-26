@@ -1,7 +1,15 @@
 import Ably from 'ably'
 import { ref, shallowRef } from 'vue'
 import { ABLY_CHANNELS } from '../../../../shared/constants'
-import type { AvatarCreatedMessage, SessionStateMessage, VoteCastMessage, VoteStartedMessage } from '../../../../shared/types'
+import type {
+  AvatarCreatedMessage,
+  SessionStateMessage,
+  VoteCastMessage,
+  VoteStartedMessage,
+  PollStartedMessage,
+  PollCastMessage,
+  PollChoice,
+} from '../../../../shared/types'
 
 interface AblyState {
   client: Ably.Realtime | null
@@ -167,6 +175,51 @@ export function useAbly() {
   }
 
   /**
+   * Subscribe to poll-started messages from the presentation
+   */
+  function onPollStarted(callback: (msg: PollStartedMessage) => void): void {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot subscribe to poll-started - not connected')
+      return
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    channel.subscribe('message', (message) => {
+      const data = message.data
+      if (data.type === 'poll-started') {
+        callback(data)
+      }
+    })
+
+    console.log('[Ably] Subscribed to poll-started messages')
+  }
+
+  /**
+   * Send a poll response to the presentation
+   */
+  async function sendPoll(pollId: string, choice: PollChoice, keynoteId: string): Promise<void> {
+    const { client } = state.value
+    if (!client || !odientId) {
+      throw new Error('Not connected to Ably')
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.VOTES)
+
+    const message: PollCastMessage = {
+      type: 'poll-cast',
+      keynoteId,
+      odientId,
+      pollId,
+      choice,
+      timestamp: Date.now(),
+    }
+
+    await channel.publish('message', message)
+    console.log('[Ably] Poll sent:', choice, 'for poll', pollId)
+  }
+
+  /**
    * Disconnect
    */
   function disconnect() {
@@ -189,7 +242,9 @@ export function useAbly() {
     restoreSession,
     onSessionState,
     onVoteStarted,
+    onPollStarted,
     sendVote,
+    sendPoll,
     disconnect,
   }
 }
