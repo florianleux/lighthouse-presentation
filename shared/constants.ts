@@ -46,10 +46,18 @@ export const LIGHTHOUSE_CATEGORIES = [
 
 // Avatar configuration
 export const AVATAR_CONFIG = {
-  HEADS_COUNT: 9,
-  BODIES_COUNT: 9,
-  ACCESSORIES_COUNT: 9,
-  TOTAL_COMBINATIONS: 9 * 9 * 9,  // 729
+  SKIN_TONES: ['dark', 'mid', 'light'] as const,
+  MOUTH_COUNT: 3,
+  NOSE_COUNT: 4,
+  EYE_OPTIONS: 3,
+  EYE_COLORS: 4,
+  ACCESSORY_COUNT: 4,
+  HAIR_OPTIONS: 3,
+  HAIR_COLORS: 5,
+  HAT_OPTIONS: 2,
+  HAT_COLORS: 4,
+  // Z-index layering order (bottom to top)
+  LAYER_ORDER: ['face', 'mouth', 'eyes', 'accessories', 'nose', 'hair', 'hat'] as const,
 } as const
 
 // LocalStorage keys

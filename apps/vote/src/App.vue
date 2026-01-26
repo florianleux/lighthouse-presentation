@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
+import AvatarCreator from './components/AvatarCreator.vue'
+import AvatarPreview from './components/AvatarPreview.vue'
 
 interface SavedMember {
   name: string
@@ -15,12 +17,12 @@ const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSe
 // Form state
 const name = ref('')
 const status = ref<'connecting' | 'waiting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
+const currentStep = ref<'name' | 'avatar'>('name')
 const joinedName = ref('')
 const activeKeynoteId = ref<string | null>(null)
 
-// Avatar emojis
-const AVATAR_EMOJIS = ['😀', '😎', '🤠']
-const selectedEmoji = ref<string | null>(null)
+// Avatar state (JSON string)
+const selectedAvatar = ref<string | null>(null)
 
 // Voting state
 const activeVoteIndex = ref<number | null>(null)
@@ -74,8 +76,8 @@ const validationMessage = computed(() => {
   return ''
 })
 
-// Can join only if we have an active keynote and selected an emoji
-const canJoin = computed(() => isValid.value && activeKeynoteId.value !== null && selectedEmoji.value !== null)
+// Can go to next step if name is valid
+const canGoNext = computed(() => isValid.value && activeKeynoteId.value !== null)
 
 // Load saved crew member from localStorage
 function loadSavedMember(): SavedMember | null {
@@ -153,14 +155,16 @@ onMounted(async () => {
             console.log('[App] Different keynote, clearing session')
             clearSavedMember()
             joinedName.value = ''
-            selectedEmoji.value = null
+            selectedAvatar.value = null
+            currentStep.value = 'name'
             status.value = 'idle'
           } else {
             // No keynote active - clear and wait
             console.log('[App] No keynote active, clearing session')
             clearSavedMember()
             joinedName.value = ''
-            selectedEmoji.value = null
+            selectedAvatar.value = null
+            currentStep.value = 'name'
             status.value = 'waiting'
           }
         } else {
@@ -176,7 +180,8 @@ onMounted(async () => {
         console.log('[App] Keynote changed, clearing session')
         clearSavedMember()
         joinedName.value = ''
-        selectedEmoji.value = null
+        selectedAvatar.value = null
+        currentStep.value = 'name'
         status.value = newKeynoteId ? 'idle' : 'waiting'
       }
     })
@@ -198,7 +203,7 @@ onMounted(async () => {
     // Just restore the data, don't set final status yet
     if (savedMember) {
       joinedName.value = savedMember.name
-      selectedEmoji.value = savedMember.avatar
+      selectedAvatar.value = savedMember.avatar
       console.log('[App] Restored data for', savedMember.name, ', waiting for session-state')
     }
     // Stay in 'connecting' - will transition when session-state is received
@@ -207,21 +212,33 @@ onMounted(async () => {
   }
 })
 
-// Join the crew
-async function handleJoin() {
-  if (!canJoin.value || status.value !== 'idle' || !activeKeynoteId.value) return
+// Go to avatar step
+function handleNext() {
+  if (!canGoNext.value || status.value !== 'idle') return
+  currentStep.value = 'avatar'
+}
+
+// Go back to name step
+function handleBack() {
+  currentStep.value = 'name'
+}
+
+// Join the crew (called from AvatarCreator)
+async function handleJoin(avatar: string) {
+  if (status.value !== 'idle' || !activeKeynoteId.value) return
 
   status.value = 'joining'
+  selectedAvatar.value = avatar
 
   try {
-    await joinCrew(name.value.trim(), activeKeynoteId.value, selectedEmoji.value)
+    await joinCrew(name.value.trim(), activeKeynoteId.value, avatar)
     joinedName.value = name.value.trim()
     status.value = 'joined'
 
     // Save to localStorage with keynoteId
     const odientId = getOdientId()
     if (odientId) {
-      saveMember(name.value.trim(), odientId, activeKeynoteId.value, selectedEmoji.value)
+      saveMember(name.value.trim(), odientId, activeKeynoteId.value, avatar)
     }
   } catch (err) {
     console.error('Failed to join crew:', err)
@@ -289,24 +306,8 @@ async function submitVote() {
         <p class="hint">Check your internet connection</p>
       </div>
 
-      <!-- State: Form -->
-      <div v-else-if="status === 'idle' || status === 'joining'" class="form">
-        <!-- Emoji selection -->
-        <div class="emoji-selector">
-          <p class="emoji-label">Choose your avatar</p>
-          <div class="emoji-buttons">
-            <button
-              v-for="emoji in AVATAR_EMOJIS"
-              :key="emoji"
-              :class="['emoji-btn', { selected: selectedEmoji === emoji }]"
-              :disabled="status === 'joining'"
-              @click="selectedEmoji = emoji"
-            >
-              {{ emoji }}
-            </button>
-          </div>
-        </div>
-
+      <!-- State: Form - Name Step -->
+      <div v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'" class="form">
         <label for="name">Your pirate name</label>
         <input
           id="name"
@@ -315,24 +316,38 @@ async function submitVote() {
           placeholder="Captain Hook"
           maxlength="20"
           :disabled="status === 'joining'"
-          @keyup.enter="handleJoin"
+          @keyup.enter="handleNext"
         />
         <p v-if="validationMessage" class="validation">{{ validationMessage }}</p>
 
         <button
-          @click="handleJoin"
-          :disabled="!canJoin || status === 'joining'"
-          class="join-btn"
+          @click="handleNext"
+          :disabled="!canGoNext"
+          class="next-btn"
         >
-          <span v-if="status === 'joining'">Boarding...</span>
-          <span v-else>Join the crew</span>
+          Next
         </button>
+      </div>
+
+      <!-- State: Form - Avatar Step -->
+      <div v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'" class="avatar-step">
+        <button class="back-btn" @click="handleBack" :disabled="status === 'joining'">
+          ← Back
+        </button>
+        <p class="name-preview">{{ name }}</p>
+        <AvatarCreator @join="handleJoin" />
+        <div v-if="status === 'joining'" class="joining-overlay">
+          <div class="spinner"></div>
+          <p>Boarding...</p>
+        </div>
       </div>
 
       <!-- State: Joined - Waiting -->
       <div v-else-if="status === 'joined' && activeVoteIndex === null" class="joined-waiting">
         <div class="name-pill">{{ joinedName }}</div>
-        <div class="avatar-square">{{ selectedEmoji }}</div>
+        <div class="avatar-wrapper">
+          <AvatarPreview v-if="selectedAvatar" :avatar="selectedAvatar" :size="120" />
+        </div>
         <p class="hint">Wait for the captain's instructions...</p>
       </div>
 
@@ -456,16 +471,7 @@ h1 {
   margin-bottom: 24px;
 }
 
-.avatar-square {
-  width: 120px;
-  height: 120px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 64px;
+.avatar-wrapper {
   margin-bottom: 16px;
 }
 
@@ -475,46 +481,78 @@ h1 {
   gap: 12px;
 }
 
-.emoji-selector {
-  margin-bottom: 8px;
+.next-btn {
+  margin-top: 8px;
+  padding: 14px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e3a5f;
+  background: #ffd700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
 }
 
-.emoji-label {
-  font-size: 14px;
-  opacity: 0.8;
-  margin-bottom: 12px;
+.next-btn:hover:not(:disabled) {
+  transform: scale(1.02);
 }
 
-.emoji-buttons {
+.next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatar-step {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   gap: 16px;
+  position: relative;
 }
 
-.emoji-btn {
-  width: 64px;
-  height: 64px;
-  font-size: 32px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
+.back-btn {
+  align-self: flex-start;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.emoji-btn:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.05);
+.back-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.emoji-btn.selected {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.2);
-}
-
-.emoji-btn:disabled {
+.back-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.name-preview {
+  font-size: 18px;
+  color: #ffd700;
+  font-weight: 600;
+  margin: 0;
+}
+
+.joining-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  z-index: 10;
 }
 
 label {
