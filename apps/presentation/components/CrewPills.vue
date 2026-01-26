@@ -26,8 +26,8 @@ const isVisible = computed(() => {
         :key="member.odientId"
         class="crew-member"
       >
-        <div class="name-pill">{{ member.name }}</div>
         <AvatarPreview :avatar="member.avatar || ''" :size="60" />
+        <div class="name-pill">{{ member.name }}</div>
       </div>
     </TransitionGroup>
   </div>
@@ -54,15 +54,14 @@ const isVisible = computed(() => {
 }
 
 .name-pill {
-  padding: 1px 5px;
-  background: black;
-  border-radius: 20px;
-  color: white;
-  margin-bottom: -15px;
-  z-index: 100;
-  font-size: 10px;
-  font-weight: 300;
-  border: 1px solid white
+  padding: 1px 6px;
+  background: rgba(255, 215, 0, 0.2);
+  border-radius: 10px;
+  color: #ffd700;
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  border: 1px solid #ffd700;
 }
 
 

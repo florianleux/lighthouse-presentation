@@ -288,26 +288,38 @@ async function submitVote() {
       <h1>Lighthouse Pirates</h1>
 
       <!-- State: Connecting -->
-      <div v-if="status === 'connecting'" class="status">
+      <div
+        v-if="status === 'connecting'"
+        class="status"
+      >
         <div class="spinner"></div>
         <p>Connecting...</p>
       </div>
 
       <!-- State: Waiting for presentation -->
-      <div v-else-if="status === 'waiting'" class="status">
+      <div
+        v-else-if="status === 'waiting'"
+        class="status"
+      >
         <div class="spinner"></div>
         <p>Waiting for the captain...</p>
         <p class="hint">The presentation hasn't started yet</p>
       </div>
 
       <!-- State: Error -->
-      <div v-else-if="status === 'error'" class="status error">
+      <div
+        v-else-if="status === 'error'"
+        class="status error"
+      >
         <p>Connection error</p>
         <p class="hint">Check your internet connection</p>
       </div>
 
       <!-- State: Form - Name Step -->
-      <div v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'" class="form">
+      <div
+        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
+        class="form"
+      >
         <label for="name">Your pirate name</label>
         <input
           id="name"
@@ -318,7 +330,10 @@ async function submitVote() {
           :disabled="status === 'joining'"
           @keyup.enter="handleNext"
         />
-        <p v-if="validationMessage" class="validation">{{ validationMessage }}</p>
+        <p
+          v-if="validationMessage"
+          class="validation"
+        >{{ validationMessage }}</p>
 
         <button
           @click="handleNext"
@@ -330,31 +345,55 @@ async function submitVote() {
       </div>
 
       <!-- State: Form - Avatar Step -->
-      <div v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'" class="avatar-step">
-        <button class="back-btn" @click="handleBack" :disabled="status === 'joining'">
+      <div
+        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
+        class="avatar-step"
+      >
+        <button
+          class="back-btn"
+          @click="handleBack"
+          :disabled="status === 'joining'"
+        >
           ← Back
         </button>
         <p class="name-preview">{{ name }}</p>
         <AvatarCreator @join="handleJoin" />
-        <div v-if="status === 'joining'" class="joining-overlay">
+        <div
+          v-if="status === 'joining'"
+          class="joining-overlay"
+        >
           <div class="spinner"></div>
           <p>Boarding...</p>
         </div>
       </div>
 
       <!-- State: Joined - Waiting -->
-      <div v-else-if="status === 'joined' && activeVoteIndex === null" class="joined-waiting">
-        <div class="name-pill">{{ joinedName }}</div>
-        <div class="avatar-wrapper">
-          <AvatarPreview v-if="selectedAvatar" :avatar="selectedAvatar" :size="120" />
+      <div
+        v-else-if="status === 'joined' && activeVoteIndex === null"
+        class="joined-waiting"
+      >
+        <div class="avatar-wrapper-large">
+          <AvatarPreview
+            v-if="selectedAvatar"
+            :avatar="selectedAvatar"
+            :size="400"
+            class="responsive-avatar"
+          />
         </div>
+        <div class="name-pill">{{ joinedName }}</div>
         <p class="hint">Wait for the captain's instructions...</p>
       </div>
 
       <!-- State: Joined - Voting -->
-      <div v-else-if="status === 'joined' && activeVoteIndex !== null && !hasVoted" class="voting">
+      <div
+        v-else-if="status === 'joined' && activeVoteIndex !== null && !hasVoted"
+        class="voting"
+      >
         <h2>Vote now!</h2>
-        <div v-if="timeRemaining > 0" class="countdown">{{ timeRemaining }}s</div>
+        <div
+          v-if="timeRemaining > 0"
+          class="countdown"
+        >{{ timeRemaining }}s</div>
         <p class="vote-hint">Choose your option</p>
         <div class="vote-buttons">
           <button
@@ -380,7 +419,10 @@ async function submitVote() {
       </div>
 
       <!-- State: Joined - Voted -->
-      <div v-else-if="status === 'joined' && hasVoted" class="success">
+      <div
+        v-else-if="status === 'joined' && hasVoted"
+        class="success"
+      >
         <div class="checkmark">✓</div>
         <h2>Vote recorded!</h2>
         <p>You voted for option {{ selectedChoice }}</p>
@@ -388,7 +430,10 @@ async function submitVote() {
       </div>
 
       <!-- State: Joined - Missed vote -->
-      <div v-else-if="status === 'joined' && voteMissed" class="missed">
+      <div
+        v-else-if="status === 'joined' && voteMissed"
+        class="missed"
+      >
         <div class="missed-icon">X</div>
         <h2>Too late!</h2>
         <p>You missed the vote</p>
@@ -421,7 +466,6 @@ async function submitVote() {
   border-radius: 16px;
   padding: 32px;
   width: 100%;
-  max-width: 360px;
   text-align: center;
 }
 
@@ -450,7 +494,9 @@ h1 {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .joined-waiting {
@@ -466,9 +512,26 @@ h1 {
   border: 2px solid #ffd700;
   border-radius: 20px;
   color: #ffd700;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-top: -30px;
+}
+
+.avatar-wrapper-large {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 16px;
+}
+
+.avatar-wrapper-large :deep(.avatar-container) {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+.avatar-wrapper-large :deep(.avatar-layer) {
+  width: 100%;
+  height: 100%;
 }
 
 .avatar-wrapper {

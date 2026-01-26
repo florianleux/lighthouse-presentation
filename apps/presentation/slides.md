@@ -229,26 +229,36 @@ Before diving into optimizations, let's remove obvious UX anti-patterns that hur
 
 # Day 1: Performance
 
-## Audits covered by our patches (4 of 6 metrics)
+## How fast does your page load and become interactive?
 
-<div class="text-sm opacity-70 mb-3">
-  <strong>6 Core Web Vitals:</strong> FCP · LCP · TBT · CLS · SI · TTI
+<div class="text-sm opacity-70 mb-4">
+  Performance is measured by <strong>6 Core Web Vitals</strong>, each with different weights.
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <div class="text-blue-400 text-sm mb-1">Option A - Images</div>
-    <ul class="text-sm">
-      <li><code>LCP</code> - Largest Contentful Paint</li>
-      <li><code>CLS</code> - Cumulative Layout Shift</li>
-    </ul>
+<div class="grid grid-cols-3 gap-3 text-center text-sm">
+  <div class="p-2 border rounded">
+    <div class="font-bold text-green-400">TBT</div>
+    <div class="text-xs opacity-70">30%</div>
   </div>
-  <div>
-    <div class="text-amber-400 text-sm mb-1">Option B - Scripts</div>
-    <ul class="text-sm">
-      <li><code>FCP</code> - First Contentful Paint</li>
-      <li><code>TBT</code> - Total Blocking Time</li>
-    </ul>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-green-400">LCP</div>
+    <div class="text-xs opacity-70">25%</div>
+  </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-blue-400">CLS</div>
+    <div class="text-xs opacity-70">25%</div>
+  </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-blue-400">FCP</div>
+    <div class="text-xs opacity-70">10%</div>
+  </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-gray-400">SI</div>
+    <div class="text-xs opacity-70">10%</div>
+  </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-gray-400">TTI</div>
+    <div class="text-xs opacity-70">0%</div>
   </div>
 </div>
 
@@ -262,21 +272,23 @@ Before diving into optimizations, let's remove obvious UX anti-patterns that hur
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Images</div>
+    <div class="text-2xl font-bold mb-2">Option A</div>
+    <div class="text-lg mb-3">Images</div>
+    <div class="text-sm opacity-70 mb-4 italic">Optimize visual content delivery and layout stability</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Convert images to WebP</li>
-      <li>Add loading="lazy" below-fold</li>
-      <li>Add width/height attributes</li>
+      <li><code>LCP</code> - Largest Contentful Paint (25%)</li>
+      <li><code>CLS</code> - Cumulative Layout Shift (25%)</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Scripts</div>
+    <div class="text-2xl font-bold mb-2">Option B</div>
+    <div class="text-lg mb-3">Scripts</div>
+    <div class="text-sm opacity-70 mb-4 italic">Reduce JavaScript blocking and improve interactivity</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Remove heavy libraries (jQuery, Lodash, Moment)</li>
-      <li>Remove third-party scripts</li>
-      <li>Remove blocking inline script</li>
+      <li><code>FCP</code> - First Contentful Paint (10%)</li>
+      <li><code>TBT</code> - Total Blocking Time (30%)</li>
     </ul>
   </div>
 </div>
@@ -329,29 +341,29 @@ layout: center
 
 # Day 2: Accessibility
 
-## Audits covered by our patches (6 of ~60 audits)
+## Can everyone use your site, including people with disabilities?
 
-<div class="text-sm opacity-70 mb-3">
-  <strong>Critical audits (weight 10):</strong> button-name · image-alt · label · aria-roles · aria-required-attr · aria-valid-attr-value
+<div class="text-sm opacity-70 mb-4">
+  Accessibility is measured by <strong>~60 audits</strong> with weight-based scoring.
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <div class="text-blue-400 text-sm mb-1">Option A - Names & Labels</div>
-    <ul class="text-sm">
-      <li><code>button-name</code></li>
-      <li><code>image-alt</code></li>
-      <li><code>label</code></li>
-    </ul>
+<div class="grid grid-cols-3 gap-3 text-center text-sm">
+  <div class="p-2 border rounded">
+    <div class="font-bold text-green-400">Critical</div>
+    <div class="text-xs opacity-70">Weight 10</div>
   </div>
-  <div>
-    <div class="text-amber-400 text-sm mb-1">Option B - ARIA</div>
-    <ul class="text-sm">
-      <li><code>aria-roles</code></li>
-      <li><code>aria-required-attr</code></li>
-      <li><code>aria-valid-attr-value</code></li>
-    </ul>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-blue-400">Serious</div>
+    <div class="text-xs opacity-70">Weight 3</div>
   </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-gray-400">Minor</div>
+    <div class="text-xs opacity-70">Weight 1</div>
+  </div>
+</div>
+
+<div class="text-sm opacity-70 mt-4">
+  Critical audits include: button-name, image-alt, label, aria-roles, aria-required-attr...
 </div>
 
 <div class="pt-4">
@@ -364,21 +376,25 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Names & Labels</div>
+    <div class="text-2xl font-bold mb-2">Option A</div>
+    <div class="text-lg mb-3">Names & Labels</div>
+    <div class="text-sm opacity-70 mb-4 italic">Ensure interactive elements are identifiable by assistive technologies</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Replace divs with buttons</li>
-      <li>Add alt text to images</li>
-      <li>Labels on all inputs</li>
+      <li><code>button-name</code> - Buttons have accessible name</li>
+      <li><code>image-alt</code> - Images have alt text</li>
+      <li><code>label</code> - Form inputs have labels</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">ARIA</div>
+    <div class="text-2xl font-bold mb-2">Option B</div>
+    <div class="text-lg mb-3">ARIA</div>
+    <div class="text-sm opacity-70 mb-4 italic">Implement correct ARIA attributes for screen reader compatibility</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Use valid ARIA roles</li>
-      <li>Add required ARIA attributes</li>
-      <li>Fix invalid ARIA attribute values</li>
+      <li><code>aria-roles</code> - Valid ARIA roles</li>
+      <li><code>aria-required-attr</code> - Required ARIA attributes</li>
+      <li><code>aria-valid-attr-value</code> - Valid attribute values</li>
     </ul>
   </div>
 </div>
@@ -431,29 +447,29 @@ layout: center
 
 # Day 3: Best Practices
 
-## Audits covered by our patches (6 of ~20 audits)
+## Does your site follow modern web standards and avoid deprecated patterns?
 
-<div class="text-sm opacity-70 mb-3">
-  <strong>~20 audits:</strong> deprecations (5) · inspector-issues (1) · paste-preventing-inputs (3) · errors-in-console (1) · notification-on-start (1) · geolocation-on-start (1) · ...
+<div class="text-sm opacity-70 mb-4">
+  Best Practices is measured by <strong>~20 audits</strong> checking for deprecated APIs, security issues, and UX problems.
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <div class="text-blue-400 text-sm mb-1">Option A - General</div>
-    <ul class="text-sm">
-      <li><code>deprecations</code></li>
-      <li><code>inspector-issues</code></li>
-      <li><code>errors-in-console</code></li>
-    </ul>
+<div class="grid grid-cols-3 gap-3 text-center text-sm">
+  <div class="p-2 border rounded">
+    <div class="font-bold text-green-400">Deprecations</div>
+    <div class="text-xs opacity-70">Weight 5</div>
   </div>
-  <div>
-    <div class="text-amber-400 text-sm mb-1">Option B - Trust & Safety</div>
-    <ul class="text-sm">
-      <li><code>geolocation-on-start</code></li>
-      <li><code>notification-on-start</code></li>
-      <li><code>paste-preventing-inputs</code></li>
-    </ul>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-blue-400">UX Issues</div>
+    <div class="text-xs opacity-70">Weight 3</div>
   </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-gray-400">Warnings</div>
+    <div class="text-xs opacity-70">Weight 1</div>
+  </div>
+</div>
+
+<div class="text-sm opacity-70 mt-4">
+  Includes: deprecations, errors-in-console, inspector-issues, geolocation-on-start, notification-on-start...
 </div>
 
 <div class="pt-4">
@@ -466,21 +482,25 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">General</div>
+    <div class="text-2xl font-bold mb-2">Option A</div>
+    <div class="text-lg mb-3">General</div>
+    <div class="text-sm opacity-70 mb-4 italic">Fix deprecated APIs and eliminate console errors</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Remove document.write()</li>
-      <li>Fix DevTools Issues warnings</li>
-      <li>Fix console errors</li>
+      <li><code>deprecations</code> - No deprecated APIs (weight 5)</li>
+      <li><code>inspector-issues</code> - No DevTools issues (weight 1)</li>
+      <li><code>errors-in-console</code> - No console errors (weight 1)</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Trust & Safety</div>
+    <div class="text-2xl font-bold mb-2">Option B</div>
+    <div class="text-lg mb-3">Trust & Safety</div>
+    <div class="text-sm opacity-70 mb-4 italic">Respect user permissions and avoid intrusive behaviors</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Remove geolocation on page load</li>
-      <li>Remove notification on page load</li>
-      <li>Allow paste in input fields</li>
+      <li><code>geolocation-on-start</code> - No auto geolocation (weight 1)</li>
+      <li><code>notification-on-start</code> - No auto notification (weight 1)</li>
+      <li><code>paste-preventing-inputs</code> - Allow paste (weight 3)</li>
     </ul>
   </div>
 </div>
@@ -533,29 +553,29 @@ layout: center
 
 # Day 4: SEO
 
-## Audits covered by our patches (6 of 10 audits)
+## Can search engines find, crawl, and understand your content?
 
-<div class="text-sm opacity-70 mb-3">
-  <strong>10 audits:</strong> is-crawlable (~4) · document-title (1) · meta-description (1) · http-status-code (1) · link-text (1) · crawlable-anchors (1) · hreflang (1) · canonical (1) · robots-txt (1)
+<div class="text-sm opacity-70 mb-4">
+  SEO is measured by <strong>10 audits</strong> checking crawlability and content metadata.
 </div>
 
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <div class="text-blue-400 text-sm mb-1">Option A - Crawlability</div>
-    <ul class="text-sm">
-      <li><code>is-crawlable</code></li>
-      <li><code>crawlable-anchors</code></li>
-      <li><code>robots-txt</code></li>
-    </ul>
+<div class="grid grid-cols-3 gap-3 text-center text-sm">
+  <div class="p-2 border rounded">
+    <div class="font-bold text-green-400">Critical</div>
+    <div class="text-xs opacity-70">Weight ~4</div>
   </div>
-  <div>
-    <div class="text-amber-400 text-sm mb-1">Option B - Content</div>
-    <ul class="text-sm">
-      <li><code>document-title</code></li>
-      <li><code>meta-description</code></li>
-      <li><code>link-text</code></li>
-    </ul>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-blue-400">Standard</div>
+    <div class="text-xs opacity-70">Weight 1</div>
   </div>
+  <div class="p-2 border rounded">
+    <div class="font-bold text-gray-400">Informative</div>
+    <div class="text-xs opacity-70">Weight 0</div>
+  </div>
+</div>
+
+<div class="text-sm opacity-70 mt-4">
+  Includes: is-crawlable, document-title, meta-description, robots-txt, link-text, crawlable-anchors...
 </div>
 
 <div class="pt-4">
@@ -568,21 +588,25 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option A</div>
-    <div class="text-lg mb-4">Crawlability</div>
+    <div class="text-2xl font-bold mb-2">Option A</div>
+    <div class="text-lg mb-3">Crawlability</div>
+    <div class="text-sm opacity-70 mb-4 italic">Allow search engines to discover and index your pages</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Remove noindex meta tag</li>
-      <li>Make navigation crawlable</li>
-      <li>Fix robots.txt blocking crawlers</li>
+      <li><code>is-crawlable</code> - Page can be indexed (~4)</li>
+      <li><code>crawlable-anchors</code> - Links are crawlable (1)</li>
+      <li><code>robots-txt</code> - robots.txt is valid (1)</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-4">Option B</div>
-    <div class="text-lg mb-4">Content</div>
+    <div class="text-2xl font-bold mb-2">Option B</div>
+    <div class="text-lg mb-3">Content</div>
+    <div class="text-sm opacity-70 mb-4 italic">Provide meaningful metadata for search result display</div>
+    <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li>Add unique page title</li>
-      <li>Add meta description</li>
-      <li>Descriptive link text</li>
+      <li><code>document-title</code> - Page has title (1)</li>
+      <li><code>meta-description</code> - Has description (1)</li>
+      <li><code>link-text</code> - Descriptive link text (1)</li>
     </ul>
   </div>
 </div>
