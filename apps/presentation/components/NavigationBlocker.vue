@@ -65,8 +65,8 @@ function blockKeyboard(e: KeyboardEvent) {
     return
   }
 
-  // For vote slides, block all navigation
-  if (isForward || isBackward) {
+  // For vote slides, only block forward navigation (allow going back)
+  if (isForward) {
     e.preventDefault()
     e.stopPropagation()
   }
@@ -94,8 +94,13 @@ function blockClick(e: MouseEvent) {
     return
   }
 
-  e.preventDefault()
-  e.stopPropagation()
+  // For vote slides, only block clicks on right side (forward), allow going back
+  const clickX = e.clientX
+  const windowWidth = window.innerWidth
+  if (clickX > windowWidth / 2) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 }
 
 watch(currentSlideNo, checkBlockingState, { immediate: true })
