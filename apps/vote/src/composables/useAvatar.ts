@@ -37,13 +37,13 @@ function generateRandomAvatar(gender: Gender, skinTone: SkinTone): PirateAvatar 
     },
     nose: randomInt(1, AVATAR_CONFIG.NOSE_COUNT),
     accessories: { regular, eyePatch },
-    hair: randomBoolean(0.8)
+    hair: randomBoolean(0.75) // 1/4 chance of bald (same as each hair type)
       ? {
           option: randomInt(1, AVATAR_CONFIG.HAIR_OPTIONS),
           color: randomInt(1, AVATAR_CONFIG.HAIR_COLORS),
         }
       : null,
-    hat: randomBoolean(0.7)
+    hat: randomBoolean(2 / 3) // 1/3 chance of no hat (same weight as each hat type)
       ? {
           option: randomInt(1, AVATAR_CONFIG.HAT_OPTIONS),
           color: randomInt(1, AVATAR_CONFIG.HAT_COLORS),
@@ -52,7 +52,7 @@ function generateRandomAvatar(gender: Gender, skinTone: SkinTone): PirateAvatar 
   }
 }
 
-export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinTone = 'mid') {
+export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinTone = 'light') {
   const avatar = ref<PirateAvatar>(generateRandomAvatar(initialGender, initialSkinTone))
   const isSpinning = ref(false)
 
