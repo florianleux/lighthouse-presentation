@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
+import { useNav } from '@slidev/client'
 
 const props = withDefaults(defineProps<{
   url?: string
@@ -9,11 +10,13 @@ const props = withDefaults(defineProps<{
   scale: 0.6,
 })
 
-// Use a key to force iframe refresh on mount
+const { currentSlideNo } = useNav()
+
+// Use a key to force iframe refresh when entering the slide
 const iframeKey = ref(Date.now())
 
-onMounted(() => {
-  // Refresh iframe each time component mounts (slide enters)
+// Refresh iframe each time the slide changes
+watch(currentSlideNo, () => {
   iframeKey.value = Date.now()
 })
 
