@@ -115,7 +115,7 @@ Our pirate test shop
 ---
 
 <div class="absolute inset-0">
-  <iframe src="https://blackmarket.florianleux.fr" class="w-full h-full border-0" style="transform: scale(0.6); transform-origin: top left; width: 166.67%; height: 166.67%;" />
+  <BlackMarketIframe />
 </div>
 
 ---
