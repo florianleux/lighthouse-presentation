@@ -472,7 +472,7 @@ async function submitPoll(choice: PollChoice) {
 
       <!-- State: Joined - Poll Submitted -->
       <div
-        v-else-if="status === 'joined' && hasPollVoted"
+        v-else-if="status === 'joined' && hasPollVoted && activeVoteIndex === null"
         class="success"
       >
         <div class="checkmark">✓</div>

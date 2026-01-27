@@ -19,6 +19,32 @@ Scan the QR code to join the crew
   <img src="/qr-code.png" alt="Scan to join" class="w-64 h-64" />
 </div>
 
+---
+
+# The Lighthouse score
+
+<div class="grid grid-cols-4 gap-4 pt-8 text-center">
+  <div class="p-4">
+    <div class="text-4xl mb-2">⚡</div>
+    <div class="font-bold">Performance</div>
+    <div class="text-xs opacity-70">Speed & efficiency</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">♿</div>
+    <div class="font-bold">Accessibility</div>
+    <div class="text-xs opacity-70">Usable by everyone</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">✅</div>
+    <div class="font-bold">Best Practices</div>
+    <div class="text-xs opacity-70">Modern standards</div>
+  </div>
+  <div class="p-4">
+    <div class="text-4xl mb-2">🔍</div>
+    <div class="font-bold">SEO</div>
+    <div class="text-xs opacity-70">Search visibility</div>
+  </div>
+</div>
 
 ---
 
@@ -43,34 +69,8 @@ Scan the QR code to join the crew
   </div>
 </div>
 
----
 
-# Lighthouse measures what matters
-
-<div class="grid grid-cols-4 gap-4 pt-8 text-center">
-  <div class="p-4">
-    <div class="text-4xl mb-2">⚡</div>
-    <div class="font-bold">Performance</div>
-    <div class="text-xs opacity-70">Speed & efficiency</div>
-  </div>
-  <div class="p-4">
-    <div class="text-4xl mb-2">♿</div>
-    <div class="font-bold">Accessibility</div>
-    <div class="text-xs opacity-70">Usable by everyone</div>
-  </div>
-  <div class="p-4">
-    <div class="text-4xl mb-2">✅</div>
-    <div class="font-bold">Best Practices</div>
-    <div class="text-xs opacity-70">Modern standards</div>
-  </div>
-  <div class="p-4">
-    <div class="text-4xl mb-2">🔍</div>
-    <div class="font-bold">SEO</div>
-    <div class="text-xs opacity-70">Search visibility</div>
-  </div>
-</div>
----
-
+--- 
 # Audience question
 
 What's your knowledge level of Lighthouse?
@@ -79,36 +79,13 @@ What's your knowledge level of Lighthouse?
 
 ---
 
-# The Pirate Adventure (1/2)
-
-## Let's build a lighthouse
-
-Narrative context to be defined (TBD)
-
-<div class="flex justify-center pt-8">
-  <div class="text-8xl">🏗️</div>
-</div>
-
----
-
-# The Pirate Adventure (2/2)
-
-Narrative context continued (TBD)
-
-<div class="flex justify-center pt-8">
-  <div class="text-8xl">⚓</div>
-</div>
-
----
-
-# The BlackMarket
+# Our example
 
 Our pirate test shop
 
 <div class="flex justify-center pt-8">
   <div class="p-8 border rounded">
     <div class="text-2xl mb-4">🏪 BlackMarket</div>
-    <div class="text-sm opacity-70">Nuxt 3 app with 40 anti-patterns</div>
   </div>
 </div>
 
@@ -168,37 +145,7 @@ The 4 starting Lighthouse scores
   </div>
 </div>
 
----
 
-# Base Cleanup
-
-## Proactive Design Matters
-
-Before diving into optimizations, let's remove obvious UX anti-patterns that hurt scores.
-
-<div class="grid grid-cols-2 gap-8 pt-4">
-  <div class="p-4 border border-red-500/50 rounded bg-red-500/10">
-    <div class="text-lg font-bold mb-2 text-red-400">Removed</div>
-    <ul class="text-sm space-y-1">
-      <li>6 spam popup modals</li>
-      <li>8 promotional banners</li>
-      <li>Dynamic layout shifts</li>
-      <li>Font size changes</li>
-    </ul>
-  </div>
-  <div class="p-4 border border-green-500/50 rounded bg-green-500/10">
-    <div class="text-lg font-bold mb-2 text-green-400">Impact</div>
-    <div class="text-3xl font-bold">+25 points</div>
-    <div class="text-sm opacity-70">Performance: 31 → 56</div>
-    <div class="text-sm opacity-70">CLS: 1.08 → 0.025</div>
-  </div>
-</div>
-
-<div class="pt-6 text-center text-sm opacity-60">
-  Good design is the first optimization. No code change needed - just remove bad patterns.
-</div>
-
----
 
 # Day 1: Performance
 
