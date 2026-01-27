@@ -157,85 +157,103 @@ export const PATCH_DATA: Record<number, VotePatchData> = {
       title: 'Scripts',
       patches: [
         {
-          title: 'Remove heavy libraries',
-          summary: 'Remove jQuery, Lodash, and Moment.js (226KB saved)',
+          title: 'Load GSAP asynchronously',
+          summary: 'Defer animation library until needed',
           before: {
             language: 'html',
-            code: `<script src="jquery.min.js"></script>    <!-- 87KB -->
-<script src="lodash.min.js"></script>   <!-- 72KB -->
-<script src="moment.min.js"></script>   <!-- 67KB -->
-<!-- Total: 226KB of unused code -->`
+            code: `<!-- nuxt.config.ts - blocking in head -->
+<script src="gsap.min.js"></script>  <!-- 60KB -->
+<!-- Blocks rendering for hover animations -->
+
+// ProductCard.vue - uses global GSAP
+gsap.to(card, { scale: 1.05 })`
           },
           after: {
             language: 'html',
-            code: `<!-- Removed: Use native APIs instead -->
-<!-- document.querySelector() vs jQuery -->
-<!-- Array methods vs Lodash -->
-<!-- Intl.DateTimeFormat vs Moment -->`
+            code: `<!-- Load GSAP with defer -->
+<script src="gsap.min.js" defer></script>
+
+// Or use CSS transitions instead
+.card:hover { transform: scale(1.05); }
+<!-- CSS handles simple animations -->`
           },
           whyMatters: [
-            'jQuery (87KB), Lodash (72KB), Moment (67KB) = 226KB',
-            'Modern browsers have native alternatives',
-            'Unused code blocks main thread during parse'
+            'GSAP (~60KB) blocks rendering when in <head>',
+            'Only used for simple hover effects on product cards',
+            'CSS transitions can replace GSAP for basic animations'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'high', description: 'Reduces blocking time by ~300ms' },
-            { metric: 'FCP', impact: 'medium', description: 'Faster initial render' }
+            { metric: 'TBT', impact: 'high', description: 'Reduces blocking time by ~100ms' },
+            { metric: 'FCP', impact: 'medium', description: 'Faster first paint' }
           ]
         },
         {
-          title: 'Remove third-party scripts',
-          summary: 'Remove Three.js, D3.js, Chart.js (unused)',
+          title: 'Tree-shake dayjs locales',
+          summary: 'Import only the locale you need',
           before: {
-            language: 'html',
-            code: `<script src="three.min.js"></script>   <!-- 150KB -->
-<script src="d3.min.js"></script>      <!-- 90KB -->
-<script src="chart.min.js"></script>   <!-- 60KB -->
-<!-- Never used in the application -->`
+            language: 'javascript',
+            code: `// app.vue - imports ALL locales (~40KB)
+import dayjs from 'dayjs'
+import 'dayjs/locale/fr'
+import 'dayjs/locale/es'
+import 'dayjs/locale/de'
+// ... 10 more locales imported
+// Only using English for "Posted X days ago"`
           },
           after: {
-            language: 'html',
-            code: `<!-- Removed unused visualization libraries -->
-<!-- Only load what you actually use -->`
+            language: 'javascript',
+            code: `// app.vue - only import what you need
+import dayjs from 'dayjs'            // ~7KB
+import relativeTime from 'dayjs/plugin/relativeTime'
+dayjs.extend(relativeTime)
+
+// Or use native Intl.RelativeTimeFormat
+const rtf = new Intl.RelativeTimeFormat('en')`
           },
           whyMatters: [
-            'Three.js, D3.js, Chart.js add ~300KB total',
-            'These libraries are never used in the app',
-            'Each script blocks rendering while parsing'
+            'All 10 locales add ~40KB (only need English)',
+            'dayjs core is only ~7KB without locales',
+            'Native Intl API can replace dayjs entirely'
           ],
           metrics: [
-            { metric: 'TBT', impact: 'high', description: 'Reduces TBT by ~400ms' },
-            { metric: 'TTI', impact: 'medium', description: 'Faster time to interactive' }
+            { metric: 'TBT', impact: 'medium', description: 'Less JS to parse (~33KB saved)' },
+            { metric: 'TTI', impact: 'low', description: 'Faster time to interactive' }
           ]
         },
         {
-          title: 'Remove blocking inline script',
-          summary: 'Remove 500ms artificial delay in head',
+          title: 'Remove duplicated data & use Nuxt data fetching',
+          summary: 'Use useAsyncData for SSR-friendly data loading',
           before: {
-            language: 'html',
-            code: `<head>
-  <script>
-    // Blocking script - runs before render
-    const start = Date.now();
-    while (Date.now() - start < 500) {}
-  </script>
-</head>`
+            language: 'javascript',
+            code: `// app.vue - onMounted (blocking main thread)
+const data = JSON.parse(
+  document.getElementById('catalog').textContent // 50KB inline!
+)
+// Data already exists in Vue state from SSR...
+const sorted = data.sort((a, b) => b.rating - a.rating)
+const byCategory = groupBy(data, 'category')
+// Sync computation blocks interactivity`
           },
           after: {
-            language: 'html',
-            code: `<head>
-  <!-- No blocking scripts -->
-  <!-- Move scripts to end of body or use defer -->
-</head>`
+            language: 'javascript',
+            code: `// Use Nuxt's data fetching (SSR + caching + dedup)
+const { data: products } = await useAsyncData('products',
+  () => $fetch('/api/products')
+)
+
+// Derived data with computed (lazy evaluation)
+const sortedProducts = computed(() =>
+  [...products.value].sort((a, b) => b.rating - a.rating)
+)`
           },
           whyMatters: [
-            'Inline scripts in <head> block rendering',
-            'This script adds 500ms artificial delay',
-            'Nothing can render until script completes'
+            'Inline JSON duplicates data already in Vue state',
+            'useAsyncData runs on server, caches, deduplicates',
+            'computed() is lazy - only evaluates when accessed'
           ],
           metrics: [
-            { metric: 'FCP', impact: 'high', description: 'Removes 500ms delay' },
-            { metric: 'LCP', impact: 'high', description: 'Content appears 500ms sooner' }
+            { metric: 'TBT', impact: 'high', description: 'Removes ~200ms of blocking work' },
+            { metric: 'TTI', impact: 'high', description: 'Page interactive faster' }
           ]
         }
       ]
@@ -345,82 +363,115 @@ export const PATCH_DATA: Record<number, VotePatchData> = {
       patches: [
         {
           title: 'Use valid ARIA roles',
-          summary: 'Replace invalid role values with standard ones',
+          summary: 'Replace made-up roles with standard WAI-ARIA roles',
           before: {
             language: 'html',
-            code: `<!-- app.vue - invalid custom roles -->
-<div role="pirate-button">Click me</div>
-<div role="treasure-chest">Content here</div>
-<span role="gold-counter">5 coins</span>
-<!-- Invalid roles are ignored by AT -->`
+            code: `<!-- FilterBar.vue - invalid role -->
+<div role="dropdown" class="relative">
+  <button @click="toggleMenu">
+    Categories
+  </button>
+  <ul class="dropdown-menu">
+    <li>Hooks</li>
+    <li>Parrots</li>
+  </ul>
+</div>
+<!-- "dropdown" is not a valid ARIA role -->`
           },
           after: {
             language: 'html',
-            code: `<!-- app.vue - valid ARIA roles -->
-<button type="button">Click me</button>
-<div role="region" aria-label="Treasure">Content here</div>
-<span role="status">5 coins</span>
-<!-- Semantic elements or valid roles -->`
+            code: `<!-- FilterBar.vue - valid menu pattern -->
+<div class="relative">
+  <button
+    aria-haspopup="menu"
+    :aria-expanded="isOpen"
+  >Categories</button>
+  <ul v-if="isOpen" role="menu">
+    <li role="menuitem">Hooks</li>
+    <li role="menuitem">Parrots</li>
+  </ul>
+</div>
+<!-- Use standard WAI-ARIA menu pattern -->`
           },
           whyMatters: [
-            'Invalid roles are ignored by assistive tech',
-            'Screen readers can\'t identify custom roles',
-            'Use standard roles from WAI-ARIA spec'
+            '"dropdown" is a common mistake - not a real ARIA role',
+            'Use "menu", "listbox", or "combobox" instead',
+            'Invalid roles are completely ignored by assistive tech'
           ],
           metrics: [
-            { metric: 'aria-roles', impact: 'high', description: 'All ARIA roles are valid' }
+            { metric: 'aria-roles', impact: 'high', description: 'All ARIA roles are valid WAI-ARIA roles' }
           ]
         },
         {
           title: 'Add required ARIA attributes',
-          summary: 'Provide missing ARIA state attributes',
+          summary: 'Provide missing state attributes for ARIA roles',
           before: {
             language: 'html',
-            code: `<!-- app.vue - missing required attributes -->
-<div role="checkbox">Remember me</div>
-<div role="slider">Volume</div>
-<div role="combobox">Select option</div>
-<!-- AT cannot determine state -->`
+            code: `<!-- TheHeader.vue - missing aria-checked -->
+<div
+  role="switch"
+  class="theme-toggle"
+  @click="isDarkMode = !isDarkMode"
+>
+  <span v-if="isDarkMode">🌙</span>
+  <span v-else>☀️</span>
+  Mode
+</div>
+<!-- role="switch" requires aria-checked -->`
           },
           after: {
             language: 'html',
-            code: `<!-- app.vue - complete ARIA attributes -->
-<div role="checkbox" aria-checked="false">Remember me</div>
-<div role="slider" aria-valuenow="50"
-     aria-valuemin="0" aria-valuemax="100">Volume</div>
-<div role="combobox" aria-expanded="false">Select</div>
-<!-- AT can announce current state -->`
+            code: `<!-- TheHeader.vue - complete switch -->
+<button
+  role="switch"
+  :aria-checked="isDarkMode"
+  class="theme-toggle"
+  @click="isDarkMode = !isDarkMode"
+>
+  <span v-if="isDarkMode">🌙</span>
+  <span v-else>☀️</span>
+  Mode
+</button>
+<!-- Screen readers announce: "Mode, switch, off" -->`
           },
           whyMatters: [
-            'ARIA roles require specific attributes',
-            'checkbox needs aria-checked state',
-            'slider needs aria-valuenow/min/max'
+            'role="switch" requires aria-checked to convey state',
+            'Without it, users cannot know if toggle is on or off',
+            'Check WAI-ARIA spec for required attributes per role'
           ],
           metrics: [
-            { metric: 'aria-required-attr', impact: 'high', description: 'ARIA roles have required attributes' }
+            { metric: 'aria-required-attr', impact: 'high', description: 'ARIA roles have all required attributes' }
           ]
         },
         {
           title: 'Fix invalid ARIA attribute values',
-          summary: 'Use valid values for ARIA attributes',
+          summary: 'Use correct boolean and enumerated values',
           before: {
             language: 'html',
-            code: `<!-- app.vue - invalid ARIA values -->
-<div role="slider" aria-valuenow="invalid">Volume</div>
-<div role="progressbar" aria-valuenow="fifty">Loading</div>
-<!-- aria-valuenow must be a number -->`
+            code: `<!-- ProductCard.vue - invalid value -->
+<button
+  aria-expanded="yes"
+  @click="showDetails = !showDetails"
+>
+  Show details
+</button>
+<!-- "yes" is invalid, must be "true" or "false" -->`
           },
           after: {
             language: 'html',
-            code: `<!-- app.vue - valid ARIA values -->
-<div role="slider" aria-valuenow="50">Volume</div>
-<div role="progressbar" aria-valuenow="50">Loading</div>
-<!-- aria-valuenow is now a valid number -->`
+            code: `<!-- ProductCard.vue - valid value -->
+<button
+  :aria-expanded="showDetails ? 'true' : 'false'"
+  @click="showDetails = !showDetails"
+>
+  {{ showDetails ? 'Hide' : 'Show' }} details
+</button>
+<!-- Vue tip: use ternary with string values -->`
           },
           whyMatters: [
-            'aria-valuenow requires a numeric value',
-            'Invalid values are ignored by assistive tech',
-            'Users cannot determine slider/progress state'
+            'ARIA boolean attributes only accept "true" or "false"',
+            '"yes", "no", "1", "0" are all invalid and ignored',
+            'With Vue, use :aria-expanded with ternary operator'
           ],
           metrics: [
             { metric: 'aria-valid-attr-value', impact: 'high', description: 'ARIA attributes have valid values' }
