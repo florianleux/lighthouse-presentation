@@ -5,35 +5,35 @@ function getBasePath(gender: Gender): string {
 }
 
 export function getFacePath(gender: Gender, skinTone: SkinTone): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/face.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/face.webp`
 }
 
 export function getMouthPath(gender: Gender, skinTone: SkinTone, option: number): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/mouth/mouth_${option}.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/mouth/mouth_${option}.webp`
 }
 
 export function getEyesPath(gender: Gender, skinTone: SkinTone, option: number, color: number): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/eyes/option_${option}/color_${color}.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/eyes/option_${option}/color_${color}.webp`
 }
 
 export function getNosePath(gender: Gender, skinTone: SkinTone, option: number): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/nose/nose_${option}.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/nose/nose_${option}.webp`
 }
 
 export function getAccessoryPath(gender: Gender, skinTone: SkinTone, option: number): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/accessories/accessory_${option}.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/accessories/accessory_${option}.webp`
 }
 
 export function getEyePatchPath(gender: Gender, skinTone: SkinTone, side: 'left' | 'right'): string {
-  return `${getBasePath(gender)}/${skinTone}_tone/accessories/eye_patch_${side}.png`
+  return `${getBasePath(gender)}/${skinTone}_tone/accessories/eye_patch_${side}.webp`
 }
 
 export function getHairPath(gender: Gender, option: number, color: number): string {
-  return `${getBasePath(gender)}/hair/option_${option}/color_${color}.png`
+  return `${getBasePath(gender)}/hair/option_${option}/color_${color}.webp`
 }
 
 export function getHatPath(gender: Gender, option: number, color: number): string {
-  return `${getBasePath(gender)}/hats/option_${option}/color_${color}.png`
+  return `${getBasePath(gender)}/hats/option_${option}/color_${color}.webp`
 }
 
 export interface AvatarLayer {
