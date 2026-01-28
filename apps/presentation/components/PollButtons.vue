@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { sessionStore, getAbly } from '../setup/main'
 import { ABLY_CHANNELS, POLL_CONFIG } from '../../../shared/constants'
 import type { PollStartedMessage } from '../../../shared/types'
@@ -49,7 +49,21 @@ function clearTimer() {
   }
 }
 
-onUnmounted(() => clearTimer())
+// Keyboard shortcut: V to start poll
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key.toLowerCase() === 'v' && !isPollActive.value && sessionStore.pollPhase !== 'ended') {
+    startPollSession()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  clearTimer()
+  window.removeEventListener('keydown', handleKeydown)
+})
 
 // Start poll session
 async function startPollSession() {
@@ -80,18 +94,8 @@ function stopPollSession() {
 
 <template>
   <div class="poll-container">
-    <!-- Start Poll Button -->
-    <div v-if="!isPollActive && sessionStore.pollPhase !== 'ended'" class="mb-6 text-center">
-      <button
-        class="px-8 py-4 bg-green-600 text-white text-xl font-bold rounded-lg hover:bg-green-700 transition-all cursor-pointer"
-        @click="startPollSession"
-      >
-        Start Poll Session
-      </button>
-    </div>
-
     <!-- Polling in progress + Timer + Stop button -->
-    <div v-else-if="isPollActive" class="mb-6 text-center flex items-center justify-center gap-4">
+    <div v-if="isPollActive" class="mb-6 text-center flex items-center justify-center gap-4">
       <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
       <span class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse">
         Polling in progress...

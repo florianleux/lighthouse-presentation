@@ -1,6 +1,6 @@
 ---
 theme: default
-title: Lighthouse Pirates
+title: Let's build a lighthouse!
 info: |
   ## Lighthouse Pirates
   Let's optimize Lighthouse scores together!
@@ -22,6 +22,8 @@ Scan the QR code to join the crew
 ---
 
 # The Lighthouse score
+
+Google's open-source tool for auditing web page quality
 
 <div class="grid grid-cols-4 gap-4 pt-8 text-center">
   <div class="p-4">
@@ -69,8 +71,8 @@ Scan the QR code to join the crew
   </div>
 </div>
 
+---
 
---- 
 # Audience question
 
 What's your knowledge level of Lighthouse?
@@ -130,22 +132,29 @@ The 4 starting Lighthouse scores
   <div class="p-4 border rounded">
     <div class="font-bold">Day 1</div>
     <div>Performance</div>
+    <div>32 --> ??</div>
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 2</div>
     <div>Accessibility</div>
+    <div>45 --> ??</div>
+
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 3</div>
     <div>Best Practices</div>
+    <div>58 --> ??</div>
+
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 4</div>
     <div>SEO</div>
+    <div>41 --> ??</div>
+
   </div>
 </div>
 
-
+---
 
 # Day 1: Performance
 
