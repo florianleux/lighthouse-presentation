@@ -242,7 +242,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="17" />
+<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="13" />
 
 ---
 
@@ -354,7 +354,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Names & Labels" label-b="ARIA" :next-slide="26" />
+<VoteButtons :vote-index="1" label-a="Names & Labels" label-b="ARIA" :next-slide="22" />
 
 ---
 
@@ -466,7 +466,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="General" label-b="Trust & Safety" :next-slide="35" />
+<VoteButtons :vote-index="2" label-a="General" label-b="Trust & Safety" :next-slide="31" />
 
 ---
 
@@ -578,7 +578,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Crawlability" label-b="Content" :next-slide="44" />
+<VoteButtons :vote-index="3" label-a="Crawlability" label-b="Content" :next-slide="40" />
 
 ---
 
@@ -619,14 +619,6 @@ layout: center
 ## Lighthouse complete!
 
 <PathDisplay />
-
----
-
-# Best Solution
-
-## Optimal combination
-
-<BestPath />
 
 ---
 
