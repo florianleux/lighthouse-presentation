@@ -10,6 +10,20 @@ import type {
   PollCastMessage,
   PollChoice,
 } from '../../../../shared/types'
+import {
+  isSessionStateMessage,
+  isVoteStartedMessage,
+  isPollStartedMessage,
+} from '../../../../shared/validators'
+
+// Connection timeout in milliseconds
+const CONNECTION_TIMEOUT = 15000
+
+// Helper to convert unknown error to Error
+function toError(err: unknown): Error {
+  if (err instanceof Error) return err
+  return new Error(String(err))
+}
 
 interface AblyState {
   client: Ably.Realtime | null
@@ -40,15 +54,16 @@ export function useAbly() {
     }
 
     try {
-      // Use saved ID or generate a new one
-      odientId = savedOdientId || 'pirate-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7)
+      // Use saved ID or generate a new one (cryptographically secure)
+      odientId = savedOdientId || 'pirate-' + crypto.randomUUID()
 
       const client = new Ably.Realtime({
         key: apiKey,
         clientId: odientId,
       })
 
-      await new Promise<void>((resolve, reject) => {
+      // Connection with timeout
+      const connectionPromise = new Promise<void>((resolve, reject) => {
         client.connection.on('connected', () => {
           console.log('[Ably] Connected as', odientId)
           state.value = { client, isConnected: true }
@@ -58,14 +73,22 @@ export function useAbly() {
 
         client.connection.on('failed', (err) => {
           console.error('[Ably] Connection failed', err)
-          error.value = err as Error
-          reject(err)
+          error.value = toError(err)
+          reject(toError(err))
         })
       })
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Connection timeout after ${CONNECTION_TIMEOUT}ms`))
+        }, CONNECTION_TIMEOUT)
+      })
+
+      await Promise.race([connectionPromise, timeoutPromise])
     } catch (err) {
       console.error('[Ably] Connection error', err)
-      error.value = err as Error
-      throw err
+      error.value = toError(err)
+      throw toError(err)
     }
   }
 
@@ -120,9 +143,12 @@ export function useAbly() {
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
     channel.subscribe('message', (message) => {
-      const data = message.data as SessionStateMessage
-      if (data.type === 'session-state') {
-        callback(data)
+      if (isSessionStateMessage(message.data)) {
+        try {
+          callback(message.data)
+        } catch (err) {
+          console.error('[Ably] Error in session-state callback:', err)
+        }
       }
     })
 
@@ -141,9 +167,12 @@ export function useAbly() {
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
     channel.subscribe('message', (message) => {
-      const data = message.data
-      if (data.type === 'vote-started') {
-        callback(data)
+      if (isVoteStartedMessage(message.data)) {
+        try {
+          callback(message.data)
+        } catch (err) {
+          console.error('[Ably] Error in vote-started callback:', err)
+        }
       }
     })
 
@@ -186,9 +215,12 @@ export function useAbly() {
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
     channel.subscribe('message', (message) => {
-      const data = message.data
-      if (data.type === 'poll-started') {
-        callback(data)
+      if (isPollStartedMessage(message.data)) {
+        try {
+          callback(message.data)
+        } catch (err) {
+          console.error('[Ably] Error in poll-started callback:', err)
+        }
       }
     })
 

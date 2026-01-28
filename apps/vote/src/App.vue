@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { PollChoice } from '../../../shared/types'
@@ -30,6 +30,8 @@ const activeVoteIndex = ref<number | null>(null)
 const selectedChoice = ref<'A' | 'B' | null>(null)
 const hasVoted = ref(false)
 const voteMissed = ref(false)
+const voteError = ref<string | null>(null)
+const isSubmitting = ref(false)
 
 // Poll state
 const activePollId = ref<string | null>(null)
@@ -198,6 +200,8 @@ onMounted(async () => {
       selectedChoice.value = null
       hasVoted.value = false
       voteMissed.value = false
+      voteError.value = null
+      isSubmitting.value = false
       // Start countdown if duration is provided
       if (msg.duration > 0) {
         startCountdown(msg.duration)
@@ -209,6 +213,8 @@ onMounted(async () => {
       console.log('[App] Poll started:', msg.pollId, 'duration:', msg.duration)
       activePollId.value = msg.pollId
       hasPollVoted.value = false
+      voteError.value = null
+      isSubmitting.value = false
       // Start countdown if duration is provided
       if (msg.duration > 0) {
         startCountdown(msg.duration)
@@ -226,6 +232,11 @@ onMounted(async () => {
   } catch (err) {
     status.value = 'error'
   }
+})
+
+// Cleanup timers on unmount to prevent memory leaks
+onBeforeUnmount(() => {
+  clearCountdown()
 })
 
 // Go to avatar step
@@ -270,6 +281,9 @@ async function submitVote() {
     activeKeynoteId: activeKeynoteId.value
   })
 
+  // Clear previous error
+  voteError.value = null
+
   // Try to get keynoteId from localStorage if not available
   let keynoteId = activeKeynoteId.value
   if (!keynoteId) {
@@ -284,9 +298,11 @@ async function submitVote() {
       activeVoteIndex: activeVoteIndex.value,
       keynoteId
     })
+    voteError.value = 'Missing data to submit vote'
     return
   }
 
+  isSubmitting.value = true
   try {
     await sendVote(activeVoteIndex.value, selectedChoice.value, keynoteId)
     hasVoted.value = true
@@ -294,6 +310,9 @@ async function submitVote() {
     console.log('[App] Vote submitted:', selectedChoice.value)
   } catch (err) {
     console.error('Failed to submit vote:', err)
+    voteError.value = 'Failed to submit vote. Tap to retry.'
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -303,6 +322,9 @@ async function submitPoll(choice: PollChoice) {
     choice,
     activePollId: activePollId.value
   })
+
+  // Clear previous error
+  voteError.value = null
 
   if (hasPollVoted.value || !activePollId.value) {
     console.warn('[App] Cannot submit poll - already voted or no active poll')
@@ -318,9 +340,11 @@ async function submitPoll(choice: PollChoice) {
 
   if (!keynoteId) {
     console.warn('[App] Cannot submit poll - no keynoteId')
+    voteError.value = 'Connection lost. Please refresh.'
     return
   }
 
+  isSubmitting.value = true
   try {
     await sendPoll(activePollId.value, choice, keynoteId)
     hasPollVoted.value = true
@@ -328,6 +352,9 @@ async function submitPoll(choice: PollChoice) {
     console.log('[App] Poll submitted:', choice)
   } catch (err) {
     console.error('Failed to submit poll:', err)
+    voteError.value = 'Failed to submit. Please try again.'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
@@ -445,10 +472,12 @@ async function submitPoll(choice: PollChoice) {
           class="countdown"
         >{{ timeRemaining }}s</div>
         <p class="poll-hint">What's your Lighthouse knowledge level?</p>
+        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
         <div class="poll-buttons">
           <button
             class="poll-btn poll-cabin"
             @click="submitPoll('cabin_boy')"
+            :disabled="isSubmitting"
           >
             <span class="poll-emoji">🪣</span>
             <span class="poll-label">Cabin Boy</span>
@@ -456,6 +485,7 @@ async function submitPoll(choice: PollChoice) {
           <button
             class="poll-btn poll-quarter"
             @click="submitPoll('quartermaster')"
+            :disabled="isSubmitting"
           >
             <span class="poll-emoji">⚓</span>
             <span class="poll-label">Quartermaster</span>
@@ -463,6 +493,7 @@ async function submitPoll(choice: PollChoice) {
           <button
             class="poll-btn poll-captain"
             @click="submitPoll('captain')"
+            :disabled="isSubmitting"
           >
             <span class="poll-emoji">🏴‍☠️</span>
             <span class="poll-label">Captain</span>
@@ -495,22 +526,25 @@ async function submitPoll(choice: PollChoice) {
           <button
             :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
             @click="selectedChoice = 'A'"
+            :disabled="isSubmitting"
           >
             A
           </button>
           <button
             :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
             @click="selectedChoice = 'B'"
+            :disabled="isSubmitting"
           >
             B
           </button>
         </div>
+        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
         <button
           class="validate-btn"
-          :disabled="!selectedChoice"
+          :disabled="!selectedChoice || isSubmitting"
           @click="submitVote"
         >
-          Validate
+          {{ isSubmitting ? 'Sending...' : 'Validate' }}
         </button>
       </div>
 
@@ -743,6 +777,15 @@ input::placeholder {
   font-size: 12px;
   color: #ff6b6b;
   text-align: left;
+}
+
+.vote-error {
+  font-size: 14px;
+  color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin: 8px 0;
 }
 
 .join-btn {
