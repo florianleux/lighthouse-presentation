@@ -4,7 +4,6 @@ import { useNav } from '@slidev/client'
 import NavigationBlocker from './components/NavigationBlocker.vue'
 import VoteTower from './components/VoteTower.vue'
 import AdminPanel from './components/AdminPanel.vue'
-import SessionRecoveryModal from './components/SessionRecoveryModal.vue'
 import CrewPills from './components/CrewPills.vue'
 import { sessionStore, voteStore, VOTE_SLIDES, publishSessionState } from './setup/main'
 
@@ -27,7 +26,6 @@ watch(currentSlideNo, (slide) => {
 })
 
 const showAdminPanel = ref(false)
-const showRecoveryModal = ref(false)
 
 // Join session with timed heartbeat
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
@@ -90,11 +88,8 @@ function handleSendHeartbeat() {
 function handleKeydown(e: KeyboardEvent) {
   // Toggle admin panel with K key
   if (e.key === 'k' || e.key === 'K') {
-    // Don't trigger if user is typing in an input or modal is shown
+    // Don't trigger if user is typing in an input
     if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-      return
-    }
-    if (showRecoveryModal.value) {
       return
     }
     showAdminPanel.value = !showAdminPanel.value
@@ -108,37 +103,8 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-function resumeSession(targetSlide: number) {
-  showRecoveryModal.value = false
-  go(targetSlide)
-  publishSessionState(targetSlide, 'intro')
-}
-
-function handleContinueHere() {
-  resumeSession(currentSlideNo.value)
-}
-
-function handleContinueAtLast() {
-  resumeSession(sessionStore.lastSlide)
-}
-
-function handleResetSession() {
-  showRecoveryModal.value = false
-  // Start fresh with new keynoteId
-  sessionStore.startNewSession()
-  // Navigate to slide 1
-  go(1)
-  // Publish the new session state
-  publishSessionState(1, 'intro')
-}
-
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
-
-  // Show recovery modal if keynoteId exists
-  if (sessionStore.keynoteId) {
-    showRecoveryModal.value = true
-  }
 })
 
 onUnmounted(() => {
@@ -158,15 +124,5 @@ onUnmounted(() => {
     @close="showAdminPanel = false"
     @start-join-session="handleStartJoinSession"
     @send-heartbeat="handleSendHeartbeat"
-  />
-  <SessionRecoveryModal
-    :visible="showRecoveryModal"
-    :keynote-id="sessionStore.keynoteId || ''"
-    :created-at="sessionStore.createdAt || 0"
-    :last-slide="sessionStore.lastSlide"
-    :current-slide="currentSlideNo"
-    @continue-here="handleContinueHere"
-    @continue-at-last="handleContinueAtLast"
-    @reset="handleResetSession"
   />
 </template>
