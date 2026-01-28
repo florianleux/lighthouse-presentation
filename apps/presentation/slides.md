@@ -99,9 +99,9 @@ Our pirate test shop
 
 ---
 
-# The starting point
+# Our starting point
 
-The 4 starting Lighthouse scores of our BlackMarket website
+The 4  Lighthouse scores of our BlackMarket website are pretty low
 
 <div class="grid grid-cols-4 gap-8 pt-8 text-center">
   <div>
@@ -124,9 +124,11 @@ The 4 starting Lighthouse scores of our BlackMarket website
 
 ---
 
-# Mission
+# Our mission
 
-## 4 days to build the best lighthouse possible
+4 days to build the best lighthouse possible
+
+One day = one floor = one subscore 
 
 <div class="grid grid-cols-4 gap-4 pt-8 text-center">
   <div class="p-4 border rounded">
@@ -153,6 +155,14 @@ The 4 starting Lighthouse scores of our BlackMarket website
 
   </div>
 </div>
+
+At every step, we will need to decide with minimal information on what part of the subscore we want to focus, following our instinct!
+
+---
+layout: center
+---
+
+# DAY 1
 
 ---
 
@@ -197,7 +207,7 @@ The 4 starting Lighthouse scores of our BlackMarket website
 
 ---
 
-# Day 1: Comparison
+# Day 1: The Choice
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
@@ -232,7 +242,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="16" />
+<VoteButtons :vote-index="0" label-a="Images" label-b="Scripts" :next-slide="17" />
 
 ---
 
@@ -265,6 +275,12 @@ layout: center
 # Day 1: Application
 
 <ApplicationDisplay :vote-index="0" category="Performance" floor="Floor 1" />
+
+---
+layout: center
+---
+
+# DAY 2
 
 ---
 
@@ -301,7 +317,7 @@ layout: center
 
 ---
 
-# Day 2: Comparison
+# Day 2: The Choice
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
@@ -338,7 +354,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="1" label-a="Names & Labels" label-b="ARIA" :next-slide="24" />
+<VoteButtons :vote-index="1" label-a="Names & Labels" label-b="ARIA" :next-slide="26" />
 
 ---
 
@@ -371,6 +387,12 @@ layout: center
 # Day 2: Application
 
 <ApplicationDisplay :vote-index="1" category="Accessibility" floor="Floor 2" />
+
+---
+layout: center
+---
+
+# DAY 3
 
 ---
 
@@ -407,7 +429,7 @@ layout: center
 
 ---
 
-# Day 3: Comparison
+# Day 3: The Choice
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
@@ -444,7 +466,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="2" label-a="General" label-b="Trust & Safety" :next-slide="32" />
+<VoteButtons :vote-index="2" label-a="General" label-b="Trust & Safety" :next-slide="35" />
 
 ---
 
@@ -477,6 +499,12 @@ layout: center
 # Day 3: Application
 
 <ApplicationDisplay :vote-index="2" category="Best Practices" floor="Floor 3" />
+
+---
+layout: center
+---
+
+# DAY 4
 
 ---
 
@@ -513,7 +541,7 @@ layout: center
 
 ---
 
-# Day 4: Comparison
+# Day 4: The Choice
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
@@ -550,7 +578,7 @@ layout: center
 
 <div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
 
-<VoteButtons :vote-index="3" label-a="Crawlability" label-b="Content" :next-slide="40" />
+<VoteButtons :vote-index="3" label-a="Crawlability" label-b="Content" :next-slide="44" />
 
 ---
 
