@@ -5,8 +5,8 @@ import { voteStore, VOTE_SLIDES } from '../setup/main'
 
 const { currentSlideNo } = useNav()
 
-// Slides où on cache la tour : intro (1-10) + slides de vote
-const HIDDEN_SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...VOTE_SLIDES]
+// Slides où on cache la tour : intro (1-8), DAY titles (9, 18, 27, 36), + slides de vote
+const HIDDEN_SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36, ...VOTE_SLIDES]
 
 const isVisible = computed(() => !HIDDEN_SLIDES.includes(currentSlideNo.value))
 

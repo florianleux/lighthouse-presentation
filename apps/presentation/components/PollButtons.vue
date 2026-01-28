@@ -94,8 +94,24 @@ function stopPollSession() {
 
 <template>
   <div class="poll-container">
+    <!-- Start poll button -->
+    <div
+      v-if="!isPollActive && sessionStore.pollPhase !== 'ended'"
+      class="mb-6 text-center"
+    >
+      <button
+        class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all cursor-pointer text-lg"
+        @click="startPollSession"
+      >
+        Start Poll
+      </button>
+    </div>
+
     <!-- Polling in progress + Timer + Stop button -->
-    <div v-if="isPollActive" class="mb-6 text-center flex items-center justify-center gap-4">
+    <div
+      v-else-if="isPollActive"
+      class="mb-6 text-center flex items-center justify-center gap-4"
+    >
       <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
       <span class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse">
         Polling in progress...
@@ -109,7 +125,10 @@ function stopPollSession() {
     </div>
 
     <!-- Poll ended indicator -->
-    <div v-else-if="sessionStore.pollPhase === 'ended'" class="mb-6 text-center">
+    <div
+      v-else-if="sessionStore.pollPhase === 'ended'"
+      class="mb-6 text-center"
+    >
       <span class="px-4 py-2 bg-gray-600 text-white rounded-full text-sm font-semibold">
         Poll ended - {{ totalVotes }} responses
       </span>
