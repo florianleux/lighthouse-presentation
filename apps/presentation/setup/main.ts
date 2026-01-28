@@ -173,11 +173,25 @@ export const sessionStore = reactive({
 
   // Start a new session with a new keynoteId (called from admin panel)
   startNewSession() {
-    // Reset vote path and force new keynote
+    // Clear localStorage first to ensure clean slate
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
+    }
+
+    // Reset vote path
     voteStore.reset()
-    this.keynoteId = null
-    this.initKeynote()
+
+    // Generate new keynote (don't use initKeynote to avoid double-persist)
+    this.keynoteId = generateKeynoteId()
+    this.createdAt = Date.now()
+    this.lastSlide = 1
+
+    // Reset all session state
     this.resetSession()
+
+    // Persist the clean state AFTER all resets
+    persistSession()
+
     console.log('[Session] New session started:', this.keynoteId)
   },
 
