@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { sessionStore, publishSessionState } from '../setup/main'
-import '../styles/modals.css'
+import { useNav } from '@slidev/client'
+import { sessionStore, voteStore, publishSessionState } from '../setup/main'
+
+const { go } = useNav()
 
 const props = defineProps<{
   visible: boolean
@@ -17,16 +19,25 @@ const emit = defineEmits<{
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
 const activeCrewCount = computed(() => sessionStore.activeCrew.length)
+const pollResults = computed(() => sessionStore.pollResults['knowledge-level'] || {
+  cabin_boy: [],
+  quartermaster: [],
+  captain: []
+})
+
+const totalPollVotes = computed(() =>
+  pollResults.value.cabin_boy.length +
+  pollResults.value.quartermaster.length +
+  pollResults.value.captain.length
+)
+
+const isPollDone = computed(() => sessionStore.pollPhase === 'ended')
+
+const voteNames = ['PERF', 'A11Y', 'BEST PRACTICES', 'SEO']
 
 // Join session controls
 const selectedDuration = ref(5)
 const isJoinSessionActive = computed(() => props.joinSessionRemaining > 0)
-
-function initKeynote() {
-  sessionStore.initKeynote()
-  // Publish session state so vote apps receive the keynoteId
-  publishSessionState(1, 'intro')
-}
 
 function startNewSession() {
   if (confirm('Start a new session? This will reset the crew and all votes.')) {
@@ -34,34 +45,59 @@ function startNewSession() {
     // Publish session state so vote apps receive the new keynoteId
     publishSessionState(1, 'intro')
     emit('close')
+    go(1)
   }
 }
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition name="modal-fade">
-      <div v-if="visible" class="modal-overlay" @click.self="$emit('close')">
-        <div class="modal-panel">
+    <Transition name="slide">
+      <div v-if="visible" class="side-panel-overlay" @click.self="$emit('close')">
+        <div class="side-panel">
           <div class="panel-header">
             <h2>Admin Panel</h2>
-            <button class="close-btn" @click="$emit('close')">x</button>
+            <button class="close-btn" @click="$emit('close')">×</button>
           </div>
 
           <div class="panel-content">
-            <!-- Keynote ID Section -->
+            <!-- New Session Section -->
             <div class="section">
-              <label>Keynote ID</label>
-              <div class="value">
-                <code v-if="keynoteId">{{ keynoteId }}</code>
-                <span v-else class="none">Not initialized</span>
+              <button
+                class="panel-btn danger full-width"
+                @click="startNewSession"
+              >
+                New Session (Reset All)
+              </button>
+            </div>
+
+            <!-- Join Session Section -->
+            <div class="section">
+              <label>Join Session</label>
+              <div class="join-controls">
+                <input
+                  v-model.number="selectedDuration"
+                  type="number"
+                  min="1"
+                  max="60"
+                  :disabled="isJoinSessionActive"
+                  class="duration-input"
+                />
+                <span class="duration-unit">min</span>
+                <button
+                  class="panel-btn primary"
+                  :disabled="!keynoteId || isJoinSessionActive"
+                  @click="emit('startJoinSession', selectedDuration)"
+                >
+                  {{ isJoinSessionActive ? `${joinSessionRemaining}s` : 'Start' }}
+                </button>
               </div>
               <button
-                v-if="!keynoteId"
-                class="modal-btn primary full-width"
-                @click="initKeynote"
+                class="panel-btn secondary full-width"
+                :disabled="!keynoteId"
+                @click="emit('sendHeartbeat')"
               >
-                Initialize Keynote
+                Send Heartbeat (sync all)
               </button>
             </div>
 
@@ -80,65 +116,40 @@ function startNewSession() {
               </div>
             </div>
 
-            <!-- Vote Results Section -->
+            <!-- Votes Section -->
             <div class="section">
-              <label>Vote Results</label>
+              <label>Votes</label>
               <div class="vote-results">
+                <!-- Poll row -->
+                <div class="vote-row">
+                  <span class="vote-index">POLL</span>
+                  <span class="vote-counts">{{ totalPollVotes }} votes</span>
+                  <span
+                    class="vote-status"
+                    :class="isPollDone ? 'done' : 'pending'"
+                  >
+                    {{ isPollDone ? 'DONE' : 'PENDING' }}
+                  </span>
+                </div>
+                <!-- Vote rows -->
                 <div
                   v-for="(results, index) in sessionStore.voteResults"
                   :key="index"
                   class="vote-row"
                 >
-                  <span class="vote-index">Vote {{ Number(index) + 1 }}</span>
+                  <span class="vote-index">{{ voteNames[index] }}</span>
                   <span class="vote-counts">
                     A: {{ results.A.length }} | B: {{ results.B.length }}
+                    <span v-if="voteStore.path[index]" class="vote-winner">→ {{ voteStore.path[index] }}</span>
                   </span>
-                  <span v-if="results.winner" class="vote-winner">
-                    Winner: {{ results.winner }}
+                  <span
+                    class="vote-status"
+                    :class="voteStore.path[index] !== null ? 'done' : 'pending'"
+                  >
+                    {{ voteStore.path[index] !== null ? 'DONE' : 'PENDING' }}
                   </span>
                 </div>
               </div>
-            </div>
-
-            <!-- Join Session Section -->
-            <div class="section">
-              <label>Join Session</label>
-              <div class="join-controls">
-                <input
-                  v-model.number="selectedDuration"
-                  type="number"
-                  min="1"
-                  max="60"
-                  :disabled="isJoinSessionActive"
-                  class="duration-input"
-                />
-                <span class="duration-unit">min</span>
-                <button
-                  class="modal-btn primary"
-                  :disabled="!keynoteId || isJoinSessionActive"
-                  @click="emit('startJoinSession', selectedDuration)"
-                >
-                  {{ isJoinSessionActive ? `${joinSessionRemaining}s` : 'Start' }}
-                </button>
-              </div>
-              <button
-                class="modal-btn secondary full-width"
-                :disabled="!keynoteId"
-                @click="emit('sendHeartbeat')"
-              >
-                Send Heartbeat (sync all)
-              </button>
-            </div>
-
-            <!-- Actions Section -->
-            <div class="section actions">
-              <button
-                class="modal-btn danger full-width"
-                :disabled="!keynoteId"
-                @click="startNewSession"
-              >
-                New Session (Reset All)
-              </button>
             </div>
           </div>
 
@@ -152,12 +163,32 @@ function startNewSession() {
 </template>
 
 <style scoped>
+.side-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 500px;
+  background: #1e293b;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .panel-header h2 {
@@ -170,9 +201,10 @@ function startNewSession() {
   background: none;
   border: none;
   color: #94a3b8;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   padding: 4px 8px;
+  line-height: 1;
 }
 
 .close-btn:hover {
@@ -182,7 +214,7 @@ function startNewSession() {
 .panel-content {
   padding: 20px;
   overflow-y: auto;
-  max-height: calc(80vh - 120px);
+  flex: 1;
 }
 
 .section {
@@ -202,25 +234,6 @@ function startNewSession() {
   margin-bottom: 8px;
 }
 
-.value {
-  margin-bottom: 12px;
-}
-
-.value code {
-  background: rgba(255, 215, 0, 0.1);
-  color: #ffd700;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 14px;
-  display: block;
-  word-break: break-all;
-}
-
-.value .none {
-  color: #64748b;
-  font-style: italic;
-}
-
 .stats {
   display: flex;
   gap: 24px;
@@ -233,7 +246,7 @@ function startNewSession() {
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: bold;
   color: white;
 }
@@ -250,19 +263,37 @@ function startNewSession() {
 }
 
 .vote-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
   align-items: center;
   gap: 12px;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
+}
+
+.vote-status {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.vote-status.done {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.vote-status.pending {
+  background: rgba(148, 163, 184, 0.2);
+  color: #94a3b8;
 }
 
 .vote-index {
   font-weight: 500;
-  color: #94a3b8;
-  min-width: 60px;
+  color: white;
 }
 
 .vote-counts {
@@ -272,13 +303,14 @@ function startNewSession() {
 .vote-winner {
   color: #22c55e;
   font-weight: 500;
-  margin-left: auto;
+  margin-left: 8px;
 }
 
 .join-controls {
   display: flex;
   gap: 8px;
   margin-bottom: 12px;
+  align-items: center;
 }
 
 .duration-input {
@@ -302,13 +334,46 @@ function startNewSession() {
   font-size: 14px;
 }
 
-.modal-btn.secondary {
+.panel-btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.panel-btn.primary {
+  background: #ffd700;
+  color: #1e293b;
+}
+
+.panel-btn.primary:hover:not(:disabled) {
+  background: #ffc700;
+}
+
+.panel-btn.secondary {
   background: rgba(255, 255, 255, 0.1);
   color: white;
 }
 
-.modal-btn.secondary:hover:not(:disabled) {
+.panel-btn.secondary:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.panel-btn.danger {
+  background: #dc2626;
+  color: white;
+}
+
+.panel-btn.danger:hover:not(:disabled) {
+  background: #ef4444;
+}
+
+.panel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .actions {
@@ -326,6 +391,7 @@ function startNewSession() {
   font-size: 12px;
   color: #64748b;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .panel-footer kbd {
@@ -333,5 +399,26 @@ function startNewSession() {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: inherit;
+}
+
+/* Slide transition */
+.slide-enter-active,
+.slide-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.slide-enter-active .side-panel,
+.slide-leave-active .side-panel {
+  transition: transform 0.2s ease;
+}
+
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-from .side-panel,
+.slide-leave-to .side-panel {
+  transform: translateX(100%);
 }
 </style>
