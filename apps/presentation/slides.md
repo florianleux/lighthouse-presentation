@@ -99,9 +99,9 @@ Our pirate test shop
 
 ---
 
-# Baseline Scores
+# The starting point
 
-The 4 starting Lighthouse scores
+The 4 starting Lighthouse scores of our BlackMarket website
 
 <div class="grid grid-cols-4 gap-8 pt-8 text-center">
   <div>
