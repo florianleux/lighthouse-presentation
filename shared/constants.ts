@@ -27,7 +27,7 @@ export const VOTE_PHASES = {
 // Vote configuration
 export const VOTE_CONFIG = {
   DURATION_SECONDS: 20,  // Duration of a vote in seconds
-  SLIDES: [16, 25, 34, 43] as const,  // Vote slide numbers (Day 1-4 vote slides)
+  SLIDES: [12, 21, 30, 39] as const,  // Vote slide numbers (Day 1-4 vote slides)
 } as const
 
 // Poll configuration
