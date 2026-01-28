@@ -9,6 +9,22 @@ import type {
   PollCastMessage,
   HeartbeatResponseMessage,
 } from '../../../shared/types'
+import {
+  isAvatarCreatedMessage,
+  isVoteCastMessage,
+  isPollCastMessage,
+  isHeartbeatResponseMessage,
+  validateMessage,
+} from '../../../shared/validators'
+
+// Connection timeout in milliseconds
+const CONNECTION_TIMEOUT = 15000
+
+// Helper to convert unknown error to Error
+function toError(err: unknown): Error {
+  if (err instanceof Error) return err
+  return new Error(String(err))
+}
 
 type MessageCallback<T> = (message: T) => void
 
@@ -49,11 +65,11 @@ export function useAbly() {
     try {
       const client = new Ably.Realtime({
         key: apiKey,
-        clientId: 'presentation-' + Date.now(),
+        clientId: 'presentation-' + crypto.randomUUID(),
       })
 
-      // Wait for connection
-      await new Promise<void>((resolve, reject) => {
+      // Connection with timeout
+      const connectionPromise = new Promise<void>((resolve, reject) => {
         client.connection.on('connected', () => {
           console.log('[Ably] Connected successfully')
           state.value = { ...state.value, client, isConnected: true }
@@ -63,17 +79,25 @@ export function useAbly() {
 
         client.connection.on('failed', (err) => {
           console.error('[Ably] Connection failed', err)
-          error.value = err as Error
-          reject(err)
+          error.value = toError(err)
+          reject(toError(err))
         })
       })
+
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Connection timeout after ${CONNECTION_TIMEOUT}ms`))
+        }, CONNECTION_TIMEOUT)
+      })
+
+      await Promise.race([connectionPromise, timeoutPromise])
 
       // Setup listeners on incoming channels
       setupIncomingChannels()
     } catch (err) {
       console.error('[Ably] Connection error', err)
-      error.value = err as Error
-      throw err
+      error.value = toError(err)
+      throw toError(err)
     }
   }
 
@@ -87,22 +111,44 @@ export function useAbly() {
     // Channel AVATARS
     const avatarsChannel = client.channels.get(ABLY_CHANNELS.AVATARS)
     avatarsChannel.subscribe((message) => {
-      const data = message.data as AvatarCreatedMessage
-      console.log('[Ably] Avatar created:', data)
-      callbacks['avatar-created'].forEach((cb) => cb(data))
+      const data = validateMessage(message.data, isAvatarCreatedMessage, 'avatar-created')
+      if (data) {
+        console.log('[Ably] Avatar created:', data)
+        callbacks['avatar-created'].forEach((cb) => {
+          try {
+            cb(data)
+          } catch (err) {
+            console.error('[Ably] Error in avatar-created callback:', err)
+          }
+        })
+      }
     })
     state.value.channels.set(ABLY_CHANNELS.AVATARS, avatarsChannel)
 
     // Channel VOTES (handles both vote-cast and poll-cast)
     const votesChannel = client.channels.get(ABLY_CHANNELS.VOTES)
     votesChannel.subscribe((message) => {
-      const data = message.data as VoteCastMessage | PollCastMessage
-      if (data.type === 'vote-cast') {
-        console.log('[Ably] Vote cast:', data)
-        callbacks['vote-cast'].forEach((cb) => cb(data))
-      } else if (data.type === 'poll-cast') {
-        console.log('[Ably] Poll cast:', data)
-        callbacks['poll-cast'].forEach((cb) => cb(data))
+      const rawData = message.data
+      if (isVoteCastMessage(rawData)) {
+        console.log('[Ably] Vote cast:', rawData)
+        callbacks['vote-cast'].forEach((cb) => {
+          try {
+            cb(rawData)
+          } catch (err) {
+            console.error('[Ably] Error in vote-cast callback:', err)
+          }
+        })
+      } else if (isPollCastMessage(rawData)) {
+        console.log('[Ably] Poll cast:', rawData)
+        callbacks['poll-cast'].forEach((cb) => {
+          try {
+            cb(rawData)
+          } catch (err) {
+            console.error('[Ably] Error in poll-cast callback:', err)
+          }
+        })
+      } else {
+        console.warn('[Ably] Invalid vote/poll message:', rawData)
       }
     })
     state.value.channels.set(ABLY_CHANNELS.VOTES, votesChannel)
@@ -110,9 +156,15 @@ export function useAbly() {
     // Channel HEARTBEAT
     const heartbeatChannel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
     heartbeatChannel.subscribe((message) => {
-      const data = message.data as HeartbeatResponseMessage
-      if (data.type === 'heartbeat-response') {
-        callbacks['heartbeat-response'].forEach((cb) => cb(data))
+      const data = validateMessage(message.data, isHeartbeatResponseMessage, 'heartbeat-response')
+      if (data) {
+        callbacks['heartbeat-response'].forEach((cb) => {
+          try {
+            cb(data)
+          } catch (err) {
+            console.error('[Ably] Error in heartbeat-response callback:', err)
+          }
+        })
       }
     })
     state.value.channels.set(ABLY_CHANNELS.HEARTBEAT, heartbeatChannel)

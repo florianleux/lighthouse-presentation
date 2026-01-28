@@ -35,7 +35,7 @@ function saveSessionData(data: SessionData) {
 }
 
 function generateKeynoteId(): string {
-  return 'keynote-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 6)
+  return 'keynote-' + crypto.randomUUID()
 }
 
 // Load initial session data
@@ -206,7 +206,7 @@ function persistSession() {
 }
 
 function generateSessionId(): string {
-  return 'session-' + Math.random().toString(36).substring(2, 9)
+  return 'session-' + crypto.randomUUID()
 }
 
 // Ably instance (initialized at setup)
