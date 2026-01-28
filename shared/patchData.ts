@@ -362,8 +362,8 @@ const sortedProducts = computed(() =>
       title: 'ARIA',
       patches: [
         {
-          title: 'Use valid ARIA roles',
-          summary: 'Replace made-up roles with standard WAI-ARIA roles',
+          title: 'Use valid ARIA roles or native HTML',
+          summary: 'Replace made-up roles with native elements or valid ARIA',
           before: {
             language: 'html',
             code: `<!-- FilterBar.vue - invalid role -->
@@ -380,34 +380,35 @@ const sortedProducts = computed(() =>
           },
           after: {
             language: 'html',
-            code: `<!-- FilterBar.vue - valid menu pattern -->
-<div class="relative">
-  <button
-    aria-haspopup="menu"
-    :aria-expanded="isOpen"
-  >Categories</button>
-  <ul v-if="isOpen" role="menu">
-    <li role="menuitem">Hooks</li>
-    <li role="menuitem">Parrots</li>
+            code: `<!-- Option 1: Native <details> (simplest) -->
+<details class="relative">
+  <summary>Categories</summary>
+  <ul>
+    <li><a href="/hooks">Hooks</a></li>
+    <li><a href="/parrots">Parrots</a></li>
   </ul>
-</div>
-<!-- Use standard WAI-ARIA menu pattern -->`
+</details>
+
+<!-- Option 2: ARIA menu (for complex menus) -->
+<button aria-haspopup="menu" :aria-expanded="isOpen">
+  Categories
+</button>`
           },
           whyMatters: [
-            '"dropdown" is a common mistake - not a real ARIA role',
-            'Use "menu", "listbox", or "combobox" instead',
-            'Invalid roles are completely ignored by assistive tech'
+            '"dropdown" is not a valid ARIA role',
+            'First rule of ARIA: prefer native HTML (<details>)',
+            'Use ARIA menu pattern only for complex navigation'
           ],
           metrics: [
             { metric: 'aria-roles', impact: 'high', description: 'All ARIA roles are valid WAI-ARIA roles' }
           ]
         },
         {
-          title: 'Add required ARIA attributes',
-          summary: 'Provide missing state attributes for ARIA roles',
+          title: 'Use native checkbox for toggle',
+          summary: 'Prefer native HTML over ARIA when possible',
           before: {
             language: 'html',
-            code: `<!-- TheHeader.vue - missing aria-checked -->
+            code: `<!-- TheHeader.vue - ARIA switch without state -->
 <div
   role="switch"
   class="theme-toggle"
@@ -417,35 +418,36 @@ const sortedProducts = computed(() =>
   <span v-else>☀️</span>
   Mode
 </div>
-<!-- role="switch" requires aria-checked -->`
+<!-- Violates first rule of ARIA -->`
           },
           after: {
             language: 'html',
-            code: `<!-- TheHeader.vue - complete switch -->
-<button
-  role="switch"
-  :aria-checked="isDarkMode"
-  class="theme-toggle"
-  @click="isDarkMode = !isDarkMode"
->
-  <span v-if="isDarkMode">🌙</span>
-  <span v-else>☀️</span>
-  Mode
-</button>
-<!-- Screen readers announce: "Mode, switch, off" -->`
+            code: `<!-- TheHeader.vue - native checkbox -->
+<label class="theme-toggle">
+  <input
+    type="checkbox"
+    v-model="isDarkMode"
+    class="sr-only"
+  />
+  <span class="toggle-track" aria-hidden="true">
+    {{ isDarkMode ? '🌙' : '☀️' }}
+  </span>
+  <span>Mode</span>
+</label>
+<!-- Native checkbox = built-in accessibility -->`
           },
           whyMatters: [
-            'role="switch" requires aria-checked to convey state',
-            'Without it, users cannot know if toggle is on or off',
-            'Check WAI-ARIA spec for required attributes per role'
+            'First rule of ARIA: use native HTML when possible',
+            'Checkbox has built-in keyboard & screen reader support',
+            'Style with CSS, hide input with sr-only class'
           ],
           metrics: [
-            { metric: 'aria-required-attr', impact: 'high', description: 'ARIA roles have all required attributes' }
+            { metric: 'aria-required-attr', impact: 'high', description: 'Using native elements avoids ARIA errors' }
           ]
         },
         {
-          title: 'Fix invalid ARIA attribute values',
-          summary: 'Use correct boolean and enumerated values',
+          title: 'Use native disclosure or fix ARIA values',
+          summary: 'Prefer <details> or use valid ARIA boolean values',
           before: {
             language: 'html',
             code: `<!-- ProductCard.vue - invalid value -->
@@ -455,23 +457,26 @@ const sortedProducts = computed(() =>
 >
   Show details
 </button>
+<div v-if="showDetails">...</div>
 <!-- "yes" is invalid, must be "true" or "false" -->`
           },
           after: {
             language: 'html',
-            code: `<!-- ProductCard.vue - valid value -->
-<button
-  :aria-expanded="showDetails ? 'true' : 'false'"
-  @click="showDetails = !showDetails"
->
+            code: `<!-- Option 1: Native <details> (preferred) -->
+<details>
+  <summary>Show details</summary>
+  <div>Product details content...</div>
+</details>
+
+<!-- Option 2: Fix ARIA value if <details> won't work -->
+<button :aria-expanded="String(showDetails)">
   {{ showDetails ? 'Hide' : 'Show' }} details
-</button>
-<!-- Vue tip: use ternary with string values -->`
+</button>`
           },
           whyMatters: [
-            'ARIA boolean attributes only accept "true" or "false"',
-            '"yes", "no", "1", "0" are all invalid and ignored',
-            'With Vue, use :aria-expanded with ternary operator'
+            'First rule of ARIA: <details> handles expand/collapse natively',
+            'If ARIA needed: only "true" or "false" are valid',
+            '"yes", "no", "1", "0" are all invalid and ignored'
           ],
           metrics: [
             { metric: 'aria-valid-attr-value', impact: 'high', description: 'ARIA attributes have valid values' }

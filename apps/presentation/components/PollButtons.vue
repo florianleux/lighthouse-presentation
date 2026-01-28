@@ -136,17 +136,17 @@ function stopPollSession() {
 
     <!-- Real-time poll results (always visible) -->
     <div class="grid grid-cols-3 gap-6 pt-4">
-      <div class="p-6 border-2 border-blue-500 rounded-lg text-center">
+      <div class="p-6 rounded-lg text-center">
         <div class="text-5xl mb-3">🪣</div>
         <div class="text-lg font-semibold mb-2">Cabin Boy</div>
         <div class="text-3xl font-bold text-blue-500">{{ results.cabin_boy.length }}</div>
       </div>
-      <div class="p-6 border-2 border-amber-500 rounded-lg text-center">
+      <div class="p-6 rounded-lg text-center">
         <div class="text-5xl mb-3">⚓</div>
         <div class="text-lg font-semibold mb-2">Quartermaster</div>
         <div class="text-3xl font-bold text-amber-500">{{ results.quartermaster.length }}</div>
       </div>
-      <div class="p-6 border-2 border-purple-500 rounded-lg text-center">
+      <div class="p-6 border-2 rounded-lg text-center">
         <div class="text-5xl mb-3">🏴‍☠️</div>
         <div class="text-lg font-semibold mb-2">Captain</div>
         <div class="text-3xl font-bold text-purple-500">{{ results.captain.length }}</div>
