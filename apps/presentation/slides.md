@@ -2,9 +2,9 @@
 theme: default
 title: Let's build a lighthouse!
 info: |
-  ## Lighthouse Pirates
-  Let's optimize Lighthouse scores together!
-  4 votes = 4 Lighthouse categories
+  ## Let's build a lighthouse!
+  An interactive presentation where the audience votes to optimize Lighthouse scores.
+  Together, we'll transform a struggling website into a high-performance beacon.
 drawings:
   persist: false
 transition: slide-left
@@ -18,6 +18,14 @@ Scan the QR code to join the crew
 <div class="flex justify-center pt-8">
   <img src="/qr-code.png" alt="Scan to join" class="w-64 h-64" />
 </div>
+
+---
+
+# Audience question
+
+What's your knowledge level of Lighthouse?
+
+<PollButtons pollId="knowledge-level" />
 
 ---
 
@@ -73,14 +81,6 @@ Google's open-source tool for auditing web page quality
 
 ---
 
-# Audience question
-
-What's your knowledge level of Lighthouse?
-
-<PollButtons pollId="knowledge-level" />
-
----
-
 # Our example
 
 Our pirate test shop
@@ -105,19 +105,19 @@ The 4  Lighthouse scores of our BlackMarket website are pretty low
 
 <div class="grid grid-cols-4 gap-8 pt-8 text-center">
   <div>
-    <div class="text-5xl font-bold text-red-500">32</div>
+    <div class="text-5xl font-bold text-red-500">38<span class="text-lg text-white opacity-50">/100</span></div>
     <div class="mt-2">Performance</div>
   </div>
   <div>
-    <div class="text-5xl font-bold text-red-500">45</div>
+    <div class="text-5xl font-bold text-red-500">47<span class="text-lg text-white opacity-50">/100</span></div>
     <div class="mt-2">Accessibility</div>
   </div>
   <div>
-    <div class="text-5xl font-bold text-orange-500">58</div>
+    <div class="text-5xl font-bold text-red-500">35<span class="text-lg text-white opacity-50">/100</span></div>
     <div class="mt-2">Best Practices</div>
   </div>
   <div>
-    <div class="text-5xl font-bold text-red-500">41</div>
+    <div class="text-5xl font-bold text-red-500">25<span class="text-lg text-white opacity-50">/100</span></div>
     <div class="mt-2">SEO</div>
   </div>
 </div>
@@ -134,24 +134,24 @@ One day = one floor = one subscore
   <div class="p-4 border rounded">
     <div class="font-bold">Day 1</div>
     <div>Performance</div>
-    <div>32 --> ??</div>
+    <div>38 --> ??</div>
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 2</div>
     <div>Accessibility</div>
-    <div>45 --> ??</div>
+    <div>47 --> ??</div>
 
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 3</div>
     <div>Best Practices</div>
-    <div>58 --> ??</div>
+    <div>35 --> ??</div>
 
   </div>
   <div class="p-4 border rounded">
     <div class="font-bold">Day 4</div>
     <div>SEO</div>
-    <div>41 --> ??</div>
+    <div>25 --> ??</div>
 
   </div>
 </div>
@@ -168,37 +168,42 @@ layout: center
 
 # Day 1: Performance
 
+<div class="absolute top-4  right-8 text-md text-center">
+  Initial Score <div class="m-auto text-red-500 font-bold text-5xl">38</div>
+</div>
+
 ## How fast does your page load and become interactive?
 
 <div class="text-sm opacity-70 mb-4">
   Performance is measured by <strong>6 Core Web Vitals</strong>, each with different weights.
 </div>
 
-<div class="grid grid-cols-3 gap-3 text-center text-sm">
-  <div class="p-2 border rounded">
-    <div class="font-bold text-green-400">TBT</div>
-    <div class="text-xs opacity-70">30%</div>
+<div class="flex flex-wrap justify-center gap-3 text-center">
+  <div class="p-3 border rounded w-[30%]">
+    <div class="text-3xl font-bold text-green-400">TBT</div>
+    <div class="text-xs opacity-70">Total Blocking Time</div>
+    <div class="text-sm font-semibold mt-1">30%</div>
   </div>
-  <div class="p-2 border rounded">
-    <div class="font-bold text-green-400">LCP</div>
-    <div class="text-xs opacity-70">25%</div>
+  <div class="p-3 border rounded w-[30%]">
+    <div class="text-3xl font-bold text-green-400">LCP</div>
+    <div class="text-xs opacity-70">Largest Contentful Paint</div>
+    <div class="text-sm font-semibold mt-1">25%</div>
   </div>
-  <div class="p-2 border rounded">
-    <div class="font-bold text-blue-400">CLS</div>
-    <div class="text-xs opacity-70">25%</div>
+  <div class="p-3 border rounded w-[30%]">
+    <div class="text-3xl font-bold text-blue-400">CLS</div>
+    <div class="text-xs opacity-70">Cumulative Layout Shift</div>
+    <div class="text-sm font-semibold mt-1">25%</div>
   </div>
-  <div class="p-2 border rounded">
-    <div class="font-bold text-blue-400">FCP</div>
-    <div class="text-xs opacity-70">10%</div>
+  <div class="p-3 border rounded w-[30%]">
+    <div class="text-3xl font-bold text-blue-400">FCP</div>
+    <div class="text-xs opacity-70">First Contentful Paint</div>
+    <div class="text-sm font-semibold mt-1">10%</div>
   </div>
-  <div class="p-2 border rounded">
-    <div class="font-bold text-gray-400">SI</div>
-    <div class="text-xs opacity-70">10%</div>
+  <div class="p-3 border rounded w-[30%]">
+    <div class="text-3xl font-bold text-gray-400">SI</div>
+    <div class="text-xs opacity-70">Speed Index</div>
+    <div class="text-sm font-semibold mt-1">10%</div>
   </div>
-</div>
-
-<div class="pt-4">
-  Current score: <span class="text-red-500 font-bold text-2xl">32</span>
 </div>
 
 ---
@@ -212,13 +217,6 @@ layout: center
     <div class="text-sm opacity-70 mb-3">Time until the largest visible element is rendered</div>
     <div class="text-xs mb-2"><strong>Weight:</strong> 25%</div>
     <div class="text-xs mb-2"><strong>Good:</strong> &lt; 2.5s</div>
-    <div class="text-xs mb-2"><strong>Common culprits:</strong></div>
-    <ul class="text-xs opacity-70">
-      <li>Unoptimized hero images</li>
-      <li>Slow server response</li>
-      <li>Render-blocking resources</li>
-      <li>Client-side rendering delays</li>
-    </ul>
   </div>
   <div class="p-4 border rounded">
     <div class="text-3xl font-bold text-blue-400 mb-2">CLS</div>
@@ -226,15 +224,22 @@ layout: center
     <div class="text-sm opacity-70 mb-3">Measures unexpected layout shifts during page load</div>
     <div class="text-xs mb-2"><strong>Weight:</strong> 25%</div>
     <div class="text-xs mb-2"><strong>Good:</strong> &lt; 0.1</div>
-    <div class="text-xs mb-2"><strong>Common culprits:</strong></div>
-    <ul class="text-xs opacity-70">
-      <li>Images without dimensions</li>
-      <li>Ads/embeds without reserved space</li>
-      <li>Dynamically injected content</li>
-      <li>Web fonts causing FOUT/FOIT</li>
-    </ul>
   </div>
 </div>
+
+<!--
+**LCP Common culprits:**
+- Unoptimized hero images
+- Slow server response
+- Render-blocking resources
+- Client-side rendering delays
+
+**CLS Common culprits:**
+- Images without dimensions
+- Ads/embeds without reserved space
+- Dynamically injected content
+- Web fonts causing FOUT/FOIT
+-->
 
 ---
 
@@ -247,13 +252,6 @@ layout: center
     <div class="text-sm opacity-70 mb-3">Time until the first text or image is painted</div>
     <div class="text-xs mb-2"><strong>Weight:</strong> 10%</div>
     <div class="text-xs mb-2"><strong>Good:</strong> &lt; 1.8s</div>
-    <div class="text-xs mb-2"><strong>Common culprits:</strong></div>
-    <ul class="text-xs opacity-70">
-      <li>Render-blocking CSS/JS</li>
-      <li>Large DOM size</li>
-      <li>Slow server response (TTFB)</li>
-      <li>Unoptimized web fonts</li>
-    </ul>
   </div>
   <div class="p-4 border rounded">
     <div class="text-3xl font-bold text-green-400 mb-2">TBT</div>
@@ -261,15 +259,22 @@ layout: center
     <div class="text-sm opacity-70 mb-3">Sum of all long tasks (>50ms) blocking the main thread</div>
     <div class="text-xs mb-2"><strong>Weight:</strong> 30%</div>
     <div class="text-xs mb-2"><strong>Good:</strong> &lt; 200ms</div>
-    <div class="text-xs mb-2"><strong>Common culprits:</strong></div>
-    <ul class="text-xs opacity-70">
-      <li>Long JavaScript tasks (&gt;50ms)</li>
-      <li>Heavy third-party scripts</li>
-      <li>Large bundle sizes</li>
-      <li>Inefficient event handlers</li>
-    </ul>
   </div>
 </div>
+
+<!--
+**FCP Common culprits:**
+- Render-blocking CSS/JS
+- Large DOM size
+- Slow server response (TTFB)
+- Unoptimized web fonts
+
+**TBT Common culprits:**
+- Long JavaScript tasks (>50ms)
+- Heavy third-party scripts
+- Large bundle sizes
+- Inefficient event handlers
+-->
 
 ---
 
@@ -277,23 +282,23 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option A</div>
-    <div class="text-lg mb-3">Images</div>
+    <span class="text-2xlmb-2 font-light">Option A: </span>
+    <span class="text-lg mb-3 font-bold">Images</span>
     <div class="text-sm opacity-70 mb-4 italic">Optimize visual content delivery and layout stability</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li><code>LCP</code> - Largest Contentful Paint (25%)</li>
-      <li><code>CLS</code> - Cumulative Layout Shift (25%)</li>
+      <li><code>LCP</code> - Largest Contentful Paint (25% weight)</li>
+      <li><code>CLS</code> - Cumulative Layout Shift (25% weight)</li>
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option B</div>
-    <div class="text-lg mb-3">Scripts</div>
+    <span class="text-2xlmb-2 font-light">Option B: </span>
+    <span class="text-lg mb-3 font-bold">Scripts</span>
     <div class="text-sm opacity-70 mb-4 italic">Reduce JavaScript blocking and improve interactivity</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
-      <li><code>FCP</code> - First Contentful Paint (10%)</li>
-      <li><code>TBT</code> - Total Blocking Time (30%)</li>
+      <li><code>FCP</code> - First Contentful Paint (10% weight)</li>
+      <li><code>TBT</code> - Total Blocking Time (30% weight)</li>
     </ul>
   </div>
 </div>
@@ -352,6 +357,10 @@ layout: center
 
 # Day 2: Accessibility
 
+<div class="absolute top-4  right-8 text-md text-center">
+  Initial Score <div class="m-auto text-red-500 font-bold text-5xl">47</div>
+</div>
+
 ## Can everyone use your site, including people with disabilities?
 
 <div class="text-sm opacity-70 mb-4">
@@ -375,10 +384,6 @@ layout: center
 
 <div class="text-sm opacity-70 mt-4">
   Critical audits include: button-name, image-alt, label, aria-roles, aria-required-attr...
-</div>
-
-<div class="pt-4">
-  Current score: <span class="text-red-500 font-bold text-2xl">45</span>
 </div>
 
 ---
@@ -469,8 +474,8 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option A</div>
-    <div class="text-lg mb-3">Names & Labels</div>
+    <span class="text-2xlmb-2 font-light">Option A: </span>
+    <span class="text-lg mb-3 font-bold">Names & Labels</span>
     <div class="text-sm opacity-70 mb-4 italic">Ensure interactive elements are identifiable by assistive technologies</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -480,8 +485,8 @@ layout: center
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option B</div>
-    <div class="text-lg mb-3">ARIA</div>
+    <span class="text-2xlmb-2 font-light">Option B: </span>
+    <span class="text-lg mb-3 font-bold">ARIA</span>
     <div class="text-sm opacity-70 mb-4 italic">Implement correct ARIA attributes for screen reader compatibility</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -546,6 +551,10 @@ layout: center
 
 # Day 3: Best Practices
 
+<div class="absolute top-4  right-8 text-md text-center">
+  Initial Score <div class="m-auto text-red-500 font-bold text-5xl">35</div>
+</div>
+
 ## Does your site follow modern web standards and avoid deprecated patterns?
 
 <div class="text-sm opacity-70 mb-4">
@@ -569,10 +578,6 @@ layout: center
 
 <div class="text-sm opacity-70 mt-4">
   Includes: deprecations, errors-in-console, inspector-issues, geolocation-on-start, notification-on-start...
-</div>
-
-<div class="pt-4">
-  Current score: <span class="text-orange-500 font-bold text-2xl">58</span>
 </div>
 
 ---
@@ -667,8 +672,8 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option A</div>
-    <div class="text-lg mb-3">General</div>
+    <span class="text-2xlmb-2 font-light">Option A: </span>
+    <span class="text-lg mb-3 font-bold">General</span>
     <div class="text-sm opacity-70 mb-4 italic">Fix deprecated APIs and eliminate console errors</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -678,8 +683,8 @@ layout: center
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option B</div>
-    <div class="text-lg mb-3">Trust & Safety</div>
+    <span class="text-2xlmb-2 font-light">Option B: </span>
+    <span class="text-lg mb-3 font-bold">Trust & Safety</span>
     <div class="text-sm opacity-70 mb-4 italic">Respect user permissions and avoid intrusive behaviors</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -744,6 +749,10 @@ layout: center
 
 # Day 4: SEO
 
+<div class="absolute top-4  right-8 text-md text-center">
+  Initial Score <div class="m-auto text-red-500 font-bold text-5xl">25</div>
+</div>
+
 ## Can search engines find, crawl, and understand your content?
 
 <div class="text-sm opacity-70 mb-4">
@@ -767,10 +776,6 @@ layout: center
 
 <div class="text-sm opacity-70 mt-4">
   Includes: is-crawlable, document-title, meta-description, robots-txt, link-text, crawlable-anchors...
-</div>
-
-<div class="pt-4">
-  Current score: <span class="text-red-500 font-bold text-2xl">41</span>
 </div>
 
 ---
@@ -859,8 +864,8 @@ layout: center
 
 <div class="grid grid-cols-2 gap-8">
   <div class="p-6 border-2 border-blue-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option A</div>
-    <div class="text-lg mb-3">Crawlability</div>
+    <span class="text-2xlmb-2 font-light">Option A: </span>
+    <span class="text-lg mb-3 font-bold">Crawlability</span>
     <div class="text-sm opacity-70 mb-4 italic">Allow search engines to discover and index your pages</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -870,8 +875,8 @@ layout: center
     </ul>
   </div>
   <div class="p-6 border-2 border-amber-500 rounded">
-    <div class="text-2xl font-bold mb-2">Option B</div>
-    <div class="text-lg mb-3">Content</div>
+    <span class="text-2xlmb-2 font-light">Option B: </span>
+    <span class="text-lg mb-3 font-bold">Content</span>
     <div class="text-sm opacity-70 mb-4 italic">Provide meaningful metadata for search result display</div>
     <div class="text-sm mb-1">Target audits:</div>
     <ul class="text-sm">
@@ -960,5 +965,5 @@ layout: center
 </div>
 
 <div class="pt-8 opacity-50">
-  Lighthouse Pirates - An interactive presentation
+  Let's build a lighthouse! - An interactive presentation
 </div>
