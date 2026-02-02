@@ -46,23 +46,72 @@ const winnerLabel = computed(() =>
 
 // Timer
 const VOTE_DURATION = 20 // seconds
+const GRACE_PERIOD = 3 // seconds - extra time to accept late votes due to network lag
+const TIME_SYNC_INTERVAL = 5 // seconds - how often to publish time sync
 const timeRemaining = ref(0)
+const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null
+let graceTimeout: ReturnType<typeof setTimeout> | null = null
+let timeSyncInterval: ReturnType<typeof setInterval> | null = null
 
 function startTimer() {
+  clearTimer() // Clear any existing timer first
   timeRemaining.value = VOTE_DURATION
+  isInGracePeriod.value = false
   timerInterval = setInterval(() => {
     timeRemaining.value--
     if (timeRemaining.value <= 0) {
-      stopVoteSession()
+      clearInterval(timerInterval!)
+      timerInterval = null
+      // Stop time sync during grace period
+      if (timeSyncInterval) {
+        clearInterval(timeSyncInterval)
+        timeSyncInterval = null
+      }
+      // Start grace period - keep accepting votes for a few more seconds
+      isInGracePeriod.value = true
+      console.log('[VoteButtons] Timer ended, grace period started')
+      graceTimeout = setTimeout(() => {
+        isInGracePeriod.value = false
+        stopVoteSession()
+      }, GRACE_PERIOD * 1000)
     }
   }, 1000)
+
+  // Start periodic time sync to keep vote apps synchronized
+  timeSyncInterval = setInterval(() => {
+    publishTimeSync()
+  }, TIME_SYNC_INTERVAL * 1000)
 }
 
 function clearTimer() {
   if (timerInterval) {
     clearInterval(timerInterval)
     timerInterval = null
+  }
+  if (graceTimeout) {
+    clearTimeout(graceTimeout)
+    graceTimeout = null
+  }
+  if (timeSyncInterval) {
+    clearInterval(timeSyncInterval)
+    timeSyncInterval = null
+  }
+  isInGracePeriod.value = false
+}
+
+// Publish time sync message to keep vote apps synchronized
+async function publishTimeSync() {
+  const ably = getAbly()
+  if (ably && timeRemaining.value > 0) {
+    const message: VoteStartedMessage = {
+      type: 'vote-started',
+      voteIndex: props.voteIndex,
+      duration: timeRemaining.value,
+      timestamp: Date.now()
+    }
+    await ably.publish(ABLY_CHANNELS.SESSION, message)
+    console.log('[VoteButtons] Time sync published:', timeRemaining.value, 'seconds remaining')
   }
 }
 
@@ -111,6 +160,7 @@ function stopVoteSession() {
 // Apply winner and continue
 function continueWithWinner() {
   voteStore.vote(props.voteIndex, winner.value)
+  sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
   go(props.nextSlide)
 }
@@ -118,7 +168,7 @@ function continueWithWinner() {
 // Manual override vote (presenter choice)
 function vote(choice: 'A' | 'B') {
   voteStore.vote(props.voteIndex, choice)
-  sessionStore.votePhase = 'ended'
+  sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
   go(props.nextSlide)
 }
@@ -145,8 +195,17 @@ function vote(choice: 'A' | 'B') {
       class="mb-4 text-center flex items-center justify-center gap-4"
     >
       <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
-      <span class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse">
+      <span
+        v-if="!isInGracePeriod"
+        class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse"
+      >
         Voting in progress...
+      </span>
+      <span
+        v-else
+        class="px-4 py-2 bg-yellow-600 text-white rounded-full text-sm font-semibold animate-pulse"
+      >
+        Accepting late votes...
       </span>
       <button
         class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all cursor-pointer"

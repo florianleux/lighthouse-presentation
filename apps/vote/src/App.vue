@@ -86,9 +86,10 @@ function startCountdown(duration: number) {
       clearInterval(timerInterval!)
       timerInterval = null
       // Auto-submit if a choice is selected, otherwise mark as missed
-      if (selectedChoice.value && !hasVoted.value) {
+      // IMPORTANT: Check isSubmitting to prevent double-submit if network is slow
+      if (selectedChoice.value && !hasVoted.value && !isSubmitting.value) {
         submitVote()
-      } else if (!hasVoted.value) {
+      } else if (!hasVoted.value && !isSubmitting.value) {
         voteMissed.value = true
       }
     }
@@ -234,11 +235,12 @@ function restoreVoteState() {
       console.log('[App] Restored countdown with', Math.ceil(remainingMs / 1000), 'seconds')
     } else {
       // Time expired while away
-      if (saved.selectedChoice && !saved.hasVoted) {
+      // Check isSubmitting to prevent double-submit
+      if (saved.selectedChoice && !saved.hasVoted && !isSubmitting.value) {
         // Auto-submit the selected choice
         console.log('[App] Time expired, auto-submitting:', saved.selectedChoice)
         submitVote()
-      } else {
+      } else if (!isSubmitting.value) {
         voteMissed.value = true
         console.log('[App] Time expired, vote missed')
       }
@@ -280,11 +282,12 @@ function handleVisibilityChange() {
       } else {
         // Time expired while hidden
         clearCountdown()
-        if (selectedChoice.value) {
+        // Check isSubmitting to prevent double-submit
+        if (selectedChoice.value && !isSubmitting.value) {
           // Auto-submit selected choice
           submitVote()
           console.log('[App] Time expired while hidden, auto-submitting')
-        } else {
+        } else if (!isSubmitting.value) {
           voteMissed.value = true
           console.log('[App] Time expired while hidden, vote missed')
         }
@@ -309,6 +312,16 @@ async function requestStateSync() {
   if (!isConnected.value) {
     console.warn('[App] Cannot sync - not connected')
     return
+  }
+
+  // If we have a saved member and are still 'connecting', restore joined status
+  const savedMember = loadSavedMember()
+  if (savedMember && status.value === 'connecting') {
+    console.log('[App] Restoring joined status for', savedMember.name)
+    status.value = 'joined'
+    joinedName.value = savedMember.name
+    selectedAvatar.value = savedMember.avatar
+    activeKeynoteId.value = savedMember.keynoteId
   }
 
   // Restore from localStorage first
@@ -447,9 +460,14 @@ onMounted(async () => {
       voteMissed.value = false
       voteError.value = null
       isSubmitting.value = false
-      // Start countdown if duration is provided
+      // Start countdown with synchronized time (account for message delay)
       if (msg.duration > 0) {
-        startCountdown(msg.duration)
+        const elapsedMs = Date.now() - msg.timestamp
+        const elapsedSeconds = Math.floor(elapsedMs / 1000)
+        const remainingDuration = Math.max(0, msg.duration - elapsedSeconds)
+        if (remainingDuration > 0) {
+          startCountdown(remainingDuration)
+        }
       }
     })
 
@@ -460,9 +478,14 @@ onMounted(async () => {
       hasPollVoted.value = false
       voteError.value = null
       isSubmitting.value = false
-      // Start countdown if duration is provided
+      // Start countdown with synchronized time (account for message delay)
       if (msg.duration > 0) {
-        startCountdown(msg.duration)
+        const elapsedMs = Date.now() - msg.timestamp
+        const elapsedSeconds = Math.floor(elapsedMs / 1000)
+        const remainingDuration = Math.max(0, msg.duration - elapsedSeconds)
+        if (remainingDuration > 0) {
+          startCountdown(remainingDuration)
+        }
       }
     })
 
@@ -808,7 +831,7 @@ async function submitPoll(choice: PollChoice) {
 
       <!-- State: Joined - Voted -->
       <div
-        v-else-if="status === 'joined' && hasVoted"
+        v-else-if="status === 'joined' && hasVoted && activeVoteIndex !== null"
         class="success"
       >
         <div class="checkmark">✓</div>
