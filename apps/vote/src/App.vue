@@ -129,7 +129,7 @@ function loadSavedMember(): SavedMember | null {
       return JSON.parse(saved)
     }
   } catch (e) {
-    console.error('Failed to load saved member:', e)
+    console.error('[App] Failed to load saved member:', e)
   }
   return null
 }
@@ -144,7 +144,7 @@ function saveMember(memberName: string, odientId: string, keynoteId: string, ava
       avatar
     }))
   } catch (e) {
-    console.error('Failed to save member:', e)
+    console.error('[App] Failed to save member:', e)
   }
 }
 
@@ -153,7 +153,7 @@ function clearSavedMember() {
   try {
     localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER)
   } catch (e) {
-    console.error('Failed to clear saved member:', e)
+    console.error('[App] Failed to clear saved member:', e)
   }
 }
 

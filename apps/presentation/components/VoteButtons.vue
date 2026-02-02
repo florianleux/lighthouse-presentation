@@ -2,7 +2,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import { voteStore, sessionStore, getAbly } from '../setup/main'
-import { ABLY_CHANNELS } from '../../../shared/constants'
+import { ABLY_CHANNELS, VOTE_CONFIG } from '../../../shared/constants'
 import type { VoteStartedMessage } from '../../../shared/types'
 
 const props = defineProps<{
@@ -44,10 +44,10 @@ const winnerLabel = computed(() =>
   winner.value === 'A' ? props.labelA : props.labelB
 )
 
-// Timer
-const VOTE_DURATION = 20 // seconds
-const GRACE_PERIOD = 3 // seconds - extra time to accept late votes due to network lag
-const TIME_SYNC_INTERVAL = 5 // seconds - how often to publish time sync
+// Timer - use shared constants for consistency
+const VOTE_DURATION = VOTE_CONFIG.DURATION_SECONDS
+const GRACE_PERIOD = VOTE_CONFIG.GRACE_PERIOD_SECONDS
+const TIME_SYNC_INTERVAL = VOTE_CONFIG.TIME_SYNC_INTERVAL_SECONDS
 const timeRemaining = ref(0)
 const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null

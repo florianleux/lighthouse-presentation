@@ -27,6 +27,8 @@ export const VOTE_PHASES = {
 // Vote configuration
 export const VOTE_CONFIG = {
   DURATION_SECONDS: 20,  // Duration of a vote in seconds
+  GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
+  TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
   SLIDES: [14, 25, 36, 47] as const,  // Vote slide numbers (Day 1-4 vote slides)
 } as const
 
