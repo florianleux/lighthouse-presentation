@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
-import type { PollChoice } from '../../../shared/types'
+import type { PollChoice, VoteStartedMessage } from '../../../shared/types'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
 
@@ -13,7 +13,31 @@ interface SavedMember {
   avatar: string | null
 }
 
-const { isConnected, error, connect, joinCrew, getOdientId, restoreSession, onSessionState, onVoteStarted, onPollStarted, sendVote, sendPoll } = useAbly()
+interface PersistedVoteState {
+  activeVoteIndex: number | null
+  selectedChoice: 'A' | 'B' | null
+  hasVoted: boolean
+  voteMissed: boolean
+  countdownEndTimestamp: number | null
+  keynoteId: string | null
+}
+
+const {
+  isConnected,
+  error,
+  connect,
+  joinCrew,
+  getOdientId,
+  restoreSession,
+  onSessionState,
+  onVoteStarted,
+  onPollStarted,
+  sendVote,
+  sendPoll,
+  setOnReconnect,
+  setupHeartbeatListener,
+  fetchSessionHistory,
+} = useAbly()
 
 // Form state
 const name = ref('')
@@ -40,6 +64,16 @@ const hasPollVoted = ref(false)
 // Timer state
 const timeRemaining = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
+
+// Watch for vote state changes and persist to localStorage
+watch(
+  [activeVoteIndex, selectedChoice, hasVoted, voteMissed],
+  () => {
+    if (status.value === 'joined' && activeVoteIndex.value !== null) {
+      saveVoteState()
+    }
+  }
+)
 
 function startCountdown(duration: number) {
   timeRemaining.value = duration
@@ -122,6 +156,215 @@ function clearSavedMember() {
   }
 }
 
+// ===========================================
+// Vote state persistence
+// ===========================================
+
+function saveVoteState() {
+  try {
+    const state: PersistedVoteState = {
+      activeVoteIndex: activeVoteIndex.value,
+      selectedChoice: selectedChoice.value,
+      hasVoted: hasVoted.value,
+      voteMissed: voteMissed.value,
+      countdownEndTimestamp: timeRemaining.value > 0
+        ? Date.now() + (timeRemaining.value * 1000)
+        : null,
+      keynoteId: activeKeynoteId.value,
+    }
+    localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(state))
+  } catch (e) {
+    console.error('[App] Failed to save vote state:', e)
+  }
+}
+
+function loadVoteState(): PersistedVoteState | null {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEYS.VOTE_STATE)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {
+    console.error('[App] Failed to load vote state:', e)
+  }
+  return null
+}
+
+function clearVoteState() {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.VOTE_STATE)
+  } catch (e) {
+    console.error('[App] Failed to clear vote state:', e)
+  }
+}
+
+// Restore vote state from localStorage
+function restoreVoteState() {
+  const saved = loadVoteState()
+  if (!saved) return false
+
+  // Only restore if it's for the same keynote
+  if (saved.keynoteId !== activeKeynoteId.value) {
+    console.log('[App] Vote state keynote mismatch, clearing')
+    clearVoteState()
+    return false
+  }
+
+  // Don't restore if already voted or missed
+  if (saved.hasVoted || saved.voteMissed) {
+    activeVoteIndex.value = saved.activeVoteIndex
+    selectedChoice.value = saved.selectedChoice
+    hasVoted.value = saved.hasVoted
+    voteMissed.value = saved.voteMissed
+    console.log('[App] Restored final vote state:', saved)
+    return true
+  }
+
+  // Restore vote state
+  activeVoteIndex.value = saved.activeVoteIndex
+  selectedChoice.value = saved.selectedChoice
+  hasVoted.value = saved.hasVoted
+  voteMissed.value = saved.voteMissed
+
+  // Restore countdown if still active
+  if (saved.countdownEndTimestamp && saved.activeVoteIndex !== null) {
+    const remainingMs = saved.countdownEndTimestamp - Date.now()
+    if (remainingMs > 0) {
+      startCountdown(Math.ceil(remainingMs / 1000))
+      console.log('[App] Restored countdown with', Math.ceil(remainingMs / 1000), 'seconds')
+    } else {
+      // Time expired while away
+      if (saved.selectedChoice && !saved.hasVoted) {
+        // Auto-submit the selected choice
+        console.log('[App] Time expired, auto-submitting:', saved.selectedChoice)
+        submitVote()
+      } else {
+        voteMissed.value = true
+        console.log('[App] Time expired, vote missed')
+      }
+    }
+  }
+
+  console.log('[App] Restored vote state:', saved)
+  return true
+}
+
+// ===========================================
+// Page visibility handling
+// ===========================================
+
+const hiddenTimestamp = ref<number | null>(null)
+const pausedTimeRemaining = ref(0)
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    // Page is now hidden - note timestamp and paused time
+    hiddenTimestamp.value = Date.now()
+    pausedTimeRemaining.value = timeRemaining.value
+    console.log('[App] Page hidden, paused at', pausedTimeRemaining.value, 'seconds')
+  } else {
+    // Page is now visible
+    console.log('[App] Page visible again')
+
+    if (hiddenTimestamp.value && pausedTimeRemaining.value > 0 && activeVoteIndex.value !== null && !hasVoted.value && !voteMissed.value) {
+      // Calculate elapsed time while hidden
+      const elapsedMs = Date.now() - hiddenTimestamp.value
+      const elapsedSeconds = Math.floor(elapsedMs / 1000)
+      const newRemaining = pausedTimeRemaining.value - elapsedSeconds
+
+      if (newRemaining > 0) {
+        // Resume countdown with adjusted time
+        clearCountdown()
+        startCountdown(newRemaining)
+        console.log('[App] Resumed countdown with', newRemaining, 'seconds')
+      } else {
+        // Time expired while hidden
+        clearCountdown()
+        if (selectedChoice.value) {
+          // Auto-submit selected choice
+          submitVote()
+          console.log('[App] Time expired while hidden, auto-submitting')
+        } else {
+          voteMissed.value = true
+          console.log('[App] Time expired while hidden, vote missed')
+        }
+      }
+    }
+
+    // Request state sync on visibility restore
+    requestStateSync()
+
+    hiddenTimestamp.value = null
+    pausedTimeRemaining.value = 0
+  }
+}
+
+// ===========================================
+// State sync on reconnection
+// ===========================================
+
+async function requestStateSync() {
+  console.log('[App] Requesting state sync...')
+
+  if (!isConnected.value) {
+    console.warn('[App] Cannot sync - not connected')
+    return
+  }
+
+  // Restore from localStorage first
+  const restoredFromStorage = restoreVoteState()
+
+  // Fetch recent history to catch any missed messages
+  const { sessionState, voteStarted } = await fetchSessionHistory()
+
+  if (sessionState) {
+    // Update keynoteId if different
+    if (sessionState.keynoteId && sessionState.keynoteId !== activeKeynoteId.value) {
+      console.log('[App] Keynote changed during disconnect')
+      activeKeynoteId.value = sessionState.keynoteId
+      // Clear vote state if keynote changed
+      clearVoteState()
+      activeVoteIndex.value = null
+      selectedChoice.value = null
+      hasVoted.value = false
+      voteMissed.value = false
+    }
+  }
+
+  if (voteStarted && !restoredFromStorage) {
+    // A vote might be in progress that we missed
+    handleVoteStartedSync(voteStarted)
+  }
+}
+
+function handleVoteStartedSync(msg: VoteStartedMessage) {
+  // Calculate remaining time based on timestamp
+  const elapsedMs = Date.now() - msg.timestamp
+  const elapsedSeconds = Math.floor(elapsedMs / 1000)
+  const remainingDuration = msg.duration - elapsedSeconds
+
+  // Don't sync if we already have this vote or already voted
+  if (activeVoteIndex.value === msg.voteIndex && (hasVoted.value || voteMissed.value)) {
+    console.log('[App] Already processed vote', msg.voteIndex)
+    return
+  }
+
+  if (remainingDuration > 0 && !hasVoted.value) {
+    console.log('[App] Syncing with active vote, remaining:', remainingDuration)
+    activeVoteIndex.value = msg.voteIndex
+    selectedChoice.value = null
+    hasVoted.value = false
+    voteMissed.value = false
+    voteError.value = null
+    isSubmitting.value = false
+    startCountdown(remainingDuration)
+  } else if (!hasVoted.value && activeVoteIndex.value !== msg.voteIndex) {
+    console.log('[App] Vote expired during disconnect')
+    activeVoteIndex.value = msg.voteIndex
+    voteMissed.value = true
+  }
+}
+
 // Connect on mount
 onMounted(async () => {
   const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
@@ -196,6 +439,8 @@ onMounted(async () => {
     // Subscribe to vote-started messages
     onVoteStarted((msg) => {
       console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
+      // Clear any previous vote state
+      clearVoteState()
       activeVoteIndex.value = msg.voteIndex
       selectedChoice.value = null
       hasVoted.value = false
@@ -221,6 +466,15 @@ onMounted(async () => {
       }
     })
 
+    // Setup reconnection callback
+    setOnReconnect(() => {
+      console.log('[App] Reconnected - requesting state sync')
+      requestStateSync()
+    })
+
+    // Setup heartbeat listener to respond to presentation
+    setupHeartbeatListener()
+
     // After connecting, stay in 'connecting' until we receive session-state
     // Just restore the data, don't set final status yet
     if (savedMember) {
@@ -232,11 +486,15 @@ onMounted(async () => {
   } catch (err) {
     status.value = 'error'
   }
+
+  // Add page visibility change listener
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
-// Cleanup timers on unmount to prevent memory leaks
+// Cleanup on unmount
 onBeforeUnmount(() => {
   clearCountdown()
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 // Go to avatar step

@@ -7,6 +7,7 @@ import type {
   VoteCastMessage,
   PollCastMessage,
   HeartbeatResponseMessage,
+  HeartbeatRequestMessage,
   SessionStateMessage,
   VoteStartedMessage,
   PollStartedMessage,
@@ -74,6 +75,14 @@ export function isHeartbeatResponseMessage(data: unknown): data is HeartbeatResp
   return (
     data.type === 'heartbeat-response' &&
     isString(data.odientId) &&
+    isNumber(data.timestamp)
+  )
+}
+
+export function isHeartbeatRequestMessage(data: unknown): data is HeartbeatRequestMessage {
+  if (!isObject(data)) return false
+  return (
+    data.type === 'heartbeat-request' &&
     isNumber(data.timestamp)
   )
 }

@@ -76,4 +76,5 @@ export const STORAGE_KEYS = {
 
   // Vote app
   CREW_MEMBER: 'lighthouse-pirates-crew',
+  VOTE_STATE: 'lighthouse-pirates-vote-state',
 } as const

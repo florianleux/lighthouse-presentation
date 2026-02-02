@@ -9,11 +9,14 @@ import type {
   PollStartedMessage,
   PollCastMessage,
   PollChoice,
+  HeartbeatResponseMessage,
+  HeartbeatRequestMessage,
 } from '../../../../shared/types'
 import {
   isSessionStateMessage,
   isVoteStartedMessage,
   isPollStartedMessage,
+  isHeartbeatRequestMessage,
 } from '../../../../shared/validators'
 
 // Connection timeout in milliseconds
@@ -23,6 +26,49 @@ const CONNECTION_TIMEOUT = 15000
 function toError(err: unknown): Error {
   if (err instanceof Error) return err
   return new Error(String(err))
+}
+
+/**
+ * Setup listeners for all connection state changes (after initial connect)
+ */
+function setupConnectionStateListeners(
+  client: Ably.Realtime,
+  isConnected: ReturnType<typeof ref<boolean>>
+): void {
+  client.connection.on('disconnected', () => {
+    console.log('[Ably] Disconnected')
+    state.value = { ...state.value, isConnected: false }
+    isConnected.value = false
+  })
+
+  client.connection.on('suspended', () => {
+    console.log('[Ably] Connection suspended')
+    state.value = { ...state.value, isConnected: false }
+    isConnected.value = false
+  })
+
+  client.connection.on('connecting', () => {
+    console.log('[Ably] Reconnecting...')
+  })
+
+  client.connection.on('closed', () => {
+    console.log('[Ably] Connection closed')
+    state.value = { ...state.value, isConnected: false }
+    isConnected.value = false
+  })
+
+  // Handle reconnections (not initial connect)
+  client.connection.on('connected', () => {
+    if (hasConnectedOnce) {
+      console.log('[Ably] Reconnected')
+      state.value = { ...state.value, isConnected: true }
+      isConnected.value = true
+      // Trigger reconnection callback if set
+      if (onReconnectCallback) {
+        onReconnectCallback()
+      }
+    }
+  })
 }
 
 interface AblyState {
@@ -37,6 +83,12 @@ const state = shallowRef<AblyState>({
 
 // Unique ID for this participant
 let odientId: string | null = null
+
+// Callback for reconnection events
+let onReconnectCallback: (() => void) | null = null
+
+// Track if initial connection completed (to distinguish reconnects from first connect)
+let hasConnectedOnce = false
 
 export function useAbly() {
   const isConnected = ref(state.value.isConnected)
@@ -64,12 +116,23 @@ export function useAbly() {
 
       // Connection with timeout
       const connectionPromise = new Promise<void>((resolve, reject) => {
-        client.connection.on('connected', () => {
+        // Initial connection handler
+        const onInitialConnect = () => {
           console.log('[Ably] Connected as', odientId)
           state.value = { client, isConnected: true }
           isConnected.value = true
+          hasConnectedOnce = true
+
+          // Remove initial handler to avoid double-firing
+          client.connection.off('connected', onInitialConnect)
+
+          // Setup ongoing connection state listeners
+          setupConnectionStateListeners(client, isConnected)
+
           resolve()
-        })
+        }
+
+        client.connection.on('connected', onInitialConnect)
 
         client.connection.on('failed', (err) => {
           console.error('[Ably] Connection failed', err)
@@ -252,6 +315,97 @@ export function useAbly() {
   }
 
   /**
+   * Set a callback to be called when the connection is restored after a disconnect
+   */
+  function setOnReconnect(callback: () => void): void {
+    onReconnectCallback = callback
+  }
+
+  /**
+   * Setup heartbeat listener to respond to heartbeat requests from the presentation
+   */
+  function setupHeartbeatListener(): void {
+    const { client } = state.value
+    if (!client || !odientId) {
+      console.warn('[Ably] Cannot setup heartbeat listener - not connected')
+      return
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
+    channel.subscribe('message', async (message) => {
+      if (isHeartbeatRequestMessage(message.data)) {
+        console.log('[Ably] Received heartbeat request, responding...')
+        await sendHeartbeatResponse()
+      }
+    })
+
+    console.log('[Ably] Heartbeat listener setup')
+  }
+
+  /**
+   * Send heartbeat response to indicate this participant is still active
+   */
+  async function sendHeartbeatResponse(): Promise<void> {
+    const { client } = state.value
+    if (!client || !odientId) {
+      console.warn('[Ably] Cannot send heartbeat - not connected or no odientId')
+      return
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
+
+    const message: HeartbeatResponseMessage = {
+      type: 'heartbeat-response',
+      odientId,
+      timestamp: Date.now(),
+    }
+
+    await channel.publish('message', message)
+    console.log('[Ably] Heartbeat response sent')
+  }
+
+  /**
+   * Fetch recent message history from the session channel
+   * Used after reconnection to catch up on missed messages
+   */
+  async function fetchSessionHistory(): Promise<{
+    sessionState: SessionStateMessage | null
+    voteStarted: VoteStartedMessage | null
+  }> {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot fetch history - not connected')
+      return { sessionState: null, voteStarted: null }
+    }
+
+    try {
+      const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+      const history = await channel.history({ limit: 10, direction: 'backwards' })
+
+      let sessionState: SessionStateMessage | null = null
+      let voteStarted: VoteStartedMessage | null = null
+
+      // Find the most recent session-state and vote-started messages
+      for (const msg of history.items) {
+        if (!sessionState && isSessionStateMessage(msg.data)) {
+          sessionState = msg.data
+        }
+        if (!voteStarted && isVoteStartedMessage(msg.data)) {
+          voteStarted = msg.data
+        }
+        // Stop once we have both
+        if (sessionState && voteStarted) break
+      }
+
+      console.log('[Ably] Fetched history - sessionState:', !!sessionState, 'voteStarted:', !!voteStarted)
+      return { sessionState, voteStarted }
+    } catch (err) {
+      console.error('[Ably] Failed to fetch history:', err)
+      return { sessionState: null, voteStarted: null }
+    }
+  }
+
+  /**
    * Disconnect
    */
   function disconnect() {
@@ -261,6 +415,8 @@ export function useAbly() {
       state.value = { client: null, isConnected: false }
       isConnected.value = false
       odientId = null
+      hasConnectedOnce = false
+      onReconnectCallback = null
       console.log('[Ably] Disconnected')
     }
   }
@@ -277,6 +433,10 @@ export function useAbly() {
     onPollStarted,
     sendVote,
     sendPoll,
+    setOnReconnect,
+    setupHeartbeatListener,
+    sendHeartbeatResponse,
+    fetchSessionHistory,
     disconnect,
   }
 }
