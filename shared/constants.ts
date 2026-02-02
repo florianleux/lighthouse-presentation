@@ -35,6 +35,8 @@ export const VOTE_CONFIG = {
 // Poll configuration
 export const POLL_CONFIG = {
   DURATION_SECONDS: 20,
+  GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
+  TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
   KNOWLEDGE_POLL_ID: 'knowledge-level',
   CHOICES: ['cabin_boy', 'quartermaster', 'captain'] as const,
 } as const
