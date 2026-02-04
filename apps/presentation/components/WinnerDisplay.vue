@@ -6,77 +6,78 @@ const props = defineProps<{
   voteIndex: number
 }>()
 
-// Vote options data - format: "audit_name: patch description"
+// Vote options data for 4 Performance metrics (CLS, LCP, FCP, TBT)
+// Note: These are placeholder thought exercises treating BlackMarket as a real app
 const voteData = {
-  0: {
+  0: { // CLS - Cumulative Layout Shift
     A: {
-      title: 'Images',
+      title: '[PLACEHOLDER Option A]',
       fixes: [
-        'LCP: Convert images to WebP',
-        'LCP: Add loading="lazy" below-fold',
-        'CLS: Add width/height attributes'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     },
     B: {
-      title: 'Scripts',
+      title: '[PLACEHOLDER Option B]',
       fixes: [
-        'TBT: Remove heavy libraries (jQuery, Lodash, Moment)',
-        'TBT: Remove third-party scripts',
-        'TBT: Remove blocking inline script'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     }
   },
-  1: {
+  1: { // LCP - Largest Contentful Paint
     A: {
-      title: 'Names & Labels',
+      title: '[PLACEHOLDER Option A]',
       fixes: [
-        'button-name: Replace divs with semantic buttons',
-        'image-alt: Add alt text to images',
-        'label: Add labels to form inputs'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     },
     B: {
-      title: 'ARIA',
+      title: '[PLACEHOLDER Option B]',
       fixes: [
-        'aria-roles: Use valid ARIA roles',
-        'aria-required-attr: Add required ARIA attributes',
-        'aria-valid-attr-value: Fix invalid ARIA values'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     }
   },
-  2: {
+  2: { // FCP - First Contentful Paint
     A: {
-      title: 'General',
+      title: '[PLACEHOLDER Option A]',
       fixes: [
-        'deprecations: Remove document.write()',
-        'inspector-issues: Fix DevTools issues',
-        'errors-in-console: Fix console errors'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     },
     B: {
-      title: 'Trust & Safety',
+      title: '[PLACEHOLDER Option B]',
       fixes: [
-        'geolocation-on-start: Remove auto geolocation request',
-        'notification-on-start: Remove auto notification request',
-        'paste-preventing-inputs: Allow paste in inputs'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     }
   },
-  3: {
+  3: { // TBT - Total Blocking Time
     A: {
-      title: 'Crawlability',
+      title: '[PLACEHOLDER Option A]',
       fixes: [
-        'is-crawlable: Remove noindex meta tag',
-        'crawlable-anchors: Make navigation crawlable',
-        'robots-txt: Fix robots.txt blocking'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     },
     B: {
-      title: 'Content',
+      title: '[PLACEHOLDER Option B]',
       fixes: [
-        'document-title: Add unique page title',
-        'meta-description: Add meta description',
-        'link-text: Use descriptive link text'
+        '[PLACEHOLDER: Fix 1]',
+        '[PLACEHOLDER: Fix 2]',
+        '[PLACEHOLDER: Fix 3]'
       ]
     }
   }

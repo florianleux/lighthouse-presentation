@@ -8,23 +8,24 @@ const props = defineProps<{
   floor: string
 }>()
 
-// Scores selon le choix A ou B pour chaque vote
+// Placeholder scores for 4 Performance metrics (CLS, LCP, FCP, TBT)
+// Note: These are "invented" scores for thought exercise purposes
 const scoreData = {
-  0: { // Performance
-    A: { score: 72, label: 'Images' },
-    B: { score: 78, label: 'Scripts' }
+  0: { // CLS - Cumulative Layout Shift
+    A: { score: '[??]', label: '[Option A]' },
+    B: { score: '[??]', label: '[Option B]' }
   },
-  1: { // Accessibility
-    A: { score: 82, label: 'Visual Cues' },
-    B: { score: 88, label: 'Semantic HTML' }
+  1: { // LCP - Largest Contentful Paint
+    A: { score: '[??]', label: '[Option A]' },
+    B: { score: '[??]', label: '[Option B]' }
   },
-  2: { // Best Practices
-    A: { score: 92, label: 'Console' },
-    B: { score: 89, label: 'Browser APIs' }
+  2: { // FCP - First Contentful Paint
+    A: { score: '[??]', label: '[Option A]' },
+    B: { score: '[??]', label: '[Option B]' }
   },
-  3: { // SEO
-    A: { score: 91, label: 'Meta Tags' },
-    B: { score: 95, label: 'Content' }
+  3: { // TBT - Total Blocking Time
+    A: { score: '[??]', label: '[Option A]' },
+    B: { score: '[??]', label: '[Option B]' }
   }
 }
 
@@ -36,14 +37,8 @@ const result = computed(() => {
   return scoreData[props.voteIndex as keyof typeof scoreData][c as 'A' | 'B']
 })
 
-// Calcul du path pour l'iframe
-const iframePath = computed(() => {
-  const path = voteStore.path.slice(0, props.voteIndex + 1)
-  if (path.some(p => p === null)) return 'baseline'
-  return path.join('').toLowerCase()
-})
-
-const iframeUrl = computed(() => `https://${iframePath.value}.blackmarket.com`)
+// Single URL - no more branch system
+const iframeUrl = computed(() => 'https://blackmarket.com')
 </script>
 
 <template>
@@ -51,7 +46,6 @@ const iframeUrl = computed(() => `https://${iframePath.value}.blackmarket.com`)
     <div class="border rounded p-4">
       <div class="text-center mb-2">
         BlackMarket
-        <span class="text-sm opacity-50 ml-2">({{ iframePath }})</span>
       </div>
       <div class="h-64 bg-gray-100 flex items-center justify-center flex-col gap-2">
         <div class="text-sm opacity-50">iframe</div>
@@ -59,7 +53,7 @@ const iframeUrl = computed(() => `https://${iframePath.value}.blackmarket.com`)
       </div>
     </div>
     <div class="p-4">
-      <div class="text-lg font-bold mb-4">Nouveau score {{ category }}</div>
+      <div class="text-lg font-bold mb-4">{{ category }} improvement</div>
       <div
         class="text-5xl font-bold"
         :class="choice ? 'text-green-500' : 'text-gray-400'"
@@ -70,7 +64,7 @@ const iframeUrl = computed(() => `https://${iframePath.value}.blackmarket.com`)
         Option {{ choice }} : {{ result.label }}
       </div>
       <div class="mt-8">
-        <div class="text-lg">Phare : {{ floor }}</div>
+        <div class="text-lg">Lighthouse : {{ floor }}</div>
       </div>
     </div>
   </div>

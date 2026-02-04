@@ -34,4 +34,8 @@ pnpm dev:vote
 ## Lien avec BlackMarket
 
 BlackMarket est dans un repo séparé (`../blackmarket/`).
-Il est affiché en iframe via les URLs : `https://{branch}.blackmarket.com`
+Il est affiché en iframe via l'URL : `https://blackmarket.com`
+
+## Votes
+
+4 votes Performance : CLS, LCP, FCP, TBT (voir `shared/constants.ts`)

@@ -29,7 +29,7 @@ export const VOTE_CONFIG = {
   DURATION_SECONDS: 20,  // Duration of a vote in seconds
   GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
   TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
-  SLIDES: [14, 25, 36, 47] as const,  // Vote slide numbers (Day 1-4 vote slides)
+  SLIDES: [15, 23, 31, 39] as const,  // Vote slide numbers (CLS, LCP, FCP, TBT)
 } as const
 
 // Poll configuration
@@ -47,13 +47,16 @@ export const HEARTBEAT_CONFIG = {
   TIMEOUT_MS: 15000,      // Timeout to consider a participant inactive (15s)
 } as const
 
-// Lighthouse categories (vote order)
-export const LIGHTHOUSE_CATEGORIES = [
-  { index: 0, name: 'Performance', short: 'Perf', color: '#f97316' },
-  { index: 1, name: 'Accessibility', short: 'A11y', color: '#3b82f6' },
-  { index: 2, name: 'Best Practices', short: 'BP', color: '#22c55e' },
-  { index: 3, name: 'SEO', short: 'SEO', color: '#a855f7' },
+// Performance metrics (vote order) - All 4 votes are about Performance
+export const PERFORMANCE_METRICS = [
+  { index: 0, name: 'CLS', fullName: 'Cumulative Layout Shift', weight: 25, color: '#f97316' },
+  { index: 1, name: 'LCP', fullName: 'Largest Contentful Paint', weight: 25, color: '#3b82f6' },
+  { index: 2, name: 'FCP', fullName: 'First Contentful Paint', weight: 10, color: '#22c55e' },
+  { index: 3, name: 'TBT', fullName: 'Total Blocking Time', weight: 30, color: '#a855f7' },
 ] as const
+
+// Backward compatibility alias
+export const LIGHTHOUSE_CATEGORIES = PERFORMANCE_METRICS
 
 // Avatar configuration
 export const AVATAR_CONFIG = {
