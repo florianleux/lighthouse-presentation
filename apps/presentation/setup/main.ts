@@ -57,6 +57,10 @@ export function getVoteIndexForSlide(slideNo: number): number | undefined {
   return voteSlideRegistry.get(slideNo)
 }
 
+export function clearVoteSlideRegistry() {
+  voteSlideRegistry.clear()
+}
+
 // Global vote store
 export const voteStore = reactive({
   path: initialSessionData?.votePath ?? [null, null, null, null] as (string | null)[],
@@ -186,6 +190,7 @@ export const sessionStore = reactive({
     this.pollPhase = 'waiting'
     this.manualMode = false
     voteStore.reset()
+    clearVoteSlideRegistry()
   },
 
   // Start a new session with a new keynoteId (called from admin panel)

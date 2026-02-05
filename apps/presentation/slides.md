@@ -208,30 +208,47 @@ layout: center
 
 ---
 
-# Day 2: LCP
-
-<div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">25%</div>
-</div>
-
-## Largest Contentful Paint
-
-<div class="text-sm opacity-70 mb-4">
-  Time until the largest visible element is rendered. Lower is better.
-</div>
-
-<div class="grid grid-cols-2 gap-6 pt-4">
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">What it measures</div>
-    <div class="text-sm opacity-70">
-      How long it takes for the main content to become visible to the user.
+<MetricIntro
+  h1="FCP"
+  h2="First Contentful Paint"
+  :weight="10"
+  :thresholds="['1.8 sec', '3.0 sec']"
+  h3="Text, image, SVG or canvas"
+  :tags="['All about perception', 'Low FCP is reassuring']"
+>
+  <template #bottom>
+    <div class="mt-20 relative">
+          <div class="flex justify-around mb-2 text-sm font-semibold">
+        <span class="text-blue-500">TTFB</span>
+        <span class="text-green-500">Rendering path</span>
+      </div>
+      <!-- Timeline bar -->
+      <div class="h-2 bg-gray-300 rounded-full relative">
+        <!-- TTFB section -->
+        <div class="absolute left-0 w-1/2 h-full bg-blue-400 rounded-l-full"></div>
+        <!-- Rendering path section -->
+        <div class="absolute left-1/2 w-1/2 h-full bg-green-400 rounded-r-full"></div>
+      </div>
+      <!-- Markers -->
+      <div class="flex justify-between mt-1">
+        <div class="flex flex-col items-center">
+          <span class="text-sm mt-1">Request</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-sm mt-1">First byte</span>
+        </div>
+        <div class="flex flex-col items-center">
+          <span class="text-sm mt-1">Display</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 2.5s</div>
-  </div>
-</div>
+  </template>
+  <template #right>
+    <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
+      Video Placeholder - FCP
+    </div>
+  </template>
+</MetricIntro>
 
 ---
 

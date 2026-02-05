@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useNav } from '@slidev/client'
-import { getVoteIndexForSlide, sessionStore, voteStore } from '../setup/main'
+import { getVoteIndexForSlide, sessionStore, voteStore, voteSlideRegistry } from '../setup/main'
 
 const { currentSlideNo } = useNav()
 
@@ -105,8 +105,10 @@ function blockClick(e: MouseEvent) {
 
 watch(currentSlideNo, checkBlockingState, { immediate: true })
 
-// Also watch keynoteId changes
-watch(() => sessionStore.keynoteId, checkBlockingState)
+// Also watch session state changes
+watch(() => sessionStore.keynoteId, checkBlockingState, { immediate: true })
+watch(() => voteStore.path, checkBlockingState, { deep: true })
+watch(() => voteSlideRegistry.size, checkBlockingState)
 
 onMounted(() => {
   // Capture phase to intercept before Slidev

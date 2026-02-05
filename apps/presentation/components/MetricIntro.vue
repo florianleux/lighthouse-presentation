@@ -12,12 +12,12 @@ defineProps<{
 }>()
 
 const slots = useSlots()
-const hasSlotContent = computed(() => !!slots.default)
+const hasRightSlot = computed(() => !!slots.right)
 </script>
 
 <template>
   <div class="grid grid-cols-3 gap-8 h-full">
-    <div :class="[hasSlotContent ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
+    <div :class="[hasRightSlot ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
       <div>
         <div class="flex justify-between items-baseline">
           <div>
@@ -50,8 +50,6 @@ const hasSlotContent = computed(() => !!slots.default)
           >{{ thresholds[1] }}</span>
         </div>
 
-
-
         <div class="mt-10 text-3xl font-bold text-center">{{ h3 }}</div>
         <div class="grid grid-cols-2 gap-10 mt-15 text-lg text-center">
           <span v-if="tags[0]">{{ tags[0] }}</span>
@@ -62,6 +60,12 @@ const hasSlotContent = computed(() => !!slots.default)
           >{{ tags[3] }}</span>
           <span v-if="tags[3]">{{ tags[4] }}</span>
         </div>
+
+        <!-- Named slot for content under keywords -->
+        <slot
+          class="mt-10"
+          name="bottom"
+        />
 
         <div
           v-if="businessInfo && businessInfo.length > 0"
@@ -85,10 +89,10 @@ const hasSlotContent = computed(() => !!slots.default)
     </div>
 
     <div
-      v-if="hasSlotContent"
+      v-if="hasRightSlot"
       class="col-span-1 flex items-center justify-center"
     >
-      <slot />
+      <slot name="right" />
     </div>
   </div>
 </template>
