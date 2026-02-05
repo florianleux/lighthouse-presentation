@@ -176,114 +176,120 @@ function vote(choice: 'A' | 'B') {
 
 <template>
   <div class="vote-container">
-    <!-- Start vote button -->
-    <div
-      v-if="!isVoteActive && !isVoteEnded"
-      class="mb-4 text-center"
-    >
-      <button
-        class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all cursor-pointer text-lg"
-        @click="startVoteSession"
-      >
-        Start Vote
-      </button>
-    </div>
-
-    <!-- Voting in progress + Timer + Stop button -->
-    <div
-      v-else-if="isVoteActive"
-      class="mb-4 text-center flex items-center justify-center gap-4"
-    >
-      <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
-      <span
-        v-if="!isInGracePeriod"
-        class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse"
-      >
-        Voting in progress...
-      </span>
-      <span
-        v-else
-        class="px-4 py-2 bg-yellow-600 text-white rounded-full text-sm font-semibold animate-pulse"
-      >
-        Accepting late votes...
-      </span>
-      <button
-        class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all cursor-pointer"
-        @click="stopVoteSession"
-      >
-        Stop Vote Session
-      </button>
-    </div>
-
-    <!-- Vote ended indicator + Continue button -->
-    <div
-      v-else-if="isVoteEnded"
-      class="mb-4 text-center flex items-center justify-center gap-4"
-    >
-      <span class="px-4 py-2 bg-gray-600 text-white rounded-full text-sm font-semibold">
-        Voting ended
-      </span>
-      <button
-        class="px-6 py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-all cursor-pointer"
-        @click="continueWithWinner"
-      >
-        Continue with {{ winner }} - {{ winnerLabel }}
-      </button>
-    </div>
-
-    <!-- Real-time vote results -->
-    <div
-      v-if="results.A.length > 0 || results.B.length > 0"
-      class="grid grid-cols-2 gap-8 mb-6"
-    >
-      <div class="p-4 border-2 border-blue-500 rounded-lg">
-        <h3 class="text-lg font-bold text-blue-500 mb-2">A - {{ labelA }} ({{ results.A.length }})</h3>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="odientId in results.A"
-            :key="odientId"
-            class="px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
-          >
-            {{ getCrewName(odientId) }}
-          </span>
-        </div>
-        <p
-          v-if="results.A.length === 0"
-          class="text-gray-400 text-sm"
-        >No votes yet</p>
+    <!-- Manual mode: only A/B buttons -->
+    <template v-if="sessionStore.manualMode">
+      <div class="grid grid-cols-2 gap-8 pt-4">
+        <button
+          class="p-8 border-4 border-blue-500 rounded-lg text-2xl font-bold hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
+          @click="vote('A')"
+        >
+          A - {{ labelA }}
+        </button>
+        <button
+          class="p-8 border-4 border-amber-500 rounded-lg text-2xl font-bold hover:bg-amber-500 hover:text-white transition-all cursor-pointer"
+          @click="vote('B')"
+        >
+          B - {{ labelB }}
+        </button>
       </div>
-      <div class="p-4 border-2 border-amber-500 rounded-lg">
-        <h3 class="text-lg font-bold text-amber-500 mb-2">B - {{ labelB }} ({{ results.B.length }})</h3>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="odientId in results.B"
-            :key="odientId"
-            class="px-3 py-1 bg-amber-500 text-white text-sm rounded-full"
-          >
-            {{ getCrewName(odientId) }}
-          </span>
-        </div>
-        <p
-          v-if="results.B.length === 0"
-          class="text-gray-400 text-sm"
-        >No votes yet</p>
-      </div>
-    </div>
+    </template>
 
-    <!-- Presenter A/B buttons -->
-    <div class="grid grid-cols-2 gap-8 pt-4">
-      <button
-        class="p-8 border-4 border-blue-500 rounded-lg text-2xl font-bold hover:bg-blue-500 hover:text-white transition-all cursor-pointer"
-        @click="vote('A')"
+    <!-- Audience vote mode -->
+    <template v-else>
+      <!-- Start vote button -->
+      <div
+        v-if="!isVoteActive && !isVoteEnded"
+        class="mb-4 text-center"
       >
-        A - {{ labelA }}
-      </button>
-      <button
-        class="p-8 border-4 border-amber-500 rounded-lg text-2xl font-bold hover:bg-amber-500 hover:text-white transition-all cursor-pointer"
-        @click="vote('B')"
+        <button
+          class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all cursor-pointer text-lg"
+          @click="startVoteSession"
+        >
+          Start Vote
+        </button>
+      </div>
+
+      <!-- Voting in progress + Timer + Stop button -->
+      <div
+        v-else-if="isVoteActive"
+        class="mb-4 text-center flex items-center justify-center gap-4"
       >
-        B - {{ labelB }}
-      </button>
-    </div>
+        <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
+        <span
+          v-if="!isInGracePeriod"
+          class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse"
+        >
+          Voting in progress...
+        </span>
+        <span
+          v-else
+          class="px-4 py-2 bg-yellow-600 text-white rounded-full text-sm font-semibold animate-pulse"
+        >
+          Accepting late votes...
+        </span>
+        <button
+          class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all cursor-pointer"
+          @click="stopVoteSession"
+        >
+          Stop Vote Session
+        </button>
+      </div>
+
+      <!-- Vote ended indicator + Continue button -->
+      <div
+        v-else-if="isVoteEnded"
+        class="mb-4 text-center flex items-center justify-center gap-4"
+      >
+        <span class="px-4 py-2 bg-gray-600 text-white rounded-full text-sm font-semibold">
+          Voting ended
+        </span>
+        <button
+          class="px-6 py-3 bg-purple-600 text-white font-bold rounded-lg hover:bg-purple-700 transition-all cursor-pointer"
+          @click="continueWithWinner"
+        >
+          Continue with {{ winner }} - {{ winnerLabel }}
+        </button>
+      </div>
+
+      <!-- Real-time vote results -->
+      <div
+        v-if="results.A.length > 0 || results.B.length > 0"
+        class="grid grid-cols-2 gap-8 mb-6"
+      >
+        <div class="p-4 border-2 border-blue-500 rounded-lg">
+          <h3 class="text-lg font-bold text-blue-500 mb-2">A - {{ labelA }} ({{ results.A.length }})</h3>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="odientId in results.A"
+              :key="odientId"
+              class="px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
+            >
+              {{ getCrewName(odientId) }}
+            </span>
+          </div>
+          <p
+            v-if="results.A.length === 0"
+            class="text-gray-400 text-sm"
+          >No votes yet</p>
+        </div>
+        <div class="p-4 border-2 border-amber-500 rounded-lg">
+          <h3 class="text-lg font-bold text-amber-500 mb-2">B - {{ labelB }} ({{ results.B.length }})</h3>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="odientId in results.B"
+              :key="odientId"
+              class="px-3 py-1 bg-amber-500 text-white text-sm rounded-full"
+            >
+              {{ getCrewName(odientId) }}
+            </span>
+          </div>
+          <p
+            v-if="results.B.length === 0"
+            class="text-gray-400 text-sm"
+          >No votes yet</p>
+        </div>
+      </div>
+
+    </template>
   </div>
 </template>

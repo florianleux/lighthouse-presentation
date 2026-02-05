@@ -77,6 +77,24 @@ async function startNewSession() {
               </button>
             </div>
 
+            <!-- Manual Mode Toggle -->
+            <div class="section">
+              <label>Vote Mode</label>
+              <div class="toggle-row">
+                <span class="toggle-label">Manual Mode</span>
+                <label class="toggle-switch">
+                  <input
+                    v-model="sessionStore.manualMode"
+                    type="checkbox"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <p class="toggle-hint">
+                {{ sessionStore.manualMode ? 'Presenter picks A/B directly' : 'Audience votes with timer' }}
+              </p>
+            </div>
+
             <!-- Join Session Section -->
             <div class="section">
               <label>Join Session</label>
@@ -389,6 +407,70 @@ async function startNewSession() {
 
 .full-width {
   width: 100%;
+}
+
+/* Toggle switch styles */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.toggle-label {
+  color: white;
+  font-size: 14px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: 0.3s;
+  border-radius: 26px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #ffd700;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(22px);
+}
+
+.toggle-hint {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #64748b;
 }
 
 .panel-footer {

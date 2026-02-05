@@ -97,6 +97,9 @@ export const sessionStore = reactive({
   activePollId: null as string | null,
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
 
+  // Manual mode (presenter picks A/B directly, no audience vote)
+  manualMode: false,
+
   // Actions
   addCrewMember(member: CrewMember) {
     if (!this.crew.find(m => m.odientId === member.odientId)) {
@@ -168,6 +171,7 @@ export const sessionStore = reactive({
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
+    this.manualMode = false
     voteStore.reset()
   },
 
