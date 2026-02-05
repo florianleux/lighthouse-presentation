@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { sessionStore, isVoteSlide } from '../setup/main'
-import AvatarPreview from './AvatarPreview.vue'
 
 const props = defineProps<{
   currentSlide: number

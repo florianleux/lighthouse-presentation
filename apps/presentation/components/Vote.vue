@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useNav } from '@slidev/client'
-import VoteButtons from './VoteButtons.vue'
 import { registerVoteSlide } from '../setup/main'
 
 const props = defineProps<{

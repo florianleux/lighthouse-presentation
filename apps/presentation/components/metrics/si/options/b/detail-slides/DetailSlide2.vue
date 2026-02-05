@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import DetailSlide from '../../../../../../components/DetailSlide.vue'
 </script>
 
 <template>

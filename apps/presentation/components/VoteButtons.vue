@@ -4,7 +4,6 @@ import { useNav } from '@slidev/client'
 import { voteStore, sessionStore, getAbly } from '../setup/main'
 import { ABLY_CHANNELS, VOTE_CONFIG } from '../../../shared/constants'
 import type { VoteStartedMessage } from '../../../shared/types'
-import VoteProportionBar from './VoteProportionBar.vue'
 
 const props = defineProps<{
   voteIndex: number

@@ -339,8 +339,6 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ## Lighthouse complete!
 
-<PathDisplay />
-
 ---
 
 # Conclusion

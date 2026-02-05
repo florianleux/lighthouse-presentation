@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Choice from './Choice.vue'
 import { getChoiceProps } from '../../../shared/metrics-data'
 import { computed } from 'vue'
 

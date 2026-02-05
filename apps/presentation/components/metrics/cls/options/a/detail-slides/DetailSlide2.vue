@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import DetailSlide from '../../../../../../components/DetailSlide.vue'
-
 const optionalFallbackCodeExample = `@font-face {
   font-family: 'CustomFont';
   src: url('font.woff2');

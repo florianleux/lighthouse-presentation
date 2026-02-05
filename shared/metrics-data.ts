@@ -24,13 +24,6 @@ export interface MetricOption {
   title: string
   subtitle: string
   keywords: Keywords
-
-  // For WinnerDisplay component
-  fixes: string[]
-
-  // For ApplicationDisplay and PathDisplay
-  score: number | string // Can be number or '[??]' placeholder
-  label: string
 }
 
 /**
@@ -67,7 +60,6 @@ export interface MetricConfig {
   color: string // Hex color
 
   // Presentation structure
-  day: number // 1-5
   floor: string // 'Floor 1', 'Floor 2', etc.
 
   // For MetricIntro component
@@ -103,7 +95,6 @@ export const METRICS: MetricsData = {
     fullName: 'Cumulative Layout Shift',
     weight: 25,
     color: '#f97316',
-    day: 1,
     floor: 'Floor 1',
     thresholds: [0.1, 0.25],
     formula: 'Impact fraction × Distance fraction',
@@ -121,25 +112,11 @@ export const METRICS: MetricsData = {
         title: 'First-party assets',
         subtitle: 'Optimize what you control',
         keywords: ['Images', 'Fonts'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for CLS Option A]',
-          '[PLACEHOLDER: Fix 2 for CLS Option A]',
-          '[PLACEHOLDER: Fix 3 for CLS Option A]',
-        ],
-        score: '[??]',
-        label: 'First-party assets',
       },
       b: {
         title: 'Third-party content',
         subtitle: 'Tame the unpredictable',
         keywords: ['Ads', 'Embeds'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for CLS Option B]',
-          '[PLACEHOLDER: Fix 2 for CLS Option B]',
-          '[PLACEHOLDER: Fix 3 for CLS Option B]',
-        ],
-        score: '[??]',
-        label: 'Third-party content',
       },
     },
   },
@@ -150,7 +127,6 @@ export const METRICS: MetricsData = {
     fullName: 'First Contentful Paint',
     weight: 10,
     color: '#22c55e',
-    day: 2,
     floor: 'Floor 2',
     thresholds: ['1.8 sec', '3.0 sec'],
     formula: 'Text, image, SVG or canvas',
@@ -158,28 +134,14 @@ export const METRICS: MetricsData = {
     businessInfo: [],
     options: {
       a: {
-        title: '[PLACEHOLDER Option A]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for FCP Option A]',
-          '[PLACEHOLDER: Fix 2 for FCP Option A]',
-          '[PLACEHOLDER: Fix 3 for FCP Option A]',
-        ],
-        score: '[??]',
-        label: '[Option A]',
+        title: 'The Delivery',
+        subtitle: 'Reduce TTFB',
+        keywords: ['Shorten distances', 'Minimize lost time'],
       },
       b: {
-        title: '[PLACEHOLDER Option B]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for FCP Option B]',
-          '[PLACEHOLDER: Fix 2 for FCP Option B]',
-          '[PLACEHOLDER: Fix 3 for FCP Option B]',
-        ],
-        score: '[??]',
-        label: '[Option B]',
+        title: 'The Painting',
+        subtitle: 'Clear the rendering path',
+        keywords: ['Rendering blockers', 'Parsing blockers'],
       },
     },
   },
@@ -190,7 +152,6 @@ export const METRICS: MetricsData = {
     fullName: 'Largest Contentful Paint',
     weight: 25,
     color: '#3b82f6',
-    day: 3,
     floor: 'Floor 3',
     thresholds: ['2.5 sec', '4.0 sec'],
     formula: 'Time to render largest element',
@@ -206,25 +167,11 @@ export const METRICS: MetricsData = {
         title: '[PLACEHOLDER Option A]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for LCP Option A]',
-          '[PLACEHOLDER: Fix 2 for LCP Option A]',
-          '[PLACEHOLDER: Fix 3 for LCP Option A]',
-        ],
-        score: '[??]',
-        label: '[Option A]',
       },
       b: {
         title: '[PLACEHOLDER Option B]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for LCP Option B]',
-          '[PLACEHOLDER: Fix 2 for LCP Option B]',
-          '[PLACEHOLDER: Fix 3 for LCP Option B]',
-        ],
-        score: '[??]',
-        label: '[Option B]',
       },
     },
   },
@@ -235,7 +182,6 @@ export const METRICS: MetricsData = {
     fullName: 'Total Blocking Time',
     weight: 30,
     color: '#a855f7',
-    day: 4,
     floor: 'Floor 4',
     thresholds: ['200 ms', '600 ms'],
     formula: 'Sum of blocking time beyond 50ms',
@@ -251,25 +197,11 @@ export const METRICS: MetricsData = {
         title: '[PLACEHOLDER Option A]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for TBT Option A]',
-          '[PLACEHOLDER: Fix 2 for TBT Option A]',
-          '[PLACEHOLDER: Fix 3 for TBT Option A]',
-        ],
-        score: '[??]',
-        label: '[Option A]',
       },
       b: {
         title: '[PLACEHOLDER Option B]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for TBT Option B]',
-          '[PLACEHOLDER: Fix 2 for TBT Option B]',
-          '[PLACEHOLDER: Fix 3 for TBT Option B]',
-        ],
-        score: '[??]',
-        label: '[Option B]',
       },
     },
   },
@@ -280,7 +212,6 @@ export const METRICS: MetricsData = {
     fullName: 'Speed Index',
     weight: 10,
     color: '#ec4899',
-    day: 5,
     floor: 'Floor 5',
     thresholds: ['3.4 sec', '5.8 sec'],
     formula: 'How quickly content is visually displayed',
@@ -296,25 +227,11 @@ export const METRICS: MetricsData = {
         title: '[PLACEHOLDER Option A]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for SI Option A]',
-          '[PLACEHOLDER: Fix 2 for SI Option A]',
-          '[PLACEHOLDER: Fix 3 for SI Option A]',
-        ],
-        score: '[??]',
-        label: '[Option A]',
       },
       b: {
         title: '[PLACEHOLDER Option B]',
         subtitle: '[PLACEHOLDER subtitle]',
         keywords: ['[Keyword 1]', '[Keyword 2]'],
-        fixes: [
-          '[PLACEHOLDER: Fix 1 for SI Option B]',
-          '[PLACEHOLDER: Fix 2 for SI Option B]',
-          '[PLACEHOLDER: Fix 3 for SI Option B]',
-        ],
-        score: '[??]',
-        label: '[Option B]',
       },
     },
   },
@@ -362,7 +279,7 @@ export function getMetricOption(
 
 /**
  * Get vote data structure for WinnerDisplay component
- * Returns format: { A: { title, fixes }, B: { title, fixes } }
+ * Returns format: { A: { title }, B: { title } }
  */
 export function getVoteData(metricIndex: number) {
   const metric = getMetricByIndex(metricIndex)
@@ -370,30 +287,9 @@ export function getVoteData(metricIndex: number) {
   return {
     A: {
       title: metric.options.a.title,
-      fixes: metric.options.a.fixes,
     },
     B: {
       title: metric.options.b.title,
-      fixes: metric.options.b.fixes,
-    },
-  }
-}
-
-/**
- * Get score data structure for ApplicationDisplay component
- * Returns format: { A: { score, label }, B: { score, label } }
- */
-export function getScoreData(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
-  return {
-    A: {
-      score: metric.options.a.score,
-      label: metric.options.a.label,
-    },
-    B: {
-      score: metric.options.b.score,
-      label: metric.options.b.label,
     },
   }
 }
@@ -430,32 +326,3 @@ export function getVoteProps(metricIndex: number) {
     voteIndex: metric.index,
   }
 }
-
-/**
- * Get ApplicationDisplay props for a metric
- */
-export function getApplicationDisplayProps(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
-  return {
-    voteIndex: metric.index,
-    category: metric.name,
-    floor: metric.floor,
-  }
-}
-
-// ===========================================
-// Backward Compatibility
-// ===========================================
-
-/**
- * Existing PERFORMANCE_METRICS format for backward compatibility
- * Components can gradually migrate to METRICS
- */
-export const PERFORMANCE_METRICS = METRICS_LIST.map((m) => ({
-  index: m.index,
-  name: m.name,
-  fullName: m.fullName,
-  weight: m.weight,
-  color: m.color,
-})) as const

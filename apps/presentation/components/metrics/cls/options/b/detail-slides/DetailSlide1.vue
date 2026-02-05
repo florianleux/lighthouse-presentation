@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import DetailSlide from '../../../../../../components/DetailSlide.vue'
-import CodeSnippet from '../../../../../../components/CodeSnippet.vue'
-
 const codeExample = `<div
   id="adContainer"
   style="min-height: 250px; min-width: 300px;"

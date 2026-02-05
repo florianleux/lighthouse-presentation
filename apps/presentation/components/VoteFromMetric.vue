@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Vote from './Vote.vue'
 import { getVoteProps } from '../../../shared/metrics-data'
 import { computed } from 'vue'
 

@@ -48,12 +48,8 @@ export const HEARTBEAT_CONFIG = {
 
 // Performance metrics - Re-exported from centralized metrics-data.ts
 // Order: CLS (0) → FCP (1) → LCP (2) → TBT (3) → SI (4)
-export { PERFORMANCE_METRICS, METRICS, METRICS_LIST } from './metrics-data'
+export { METRICS, METRICS_LIST } from './metrics-data'
 export type { MetricConfig, MetricOption, MetricName } from './metrics-data'
-
-// Backward compatibility alias
-import { PERFORMANCE_METRICS as _PERFORMANCE_METRICS } from './metrics-data'
-export const LIGHTHOUSE_CATEGORIES = _PERFORMANCE_METRICS
 
 // Avatar configuration
 export const AVATAR_CONFIG = {

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import ChoiceOption from './ChoiceOption.vue'
-
 // Type that allows 1 to 4 keywords
 type Keywords = [string] | [string, string] | [string, string, string] | [string, string, string, string]
 

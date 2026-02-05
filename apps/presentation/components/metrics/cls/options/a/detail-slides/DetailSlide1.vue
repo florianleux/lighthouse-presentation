@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import DetailSlide from '../../../../../../components/DetailSlide.vue'
-
 const htmlBeforeCodeExample = `<img
   src="/banner.jpg"
   alt="Banner image"
