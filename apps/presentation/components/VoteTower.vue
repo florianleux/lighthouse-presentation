@@ -1,27 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useNav } from '@slidev/client'
-import { voteStore, isVoteSlide } from '../setup/main'
+import { voteStore } from '../setup/main'
+import { METRICS_LIST } from '../../../shared/metrics-data'
 
-const { currentSlideNo } = useNav()
+// Floors from metrics data (CLS, FCP, LCP, TBT, SI)
+const floors = METRICS_LIST.map(m => ({
+  label: m.name,
+  index: m.index,
+  color: m.color
+}))
 
-// Slides où on cache la tour : intro (1-8), DAY titles (9, 18, 27, 36)
-const HIDDEN_INTRO_SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36]
-
-const isVisible = computed(() => {
-  const slide = currentSlideNo.value
-  return !HIDDEN_INTRO_SLIDES.includes(slide) && !isVoteSlide(slide)
-})
-
-// Labels pour chaque étage (du bas vers le haut)
-const floors = [
-  { label: 'Perf', index: 0 },
-  { label: 'A11y', index: 1 },
-  { label: 'BP', index: 2 },
-  { label: 'SEO', index: 3 }
-]
-
-// Inversé pour afficher du haut vers le bas (SEO en haut)
+// Reversed for display (SI at top, CLS at bottom)
 const floorsReversed = computed(() => [...floors].reverse())
 
 function getChoice(index: number) {
@@ -37,44 +26,27 @@ function getColor(index: number) {
 </script>
 
 <template>
-  <Transition name="fade">
+  <div class="h-full flex flex-col gap-1">
+    <!-- Lanterne (si tous les votes sont faits) -->
     <div
-      v-if="isVisible"
-      class="fixed bottom-4 right-4 z-50 flex flex-col gap-1"
+      v-if="voteStore.path.every(p => p !== null)"
+      class="w-12 h-6 shrink-0 bg-yellow-400 rounded-t-full flex items-center justify-center text-xs"
     >
-      <!-- Lanterne (si tous les votes sont faits) -->
-      <div
-        v-if="voteStore.path.every(p => p !== null)"
-        class="w-12 h-6 bg-yellow-400 rounded-t-full flex items-center justify-center text-xs"
-      >
-        💡
-      </div>
-
-      <!-- Étages (SEO en haut, Perf en bas) -->
-      <div
-        v-for="floor in floorsReversed"
-        :key="floor.index"
-        class="w-12 h-10 flex flex-col items-center justify-center rounded text-xs font-bold transition-all duration-300"
-        :class="getColor(floor.index)"
-      >
-        <span class="text-[10px] opacity-70">{{ floor.label }}</span>
-        <span class="text-lg">{{ getChoice(floor.index) }}</span>
-      </div>
-
-      <!-- Fondation -->
-      <div class="w-14 h-3 bg-gray-800 rounded-b -mx-1" />
+      💡
     </div>
-  </Transition>
+
+    <!-- Étages (SI en haut, CLS en bas) -->
+    <div
+      v-for="floor in floorsReversed"
+      :key="floor.index"
+      class="w-12 flex-1 flex flex-col items-center justify-center rounded text-xs font-bold transition-all duration-300"
+      :class="getColor(floor.index)"
+    >
+      <span class="text-[10px] opacity-70">{{ floor.label }}</span>
+      <span class="text-lg">{{ getChoice(floor.index) }}</span>
+    </div>
+
+    <!-- Fondation -->
+    <div class="w-14 h-3 shrink-0 bg-gray-800 rounded-b -mx-1" />
+  </div>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>

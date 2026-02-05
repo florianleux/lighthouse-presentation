@@ -160,8 +160,6 @@ At every step, we will decide which optimization to apply, following our instinc
 layout: center
 ---
 
-# DAY 1
-
 ---
 
 <MetricIntro metric="cls">
@@ -193,10 +191,6 @@ layout: center
 ---
 
 <DetailSlideLoader metric="cls" :slide-index="2" />
-
----
-
-# DAY 2
 
 ---
 
@@ -236,24 +230,16 @@ layout: center
 </MetricIntro>
 
 ---
-
-# Day 2: The Choice
-
 <ChoiceFromMetric :metric-index="1" />
 
 ---
 layout: center
 ---
 
-# Day 2: Vote
-
-## FCP - First Contentful Paint
 
 <VoteFromMetric :metric-index="1" />
 
 ---
-
-# Day 2: Winning Option
 
 <WinnerDisplay :vote-index="1" />
 
@@ -266,14 +252,10 @@ layout: center
 <DetailSlideLoader metric="fcp" :slide-index="2" />
 
 ---
-# DAY 3
----
 
 <MetricIntro metric="lcp" />
 
 ---
-
-# Day 3: The Choice
 
 <ChoiceFromMetric :metric-index="2" />
 
@@ -281,15 +263,9 @@ layout: center
 layout: center
 ---
 
-# Day 3: Vote
-
-## LCP - Largest Contentful Paint
-
 <VoteFromMetric :metric-index="2" />
 
 ---
-
-# Day 3: Winning Option
 
 <WinnerDisplay :vote-index="2" />
 
@@ -303,15 +279,9 @@ layout: center
 
 ---
 
-# DAY 4
-
----
-
 <MetricIntro metric="tbt" />
 
 ---
-
-# Day 4: The Choice
 
 <ChoiceFromMetric :metric-index="3" />
 
@@ -319,15 +289,9 @@ layout: center
 layout: center
 ---
 
-# Day 4: Vote
-
-## TBT - Total Blocking Time
-
 <VoteFromMetric :metric-index="3" />
 
 ---
-
-# Day 4: Winning Option
 
 <WinnerDisplay :vote-index="3" />
 
@@ -341,15 +305,9 @@ layout: center
 
 ---
 
-# DAY 5
-
----
-
 <MetricIntro metric="si" />
 
 ---
-
-# Day 5: The Choice
 
 <ChoiceFromMetric :metric-index="4" />
 
@@ -357,15 +315,9 @@ layout: center
 layout: center
 ---
 
-# Day 5: Vote
-
-## SI - Speed Index
-
 <VoteFromMetric :metric-index="4" />
 
 ---
-
-# Day 5: Winning Option
 
 <WinnerDisplay :vote-index="4" />
 

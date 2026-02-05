@@ -2,6 +2,14 @@ import { reactive, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { useAbly } from '../composables/useAbly'
 import { ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
+
+// Debug mode detection (?debug in URL)
+function isDebugMode(): boolean {
+  if (typeof window === 'undefined') return false
+  return new URLSearchParams(window.location.search).has('debug')
+}
+
+export const debugMode = isDebugMode()
 import type {
   CrewMember,
   VoteResults,
@@ -116,7 +124,8 @@ export const sessionStore = reactive({
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
 
   // Manual mode (presenter picks A/B directly, no audience vote)
-  manualMode: false,
+  // Enabled by default in debug mode (?debug URL param)
+  manualMode: debugMode,
 
   // Actions
   addCrewMember(member: CrewMember) {
@@ -190,7 +199,7 @@ export const sessionStore = reactive({
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
-    this.manualMode = false
+    this.manualMode = debugMode // Keep manual mode in debug
     voteStore.reset()
     clearVoteSlideRegistry()
   },
@@ -255,6 +264,11 @@ export function getAbly() {
 }
 
 export default defineAppSetup(({ app }) => {
+  // Debug mode indicator
+  if (debugMode) {
+    console.log('[Debug] Debug mode enabled - manual vote mode active')
+  }
+
   // Make stores globally accessible
   app.provide('voteStore', voteStore)
   app.provide('sessionStore', sessionStore)

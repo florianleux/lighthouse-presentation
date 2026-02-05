@@ -2,9 +2,10 @@
 import { ref, watchEffect, computed } from 'vue'
 import { codeToHtml } from 'shiki'
 
-type Size = 'small' | 'medium' | 'large'
+type Size = 'tiny' | 'small' | 'medium' | 'large'
 
 const sizePresets: Record<Size, string> = {
+  tiny: '0.6em',
   small: '0.75em',
   medium: '1em',
   large: '1.25em',

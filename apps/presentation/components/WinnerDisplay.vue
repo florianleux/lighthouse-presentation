@@ -20,28 +20,15 @@ const winner = computed(() => {
 <template>
   <div
     v-if="choice && winner"
-    class="mt-4"
+    class=" flex flex-col items-left h-full"
   >
-    <div class="text-lg mb-4 flex flex-col items-center">
-      <div>The crew has voted for</div>
-      <div class="font-bold font-title text-5xl ">{{ winner.title }}</div>
+    <div>The crew has voted for</div>
+    <div class="font-bold font-title text-5xl ">{{ winner.title }}</div>
+
+    <div class="absolute right-20 bottom-20">
+      <VoteTower />
     </div>
-    <div
-      class="p-6 border-2 rounded-lg"
-      :class="choice === 'A' ? 'border-blue-500' : 'border-amber-500'"
-    >
-      <div class="text-xl font-bold mb-4">{{ winner.title }}</div>
-      <ul class="space-y-2">
-        <li
-          v-for="fix in winner.fixes"
-          :key="fix"
-          class="flex items-start gap-2"
-        >
-          <span class="text-green-500">✓</span>
-          <span>{{ fix }}</span>
-        </li>
-      </ul>
-    </div>
+
   </div>
   <div
     v-else
