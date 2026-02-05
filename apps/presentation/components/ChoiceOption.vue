@@ -1,0 +1,64 @@
+<script setup lang="ts">
+// Type that allows 1 to 4 keywords
+type Keywords = [string] | [string, string] | [string, string, string] | [string, string, string, string]
+
+defineProps<{
+  letter: 'A' | 'B'
+  title: string
+  subtitle: string
+  keywords: Keywords
+}>()
+
+// Color classes based on letter
+const colorClasses = {
+  A: {
+    border: 'border-blue-500',
+    bg: 'bg-blue-500/5',
+    text: 'text-blue-500'
+  },
+  B: {
+    border: 'border-amber-500',
+    bg: 'bg-amber-500/5',
+    text: 'text-amber-500'
+  }
+}
+</script>
+
+<template>
+  <div
+    class="flex flex-col rounded-xl p-6 border-4"
+    :class="[colorClasses[letter].border, colorClasses[letter].bg]"
+  >
+    <div class="mb-4">
+      <div class="flex flex-col items-center mb-4">
+        <div
+          class="text-xl font-bold font-title"
+          :class="colorClasses[letter].text"
+        >
+          Option {{ letter }}
+        </div>
+        <div class="text-4xl font-bold font-title">{{ title }}</div>
+        <div class="text-lg italic text-center">
+          {{ subtitle }}
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      v-if="keywords.length > 0"
+      class="grid grid-cols-2 gap-4"
+    >
+      <div
+        v-for="(keyword, index) in keywords"
+        :key="index"
+        class="text-2xl text-center p-3"
+        :class="[
+          index === keywords.length - 1 && keywords.length % 2 === 1 ? 'col-span-2' : ''
+        ]"
+      >
+        {{ keyword }}
+      </div>
+    </div>
+  </div>
+</template>
