@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { METRICS } from '../../../../../../../../shared/metrics-data'
+import DetailSlide from '../../../../../../components/DetailSlide.vue'
 import CodeSnippet from '../../../../../../components/CodeSnippet.vue'
-
-const metric = METRICS.cls
-const option = metric.options.b
 
 const codeExample = `<div
   id="adContainer"
@@ -14,18 +11,7 @@ const codeExample = `<div
 </script>
 
 <template>
-  <div class="h-full flex flex-col gap-8 ">
-    <div>
-      <div class=" text-4xl font-title">
-        {{ option.title }}
-      </div>
-      <div
-        v-if="option.keywords[0]"
-        class="text-left text-lg"
-      >
-        {{ option.keywords.join(' and ') }}
-      </div>
-    </div>
+  <DetailSlide metric="cls" option="b">
     <div class="items-center flex-grow justify-center flex mt-5 text-2xl gap-12">
       <div>
         Not designed by us
@@ -49,8 +35,5 @@ const codeExample = `<div
         />
       </div>
     </div>
-    <div>
-
-    </div>
-  </div>
+  </DetailSlide>
 </template>

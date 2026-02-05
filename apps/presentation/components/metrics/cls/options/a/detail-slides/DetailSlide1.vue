@@ -1,17 +1,10 @@
 <script setup lang="ts">
-import { METRICS } from '../../../../../../../../shared/metrics-data'
-
-const metric = METRICS.cls
-const option = metric.options.a
+import DetailSlide from '../../../../../../components/DetailSlide.vue'
 </script>
 
 <template>
-  <div class="h-full flex flex-col items-center justify-center p-8">
-    <h2 class="text-4xl font-bold mb-8" :style="{ color: metric.color }">
-      {{ option.title }}
-    </h2>
-
-    <div class="max-w-4xl w-full space-y-8">
+  <DetailSlide metric="cls" option="a">
+    <div class="max-w-4xl w-full space-y-8 mx-auto">
       <section>
         <h3 class="text-2xl font-semibold mb-4">Image Optimization</h3>
         <div class="bg-gray-800 rounded-lg p-6">
@@ -41,5 +34,5 @@ const option = metric.options.a
         </p>
       </section>
     </div>
-  </div>
+  </DetailSlide>
 </template>

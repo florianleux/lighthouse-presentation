@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import { METRICS } from '../../../../../../../../shared/metrics-data'
-
-const metric = METRICS.lcp
-const option = metric.options.a
+import DetailSlide from '../../../../../../components/DetailSlide.vue'
 </script>
 
 <template>
-  <div class="h-full flex flex-col items-center justify-center p-8">
-    <h2 class="text-4xl font-bold mb-8" :style="{ color: metric.color }">
-      {{ option.title }}
-    </h2>
-
-    <div class="max-w-4xl w-full">
+  <DetailSlide metric="lcp" option="a">
+    <div class="max-w-4xl w-full mx-auto">
       <p class="text-xl text-gray-300 text-center">
         [PLACEHOLDER: Content for LCP Option A - Slide 2]
       </p>
     </div>
-  </div>
+  </DetailSlide>
 </template>
