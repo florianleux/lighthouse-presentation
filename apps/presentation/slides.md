@@ -157,8 +157,8 @@ One day = one floor = one Performance metric
 At every step, we will decide which optimization to apply, following our instinct!
 
 ---
-layout: center
----
+
+<DayIntro :day="1" metric="cls" />
 
 ---
 
@@ -175,8 +175,6 @@ layout: center
 <ChoiceFromMetric :metric-index="0" />
 
 ---
-layout: center
----
 
 <VoteFromMetric :metric-index="0" />
 
@@ -191,6 +189,10 @@ layout: center
 ---
 
 <DetailSlideLoader metric="cls" :slide-index="2" />
+
+---
+
+<DayIntro :day="2" metric="fcp" />
 
 ---
 
@@ -233,9 +235,6 @@ layout: center
 <ChoiceFromMetric :metric-index="1" />
 
 ---
-layout: center
----
-
 
 <VoteFromMetric :metric-index="1" />
 
@@ -253,14 +252,16 @@ layout: center
 
 ---
 
+<DayIntro :day="3" metric="lcp" />
+
+---
+
 <MetricIntro metric="lcp" />
 
 ---
 
 <ChoiceFromMetric :metric-index="2" />
 
----
-layout: center
 ---
 
 <VoteFromMetric :metric-index="2" />
@@ -279,6 +280,10 @@ layout: center
 
 ---
 
+<DayIntro :day="4" metric="tbt" />
+
+---
+
 <MetricIntro metric="tbt" />
 
 ---
@@ -286,9 +291,6 @@ layout: center
 <ChoiceFromMetric :metric-index="3" />
 
 ---
-layout: center
----
-
 <VoteFromMetric :metric-index="3" />
 
 ---
@@ -305,14 +307,16 @@ layout: center
 
 ---
 
+<DayIntro :day="5" metric="si" />
+
+---
+
 <MetricIntro metric="si" />
 
 ---
 
 <ChoiceFromMetric :metric-index="4" />
 
----
-layout: center
 ---
 
 <VoteFromMetric :metric-index="4" />
@@ -352,8 +356,6 @@ layout: center
   (TBD)
 </div>
 
----
-layout: center
 ---
 
 # Questions?
