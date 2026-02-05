@@ -1,11 +1,14 @@
 <script setup lang="ts">
-// TBT Option B - Detail Slide 2
+import { METRICS } from '../../../../../../../../shared/metrics-data'
+
+const metric = METRICS.tbt
+const option = metric.options.b
 </script>
 
 <template>
   <div class="h-full flex flex-col items-center justify-center p-8">
-    <h2 class="text-4xl font-bold mb-8 text-purple-500">
-      TBT Option B (continued)
+    <h2 class="text-4xl font-bold mb-8" :style="{ color: metric.color }">
+      {{ option.title }}
     </h2>
 
     <div class="max-w-4xl w-full">

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-// CLS Option A - Detail Slide 1
-// First-party assets: Images & Fonts optimization
+import { METRICS } from '../../../../../../../../shared/metrics-data'
+
+const metric = METRICS.cls
+const option = metric.options.a
 </script>
 
 <template>
   <div class="h-full flex flex-col items-center justify-center p-8">
-    <h2 class="text-4xl font-bold mb-8 text-orange-500">
-      First-party Assets
+    <h2 class="text-4xl font-bold mb-8" :style="{ color: metric.color }">
+      {{ option.title }}
     </h2>
 
     <div class="max-w-4xl w-full space-y-8">

@@ -1,12 +1,14 @@
 <script setup lang="ts">
-// CLS Option B - Detail Slide 2
-// Third-party content: Additional optimizations
+import { METRICS } from '../../../../../../../../shared/metrics-data'
+
+const metric = METRICS.cls
+const option = metric.options.b
 </script>
 
 <template>
   <div class="h-full flex flex-col items-center justify-center p-8">
-    <h2 class="text-4xl font-bold mb-8 text-orange-500">
-      Third-party Content (continued)
+    <h2 class="text-4xl font-bold mb-8" :style="{ color: metric.color }">
+      {{ option.title }}
     </h2>
 
     <div class="max-w-4xl w-full">
