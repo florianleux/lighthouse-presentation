@@ -198,6 +198,14 @@ layout: center
 
 ---
 
+<DetailSlideLoader metric="cls" :slide-index="1" />
+
+---
+
+<DetailSlideLoader metric="cls" :slide-index="2" />
+
+---
+
 # Day 1: Application
 
 <ApplicationDisplayFromMetric :metric-index="0" />
@@ -276,6 +284,14 @@ layout: center
 
 ---
 
+<DetailSlideLoader metric="fcp" :slide-index="1" />
+
+---
+
+<DetailSlideLoader metric="fcp" :slide-index="2" />
+
+---
+
 # Day 2: Application
 
 <ApplicationDisplayFromMetric :metric-index="1" />
@@ -334,6 +350,14 @@ layout: center
 # Day 3: Winning Option
 
 <WinnerDisplay :vote-index="2" />
+
+---
+
+<DetailSlideLoader metric="lcp" :slide-index="1" />
+
+---
+
+<DetailSlideLoader metric="lcp" :slide-index="2" />
 
 ---
 
@@ -398,6 +422,14 @@ layout: center
 
 ---
 
+<DetailSlideLoader metric="tbt" :slide-index="1" />
+
+---
+
+<DetailSlideLoader metric="tbt" :slide-index="2" />
+
+---
+
 # Day 4: Application
 
 <ApplicationDisplayFromMetric :metric-index="3" />
@@ -456,6 +488,14 @@ layout: center
 # Day 5: Winning Option
 
 <WinnerDisplay :vote-index="4" />
+
+---
+
+<DetailSlideLoader metric="si" :slide-index="1" />
+
+---
+
+<DetailSlideLoader metric="si" :slide-index="2" />
 
 ---
 
