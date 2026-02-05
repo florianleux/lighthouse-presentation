@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { useAbly } from '../composables/useAbly'
-import { VOTE_CONFIG, ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
+import { ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
 import type {
   CrewMember,
   VoteResults,
@@ -41,8 +41,21 @@ function generateKeynoteId(): string {
 // Load initial session data
 const initialSessionData = loadSessionData()
 
-// Vote slides (navigation blocked)
-export const VOTE_SLIDES = VOTE_CONFIG.SLIDES as unknown as number[]
+// Dynamic vote slide registry (slideNo → voteIndex)
+// Populated at runtime when Vote components mount
+export const voteSlideRegistry = reactive(new Map<number, number>())
+
+export function registerVoteSlide(slideNo: number, voteIndex: number) {
+  voteSlideRegistry.set(slideNo, voteIndex)
+}
+
+export function isVoteSlide(slideNo: number): boolean {
+  return voteSlideRegistry.has(slideNo)
+}
+
+export function getVoteIndexForSlide(slideNo: number): number | undefined {
+  return voteSlideRegistry.get(slideNo)
+}
 
 // Global vote store
 export const voteStore = reactive({

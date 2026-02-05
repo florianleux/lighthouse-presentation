@@ -4,6 +4,7 @@ import { useNav } from '@slidev/client'
 import { voteStore, sessionStore, getAbly } from '../setup/main'
 import { ABLY_CHANNELS, VOTE_CONFIG } from '../../../shared/constants'
 import type { VoteStartedMessage } from '../../../shared/types'
+import VoteProportionBar from './VoteProportionBar.vue'
 
 const props = defineProps<{
   voteIndex: number
@@ -21,12 +22,6 @@ const isVoteActive = computed(() =>
 
 // Vote results for this vote
 const results = computed(() => sessionStore.voteResults[props.voteIndex])
-
-// Get crew member name by odientId
-function getCrewName(odientId: string): string {
-  const member = sessionStore.crew.find(m => m.odientId === odientId)
-  return member?.name || odientId.slice(0, 8)
-}
 
 // Is this vote ended (show results)?
 const isVoteEnded = computed(() =>
@@ -251,44 +246,14 @@ function vote(choice: 'A' | 'B') {
         </button>
       </div>
 
-      <!-- Real-time vote results -->
-      <div
-        v-if="results.A.length > 0 || results.B.length > 0"
-        class="grid grid-cols-2 gap-8 mb-6"
-      >
-        <div class="p-4 border-2 border-blue-500 rounded-lg">
-          <h3 class="text-lg font-bold text-blue-500 mb-2">A - {{ labelA }} ({{ results.A.length }})</h3>
-          <div class="flex flex-wrap gap-2">
-            <span
-              v-for="odientId in results.A"
-              :key="odientId"
-              class="px-3 py-1 bg-blue-500 text-white text-sm rounded-full"
-            >
-              {{ getCrewName(odientId) }}
-            </span>
-          </div>
-          <p
-            v-if="results.A.length === 0"
-            class="text-gray-400 text-sm"
-          >No votes yet</p>
-        </div>
-        <div class="p-4 border-2 border-amber-500 rounded-lg">
-          <h3 class="text-lg font-bold text-amber-500 mb-2">B - {{ labelB }} ({{ results.B.length }})</h3>
-          <div class="flex flex-wrap gap-2">
-            <span
-              v-for="odientId in results.B"
-              :key="odientId"
-              class="px-3 py-1 bg-amber-500 text-white text-sm rounded-full"
-            >
-              {{ getCrewName(odientId) }}
-            </span>
-          </div>
-          <p
-            v-if="results.B.length === 0"
-            class="text-gray-400 text-sm"
-          >No votes yet</p>
-        </div>
-      </div>
+      <!-- Vote proportion bar -->
+      <VoteProportionBar
+        v-if="isVoteActive || isVoteEnded"
+        :vote-index="voteIndex"
+        :label-a="labelA"
+        :label-b="labelB"
+        height="lg"
+      />
 
     </template>
   </div>

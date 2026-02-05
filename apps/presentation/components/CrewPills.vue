@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { sessionStore, VOTE_SLIDES } from '../setup/main'
+import { sessionStore, isVoteSlide } from '../setup/main'
 import AvatarPreview from './AvatarPreview.vue'
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const crew = computed(() => sessionStore.crew)
 
 // Show only on slide 1 or vote slides
 const isVisible = computed(() => {
-  return props.currentSlide === 1 || VOTE_SLIDES.includes(props.currentSlide)
+  return props.currentSlide === 1 || isVoteSlide(props.currentSlide)
 })
 </script>
 

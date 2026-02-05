@@ -5,7 +5,7 @@ import NavigationBlocker from './components/NavigationBlocker.vue'
 import VoteTower from './components/VoteTower.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import CrewPills from './components/CrewPills.vue'
-import { sessionStore, voteStore, VOTE_SLIDES, publishSessionState } from './setup/main'
+import { sessionStore, voteStore, getVoteIndexForSlide, publishSessionState } from './setup/main'
 
 const { go, currentSlideNo } = useNav()
 
@@ -18,8 +18,8 @@ watch(currentSlideNo, (slide) => {
   }
 
   // Auto-skip completed vote slides
-  const voteIndex = VOTE_SLIDES.indexOf(slide)
-  if (voteIndex !== -1 && voteStore.path[voteIndex] !== null) {
+  const voteIndex = getVoteIndexForSlide(slide)
+  if (voteIndex !== undefined && voteStore.path[voteIndex] !== null) {
     // Vote already done, skip forward
     nextTick(() => go(slide + 1))
   }

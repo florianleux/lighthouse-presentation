@@ -29,7 +29,6 @@ export const VOTE_CONFIG = {
   DURATION_SECONDS: 20,  // Duration of a vote in seconds
   GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
   TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
-  SLIDES: [15, 23, 31, 39] as const,  // Vote slide numbers (CLS, LCP, FCP, TBT)
 } as const
 
 // Poll configuration

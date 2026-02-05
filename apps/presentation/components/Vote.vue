@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { useNav } from '@slidev/client'
 import VoteButtons from './VoteButtons.vue'
+import { registerVoteSlide } from '../setup/main'
 
-defineProps<{
+const props = defineProps<{
   titleA: string
   titleB: string
   voteIndex: number
   nextSlide: number
 }>()
+
+const { currentSlideNo } = useNav()
+
+// Register this slide as a vote slide when mounted
+onMounted(() => {
+  registerVoteSlide(currentSlideNo.value, props.voteIndex)
+})
 </script>
 
 <template>

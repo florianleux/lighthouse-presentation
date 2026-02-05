@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useNav } from '@slidev/client'
-import { voteStore, VOTE_SLIDES } from '../setup/main'
+import { voteStore, isVoteSlide } from '../setup/main'
 
 const { currentSlideNo } = useNav()
 
-// Slides où on cache la tour : intro (1-8), DAY titles (9, 18, 27, 36), + slides de vote
-const HIDDEN_SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36, ...VOTE_SLIDES]
+// Slides où on cache la tour : intro (1-8), DAY titles (9, 18, 27, 36)
+const HIDDEN_INTRO_SLIDES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36]
 
-const isVisible = computed(() => !HIDDEN_SLIDES.includes(currentSlideNo.value))
+const isVisible = computed(() => {
+  const slide = currentSlideNo.value
+  return !HIDDEN_INTRO_SLIDES.includes(slide) && !isVoteSlide(slide)
+})
 
 // Labels pour chaque étage (du bas vers le haut)
 const floors = [

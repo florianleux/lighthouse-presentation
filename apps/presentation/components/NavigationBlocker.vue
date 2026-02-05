@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useNav } from '@slidev/client'
-import { VOTE_SLIDES, sessionStore, voteStore } from '../setup/main'
+import { getVoteIndexForSlide, sessionStore, voteStore } from '../setup/main'
 
 const { currentSlideNo } = useNav()
 
@@ -23,9 +23,9 @@ function displayToast(message: string) {
 
 // Check blocking conditions
 function checkBlockingState() {
-  const voteIndex = VOTE_SLIDES.indexOf(currentSlideNo.value)
+  const voteIndex = getVoteIndexForSlide(currentSlideNo.value)
 
-  if (voteIndex !== -1) {
+  if (voteIndex !== undefined) {
     // It's a vote slide - check if vote already done
     if (voteStore.path[voteIndex] !== null) {
       // Vote already done - don't block, will auto-skip
