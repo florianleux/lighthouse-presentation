@@ -164,20 +164,10 @@ layout: center
 
 ---
 
-<MetricIntro
-  h1="CLS"
-  h2="Cumulative Layout Shift"
-  :weight="25"
-  :thresholds="[0.1, 0.25]"
-  h3="Impact fraction × Distance fraction"
-  :tags="['Core Web Vital : Impact SEO !', 'High CLS destroys trust','User initiated shifts are excluded','Only the worst burst of shift counts']"
-  :business-info="[
-    { company: 'Yahoo! Japan', comment: 'Reduced CLS by 0.2 → 15% increase in page views' },
-  ]"
->
+<MetricIntro metric="cls">
   <template #right>
     <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
-      Video Placeholder - FCP
+      Video Placeholder - CLS
     </div>
   </template>
 </MetricIntro>
@@ -206,26 +196,11 @@ layout: center
 
 ---
 
-# Day 1: Application
-
-<ApplicationDisplayFromMetric :metric-index="0" />
-
----
-layout: center
----
-
 # DAY 2
 
 ---
 
-<MetricIntro
-  h1="FCP"
-  h2="First Contentful Paint"
-  :weight="10"
-  :thresholds="['1.8 sec', '3.0 sec']"
-  h3="Text, image, SVG or canvas"
-  :tags="['All about perception', 'Low FCP is reassuring']"
->
+<MetricIntro metric="fcp">
   <template #bottom>
     <div class="mt-20 relative">
           <div class="flex justify-around mb-2 text-sm font-semibold">
@@ -291,43 +266,10 @@ layout: center
 <DetailSlideLoader metric="fcp" :slide-index="2" />
 
 ---
-
-# Day 2: Application
-
-<ApplicationDisplayFromMetric :metric-index="1" />
-
----
-layout: center
----
-
 # DAY 3
-
 ---
 
-# Day 3: LCP
-
-<div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">25%</div>
-</div>
-
-## Largest Contentful Paint
-
-<div class="text-sm opacity-70 mb-4">
-  Time until the largest content element is rendered. Lower is better.
-</div>
-
-<div class="grid grid-cols-2 gap-6 pt-4">
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">What it measures</div>
-    <div class="text-sm opacity-70">
-      How quickly the main content of a page is loaded and visible to users.
-    </div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 2.5s</div>
-  </div>
-</div>
+<MetricIntro metric="lcp" />
 
 ---
 
@@ -361,42 +303,11 @@ layout: center
 
 ---
 
-# Day 3: Application
-
-<ApplicationDisplayFromMetric :metric-index="2" />
-
----
-layout: center
----
-
 # DAY 4
 
 ---
 
-# Day 4: TBT
-
-<div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">30%</div>
-</div>
-
-## Total Blocking Time
-
-<div class="text-sm opacity-70 mb-4">
-  Sum of all long tasks (>50ms) blocking the main thread. Lower is better.
-</div>
-
-<div class="grid grid-cols-2 gap-6 pt-4">
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">What it measures</div>
-    <div class="text-sm opacity-70">
-      How long the main thread is blocked, preventing user interaction.
-    </div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 200ms</div>
-  </div>
-</div>
+<MetricIntro metric="tbt" />
 
 ---
 
@@ -430,42 +341,11 @@ layout: center
 
 ---
 
-# Day 4: Application
-
-<ApplicationDisplayFromMetric :metric-index="3" />
-
----
-layout: center
----
-
 # DAY 5
 
 ---
 
-# Day 5: SI
-
-<div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">10%</div>
-</div>
-
-## Speed Index
-
-<div class="text-sm opacity-70 mb-4">
-  How quickly content is visually displayed during page load. Lower is better.
-</div>
-
-<div class="grid grid-cols-2 gap-6 pt-4">
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">What it measures</div>
-    <div class="text-sm opacity-70">
-      The average time at which visible parts of the page are displayed.
-    </div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 3.4s</div>
-  </div>
-</div>
+<MetricIntro metric="si" />
 
 ---
 
@@ -496,12 +376,6 @@ layout: center
 ---
 
 <DetailSlideLoader metric="si" :slide-index="2" />
-
----
-
-# Day 5: Application
-
-<ApplicationDisplayFromMetric :metric-index="4" />
 
 ---
 

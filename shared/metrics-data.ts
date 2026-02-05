@@ -399,23 +399,6 @@ export function getScoreData(metricIndex: number) {
 }
 
 /**
- * Get MetricIntro props for a metric
- */
-export function getMetricIntroProps(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
-  return {
-    h1: metric.name,
-    h2: metric.fullName,
-    weight: metric.weight,
-    thresholds: metric.thresholds,
-    h3: metric.formula,
-    tags: metric.tags,
-    businessInfo: metric.businessInfo,
-  }
-}
-
-/**
  * Get Choice props for a metric
  */
 export function getChoiceProps(metricIndex: number) {

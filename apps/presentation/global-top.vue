@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import NavigationBlocker from './components/NavigationBlocker.vue'
 import VoteTower from './components/VoteTower.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import CrewPills from './components/CrewPills.vue'
@@ -115,7 +114,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <NavigationBlocker />
   <CrewPills :current-slide="currentSlideNo" />
   <VoteTower />
   <AdminPanel
