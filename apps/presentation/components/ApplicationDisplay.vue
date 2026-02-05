@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { voteStore } from '../setup/main'
+import { getScoreData } from '../../../shared/metrics-data'
 
 const props = defineProps<{
   voteIndex: number
@@ -8,33 +9,14 @@ const props = defineProps<{
   floor: string
 }>()
 
-// Placeholder scores for 4 Performance metrics (CLS, LCP, FCP, TBT)
-// Note: These are "invented" scores for thought exercise purposes
-const scoreData = {
-  0: { // CLS - Cumulative Layout Shift
-    A: { score: '[??]', label: '[Option A]' },
-    B: { score: '[??]', label: '[Option B]' }
-  },
-  1: { // LCP - Largest Contentful Paint
-    A: { score: '[??]', label: '[Option A]' },
-    B: { score: '[??]', label: '[Option B]' }
-  },
-  2: { // FCP - First Contentful Paint
-    A: { score: '[??]', label: '[Option A]' },
-    B: { score: '[??]', label: '[Option B]' }
-  },
-  3: { // TBT - Total Blocking Time
-    A: { score: '[??]', label: '[Option A]' },
-    B: { score: '[??]', label: '[Option B]' }
-  }
-}
-
 const choice = computed(() => voteStore.getChoice(props.voteIndex))
 
 const result = computed(() => {
   const c = choice.value
   if (!c) return { score: '??', label: 'Non voté' }
-  return scoreData[props.voteIndex as keyof typeof scoreData][c as 'A' | 'B']
+  const scoreData = getScoreData(props.voteIndex)
+  if (!scoreData) return { score: '??', label: 'Non voté' }
+  return scoreData[c as 'A' | 'B']
 })
 
 // Single URL - no more branch system

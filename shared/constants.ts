@@ -46,16 +46,14 @@ export const HEARTBEAT_CONFIG = {
   TIMEOUT_MS: 15000,      // Timeout to consider a participant inactive (15s)
 } as const
 
-// Performance metrics (vote order) - All 4 votes are about Performance
-export const PERFORMANCE_METRICS = [
-  { index: 0, name: 'CLS', fullName: 'Cumulative Layout Shift', weight: 25, color: '#f97316' },
-  { index: 1, name: 'LCP', fullName: 'Largest Contentful Paint', weight: 25, color: '#3b82f6' },
-  { index: 2, name: 'FCP', fullName: 'First Contentful Paint', weight: 10, color: '#22c55e' },
-  { index: 3, name: 'TBT', fullName: 'Total Blocking Time', weight: 30, color: '#a855f7' },
-] as const
+// Performance metrics - Re-exported from centralized metrics-data.ts
+// Order: CLS (0) → FCP (1) → LCP (2) → TBT (3) → SI (4)
+export { PERFORMANCE_METRICS, METRICS, METRICS_LIST } from './metrics-data'
+export type { MetricConfig, MetricOption, MetricName } from './metrics-data'
 
 // Backward compatibility alias
-export const LIGHTHOUSE_CATEGORIES = PERFORMANCE_METRICS
+import { PERFORMANCE_METRICS as _PERFORMANCE_METRICS } from './metrics-data'
+export const LIGHTHOUSE_CATEGORIES = _PERFORMANCE_METRICS
 
 // Avatar configuration
 export const AVATAR_CONFIG = {

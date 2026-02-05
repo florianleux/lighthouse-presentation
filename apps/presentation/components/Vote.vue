@@ -8,7 +8,6 @@ const props = defineProps<{
   titleA: string
   titleB: string
   voteIndex: number
-  nextSlide: number
 }>()
 
 const { currentSlideNo } = useNav()
@@ -41,7 +40,6 @@ onMounted(() => {
       :vote-index="voteIndex"
       :label-a="titleA"
       :label-b="titleB"
-      :next-slide="nextSlide"
     />
   </div>
 </template>

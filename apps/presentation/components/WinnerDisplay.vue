@@ -1,93 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { voteStore } from '../setup/main'
+import { getVoteData } from '../../../shared/metrics-data'
 
 const props = defineProps<{
   voteIndex: number
 }>()
 
-// Vote options data for 4 Performance metrics (CLS, LCP, FCP, TBT)
-// Note: These are placeholder thought exercises treating BlackMarket as a real app
-const voteData = {
-  0: { // CLS - Cumulative Layout Shift
-    A: {
-      title: '[PLACEHOLDER Option A]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    },
-    B: {
-      title: '[PLACEHOLDER Option B]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    }
-  },
-  1: { // LCP - Largest Contentful Paint
-    A: {
-      title: '[PLACEHOLDER Option A]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    },
-    B: {
-      title: '[PLACEHOLDER Option B]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    }
-  },
-  2: { // FCP - First Contentful Paint
-    A: {
-      title: '[PLACEHOLDER Option A]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    },
-    B: {
-      title: '[PLACEHOLDER Option B]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    }
-  },
-  3: { // TBT - Total Blocking Time
-    A: {
-      title: '[PLACEHOLDER Option A]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    },
-    B: {
-      title: '[PLACEHOLDER Option B]',
-      fixes: [
-        '[PLACEHOLDER: Fix 1]',
-        '[PLACEHOLDER: Fix 2]',
-        '[PLACEHOLDER: Fix 3]'
-      ]
-    }
-  }
-}
-
 const choice = computed(() => voteStore.getChoice(props.voteIndex))
 const winner = computed(() => {
   const c = choice.value
   if (!c) return null
-  return voteData[props.voteIndex as keyof typeof voteData][c as 'A' | 'B']
+  const voteData = getVoteData(props.voteIndex)
+  if (!voteData) return null
+  return voteData[c as 'A' | 'B']
 })
 </script>
 

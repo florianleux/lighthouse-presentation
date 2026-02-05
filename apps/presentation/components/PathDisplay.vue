@@ -1,27 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { voteStore } from '../setup/main'
+import { METRICS_LIST, getScoreData } from '../../../shared/metrics-data'
 
-// Scores selon le choix A ou B pour chaque vote
-const scoreData = {
-  0: { A: 72, B: 78 }, // Performance
-  1: { A: 82, B: 88 }, // Accessibility
-  2: { A: 92, B: 89 }, // Best Practices
-  3: { A: 91, B: 95 }  // SEO
+// Get score for a specific vote based on choice
+function getScore(voteIndex: number): number | string {
+  const choice = voteStore.path[voteIndex]
+  if (!choice) return '??'
+  const scoreData = getScoreData(voteIndex)
+  if (!scoreData) return '??'
+  return scoreData[choice as 'A' | 'B'].score
 }
 
-const scores = computed(() => ({
-  performance: voteStore.path[0] ? scoreData[0][voteStore.path[0] as 'A' | 'B'] : '??',
-  accessibility: voteStore.path[1] ? scoreData[1][voteStore.path[1] as 'A' | 'B'] : '??',
-  bestPractices: voteStore.path[2] ? scoreData[2][voteStore.path[2] as 'A' | 'B'] : '??',
-  seo: voteStore.path[3] ? scoreData[3][voteStore.path[3] as 'A' | 'B'] : '??'
-}))
+// Computed scores for all 5 metrics
+const metricScores = computed(() =>
+  METRICS_LIST.map((metric) => ({
+    name: metric.name,
+    fullName: metric.fullName,
+    score: getScore(metric.index),
+    weight: metric.weight,
+  }))
+)
 
-const totalScore = computed(() => {
-  const s = scores.value
-  if (typeof s.performance === 'string') return '??'
-  return (s.performance as number) + (s.accessibility as number) + (s.bestPractices as number) + (s.seo as number)
-})
+// Check if all votes are complete
+const allVoted = computed(() => voteStore.path.every((v) => v !== null))
 </script>
 
 <template>
@@ -30,33 +32,26 @@ const totalScore = computed(() => {
       <div class="text-9xl">🗼</div>
     </div>
     <div>
-      <div class="text-xl font-bold mb-4">Votre chemin</div>
+      <div class="text-xl font-bold mb-4">Your path</div>
       <div class="flex gap-2 text-2xl mb-6">
-        <span :class="voteStore.path[0] === 'A' ? 'text-blue-500' : 'text-amber-500'">{{ voteStore.path[0] || '?' }}</span>
-        <span>→</span>
-        <span :class="voteStore.path[1] === 'A' ? 'text-blue-500' : 'text-amber-500'">{{ voteStore.path[1] || '?' }}</span>
-        <span>→</span>
-        <span :class="voteStore.path[2] === 'A' ? 'text-blue-500' : 'text-amber-500'">{{ voteStore.path[2] || '?' }}</span>
-        <span>→</span>
-        <span :class="voteStore.path[3] === 'A' ? 'text-blue-500' : 'text-amber-500'">{{ voteStore.path[3] || '?' }}</span>
+        <template v-for="(choice, index) in voteStore.path" :key="index">
+          <span v-if="index > 0">→</span>
+          <span :class="choice === 'A' ? 'text-blue-500' : choice === 'B' ? 'text-amber-500' : 'text-gray-400'">
+            {{ choice || '?' }}
+          </span>
+        </template>
       </div>
-      <div class="text-xl font-bold mb-4">Scores finaux <span class="text-base font-normal opacity-70">(total: {{ totalScore }})</span></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <div class="text-3xl font-bold" :class="typeof scores.performance === 'number' ? 'text-green-500' : 'text-gray-400'">{{ scores.performance }}</div>
-          <div>Performance</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" :class="typeof scores.accessibility === 'number' ? 'text-green-500' : 'text-gray-400'">{{ scores.accessibility }}</div>
-          <div>Accessibility</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" :class="typeof scores.bestPractices === 'number' ? 'text-green-500' : 'text-gray-400'">{{ scores.bestPractices }}</div>
-          <div>Best Practices</div>
-        </div>
-        <div>
-          <div class="text-3xl font-bold" :class="typeof scores.seo === 'number' ? 'text-green-500' : 'text-gray-400'">{{ scores.seo }}</div>
-          <div>SEO</div>
+      <div class="text-xl font-bold mb-4">Final scores</div>
+      <div class="grid grid-cols-3 gap-4">
+        <div v-for="metric in metricScores" :key="metric.name">
+          <div
+            class="text-3xl font-bold"
+            :class="typeof metric.score === 'number' ? 'text-green-500' : 'text-gray-400'"
+          >
+            {{ metric.score }}
+          </div>
+          <div>{{ metric.name }}</div>
+          <div class="text-xs opacity-50">{{ metric.weight }}%</div>
         </div>
       </div>
     </div>

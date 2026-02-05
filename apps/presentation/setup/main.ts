@@ -61,9 +61,9 @@ export function clearVoteSlideRegistry() {
   voteSlideRegistry.clear()
 }
 
-// Global vote store
+// Global vote store (5 votes for 5 metrics: CLS, FCP, LCP, TBT, SI)
 export const voteStore = reactive({
-  path: initialSessionData?.votePath ?? [null, null, null, null] as (string | null)[],
+  path: initialSessionData?.votePath ?? [null, null, null, null, null] as (string | null)[],
 
   vote(index: number, choice: 'A' | 'B') {
     this.path[index] = choice
@@ -76,7 +76,7 @@ export const voteStore = reactive({
   },
 
   reset() {
-    this.path = [null, null, null, null]
+    this.path = [null, null, null, null, null]
   }
 })
 
@@ -93,12 +93,13 @@ export const sessionStore = reactive({
   crew: [] as CrewMember[],
   activeCrew: [] as string[],
 
-  // Vote results
+  // Vote results (5 votes for 5 metrics: CLS, FCP, LCP, TBT, SI)
   voteResults: {
     0: { A: [], B: [], winner: null },
     1: { A: [], B: [], winner: null },
     2: { A: [], B: [], winner: null },
     3: { A: [], B: [], winner: null },
+    4: { A: [], B: [], winner: null },
   } as Record<number, VoteResults>,
 
   // Current vote state
@@ -180,6 +181,7 @@ export const sessionStore = reactive({
       1: { A: [], B: [], winner: null },
       2: { A: [], B: [], winner: null },
       3: { A: [], B: [], winner: null },
+      4: { A: [], B: [], winner: null },
     }
     this.activeVoteIndex = null
     this.votePhase = 'waiting'

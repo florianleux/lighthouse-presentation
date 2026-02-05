@@ -122,30 +122,35 @@ The Performance score of our BlackMarket website is pretty low
 
 # Our mission
 
-4 days to build the best lighthouse possible
+5 days to build the best lighthouse possible
 
 One day = one floor = one Performance metric
 
-<div class="grid grid-cols-4 gap-4 pt-8 text-center">
-  <div class="p-4 border rounded">
+<div class="grid grid-cols-5 gap-3 pt-8 text-center">
+  <div class="p-3 border rounded">
     <div class="font-bold">Day 1</div>
     <div>CLS</div>
     <div class="text-xs opacity-70">Layout Shift</div>
   </div>
-  <div class="p-4 border rounded">
+  <div class="p-3 border rounded">
     <div class="font-bold">Day 2</div>
-    <div>LCP</div>
-    <div class="text-xs opacity-70">Largest Paint</div>
-  </div>
-  <div class="p-4 border rounded">
-    <div class="font-bold">Day 3</div>
     <div>FCP</div>
     <div class="text-xs opacity-70">First Paint</div>
   </div>
-  <div class="p-4 border rounded">
+  <div class="p-3 border rounded">
+    <div class="font-bold">Day 3</div>
+    <div>LCP</div>
+    <div class="text-xs opacity-70">Largest Paint</div>
+  </div>
+  <div class="p-3 border rounded">
     <div class="font-bold">Day 4</div>
     <div>TBT</div>
     <div class="text-xs opacity-70">Blocking Time</div>
+  </div>
+  <div class="p-3 border rounded">
+    <div class="font-bold">Day 5</div>
+    <div>SI</div>
+    <div class="text-xs opacity-70">Speed Index</div>
   </div>
 </div>
 
@@ -170,27 +175,24 @@ layout: center
     { company: 'Yahoo! Japan', comment: 'Reduced CLS by 0.2 → 15% increase in page views' },
   ]"
 >
-  <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
-    Video Placeholder - CLS
-  </div>
+  <template #right>
+    <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
+      Video Placeholder - FCP
+    </div>
+  </template>
 </MetricIntro>
 
 ---
 
-<Choice
-  :optionA="{ title: 'First-party assets', subtitle:'Optimize what you control', keywords: ['Images','Fonts'] }"
-  :optionB="{ title: 'Third-party content', subtitle:'Tame the unpredictable', keywords: ['Ads', 'Embeds'] }"
-/>
+<ChoiceFromMetric :metric-index="0" />
 
 ---
 layout: center
 ---
 
-<Vote titleA="First-party assets" titleB="Third-party content" :vote-index="0" :next-slide="16" />
+<VoteFromMetric :metric-index="0" />
 
 ---
-
-# Day 1: Winning Option
 
 <WinnerDisplay :vote-index="0" />
 
@@ -198,7 +200,7 @@ layout: center
 
 # Day 1: Application
 
-<ApplicationDisplay :vote-index="0" category="CLS" floor="Floor 1" />
+<ApplicationDisplayFromMetric :metric-index="0" />
 
 ---
 layout: center
@@ -254,10 +256,7 @@ layout: center
 
 # Day 2: The Choice
 
-<Choice
-  :optionA="{ title: '', keywords: [] }"
-  :optionB="{ title: '', keywords: [] }"
-/>
+<ChoiceFromMetric :metric-index="1" />
 
 ---
 layout: center
@@ -265,9 +264,9 @@ layout: center
 
 # Day 2: Vote
 
-## LCP - Largest Contentful Paint
+## FCP - First Contentful Paint
 
-<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="1" :next-slide="24" />
+<VoteFromMetric :metric-index="1" />
 
 ---
 
@@ -279,7 +278,7 @@ layout: center
 
 # Day 2: Application
 
-<ApplicationDisplay :vote-index="1" category="LCP" floor="Floor 2" />
+<ApplicationDisplayFromMetric :metric-index="1" />
 
 ---
 layout: center
@@ -289,28 +288,28 @@ layout: center
 
 ---
 
-# Day 3: FCP
+# Day 3: LCP
 
 <div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">10%</div>
+  Weight <div class="m-auto text-orange-500 font-bold text-3xl">25%</div>
 </div>
 
-## First Contentful Paint
+## Largest Contentful Paint
 
 <div class="text-sm opacity-70 mb-4">
-  Time until the first text or image is painted. Lower is better.
+  Time until the largest content element is rendered. Lower is better.
 </div>
 
 <div class="grid grid-cols-2 gap-6 pt-4">
   <div class="p-4 border rounded">
     <div class="text-xl font-bold mb-2">What it measures</div>
     <div class="text-sm opacity-70">
-      How quickly the user sees any content at all, indicating the page is loading.
+      How quickly the main content of a page is loaded and visible to users.
     </div>
   </div>
   <div class="p-4 border rounded">
     <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 1.8s</div>
+    <div class="text-3xl font-bold text-green-400">&lt; 2.5s</div>
   </div>
 </div>
 
@@ -318,10 +317,7 @@ layout: center
 
 # Day 3: The Choice
 
-<Choice
-  :optionA="{ title: '', keywords: [] }"
-  :optionB="{ title: '', keywords: [] }"
-/>
+<ChoiceFromMetric :metric-index="2" />
 
 ---
 layout: center
@@ -329,9 +325,9 @@ layout: center
 
 # Day 3: Vote
 
-## FCP - First Contentful Paint
+## LCP - Largest Contentful Paint
 
-<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="2" :next-slide="32" />
+<VoteFromMetric :metric-index="2" />
 
 ---
 
@@ -343,7 +339,7 @@ layout: center
 
 # Day 3: Application
 
-<ApplicationDisplay :vote-index="2" category="FCP" floor="Floor 3" />
+<ApplicationDisplayFromMetric :metric-index="2" />
 
 ---
 layout: center
@@ -382,10 +378,7 @@ layout: center
 
 # Day 4: The Choice
 
-<Choice
-  :optionA="{ title: '', keywords: [] }"
-  :optionB="{ title: '', keywords: [] }"
-/>
+<ChoiceFromMetric :metric-index="3" />
 
 ---
 layout: center
@@ -395,7 +388,7 @@ layout: center
 
 ## TBT - Total Blocking Time
 
-<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="3" :next-slide="40" />
+<VoteFromMetric :metric-index="3" />
 
 ---
 
@@ -407,7 +400,68 @@ layout: center
 
 # Day 4: Application
 
-<ApplicationDisplay :vote-index="3" category="TBT" floor="Complete + Lantern" />
+<ApplicationDisplayFromMetric :metric-index="3" />
+
+---
+layout: center
+---
+
+# DAY 5
+
+---
+
+# Day 5: SI
+
+<div class="absolute top-4 right-8 text-md text-center">
+  Weight <div class="m-auto text-orange-500 font-bold text-3xl">10%</div>
+</div>
+
+## Speed Index
+
+<div class="text-sm opacity-70 mb-4">
+  How quickly content is visually displayed during page load. Lower is better.
+</div>
+
+<div class="grid grid-cols-2 gap-6 pt-4">
+  <div class="p-4 border rounded">
+    <div class="text-xl font-bold mb-2">What it measures</div>
+    <div class="text-sm opacity-70">
+      The average time at which visible parts of the page are displayed.
+    </div>
+  </div>
+  <div class="p-4 border rounded">
+    <div class="text-xl font-bold mb-2">Good score</div>
+    <div class="text-3xl font-bold text-green-400">&lt; 3.4s</div>
+  </div>
+</div>
+
+---
+
+# Day 5: The Choice
+
+<ChoiceFromMetric :metric-index="4" />
+
+---
+layout: center
+---
+
+# Day 5: Vote
+
+## SI - Speed Index
+
+<VoteFromMetric :metric-index="4" />
+
+---
+
+# Day 5: Winning Option
+
+<WinnerDisplay :vote-index="4" />
+
+---
+
+# Day 5: Application
+
+<ApplicationDisplayFromMetric :metric-index="4" />
 
 ---
 
@@ -424,7 +478,7 @@ layout: center
 ## What we learned
 
 - Performance optimizations have measurable impact
-- 4 Core Web Vitals: CLS (25%), LCP (25%), FCP (10%), TBT (30%)
+- 5 Performance metrics: CLS (25%), FCP (10%), LCP (25%), TBT (30%), SI (10%)
 - Optimization choices are often trade-offs
 - The key is to prioritize based on context
 

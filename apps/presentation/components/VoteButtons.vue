@@ -10,10 +10,9 @@ const props = defineProps<{
   voteIndex: number
   labelA: string
   labelB: string
-  nextSlide: number
 }>()
 
-const { go } = useNav()
+const { next } = useNav()
 
 // Is this vote currently active?
 const isVoteActive = computed(() =>
@@ -157,7 +156,7 @@ function continueWithWinner() {
   voteStore.vote(props.voteIndex, winner.value)
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
-  go(props.nextSlide)
+  next()
 }
 
 // Manual override vote (presenter choice)
@@ -165,7 +164,7 @@ function vote(choice: 'A' | 'B') {
   voteStore.vote(props.voteIndex, choice)
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
-  go(props.nextSlide)
+  next()
 }
 </script>
 
