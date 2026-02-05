@@ -9,7 +9,15 @@ drawings:
   persist: false
 transition: slide-left
 mdc: true
+fonts:
+  sans: 'Crimson Text'
+  serif: 'Germania One'
+  mono: 'Fira Code'
+css: unocss
 ---
+
+<style src="./styles/theme.css"></style>
+<style src="./styles/modals.css"></style>
 
 # Join the crew!
 
@@ -151,57 +159,28 @@ layout: center
 
 ---
 
-# Day 1: CLS
-
-<div class="absolute top-4 right-8 text-md text-center">
-  Weight <div class="m-auto text-orange-500 font-bold text-3xl">25%</div>
-</div>
-
-## Cumulative Layout Shift
-
-<div class="text-sm opacity-70 mb-4">
-  Measures unexpected layout shifts during page load. Lower is better.
-</div>
-
-<div class="grid grid-cols-2 gap-6 pt-4">
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">What it measures</div>
-    <div class="text-sm opacity-70">
-      How much visible content moves around unexpectedly as the page loads.
-    </div>
+<MetricIntro
+  h1="CLS"
+  h2="Cumulative Layout Shift"
+  :weight="25"
+  :thresholds="[0.1, 0.25]"
+  h3="Impact fraction × Distance fraction"
+  :tags="['Core Web Vital : Impact SEO !', 'High CLS destroys trust','User initiated shifts are excluded','Only the worst burst of shift counts']"
+  :business-info="[
+    { company: 'Yahoo! Japan', comment: 'Reduced CLS by 0.2 → 15% increase in page views' },
+  ]"
+>
+  <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
+    Video Placeholder - CLS
   </div>
-  <div class="p-4 border rounded">
-    <div class="text-xl font-bold mb-2">Good score</div>
-    <div class="text-3xl font-bold text-green-400">&lt; 0.1</div>
-  </div>
-</div>
+</MetricIntro>
 
 ---
 
-# Day 1: The Choice
-
-<div class="grid grid-cols-2 gap-8">
-  <div class="p-6 border-2 border-blue-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option A: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option A]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-  <div class="p-6 border-2 border-amber-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option B: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option B]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-</div>
+<Choice
+  :optionA="{ title: 'First-party assets', subtitle:'Optimize what you control', keywords: ['Images','Fonts'] }"
+  :optionB="{ title: 'Third-party content', subtitle:'Tame the unpredictable', keywords: ['Ads', 'Embeds'] }"
+/>
 
 ---
 layout: center
@@ -211,9 +190,7 @@ layout: center
 
 ## CLS - Cumulative Layout Shift
 
-<div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
-
-<VoteButtons :vote-index="0" label-a="[Option A]" label-b="[Option B]" :next-slide="16" />
+<Vote titleA="First-party assets" titleB="Third-party content" :vote-index="0" :next-slide="16" />
 
 ---
 
@@ -264,28 +241,10 @@ layout: center
 
 # Day 2: The Choice
 
-<div class="grid grid-cols-2 gap-8">
-  <div class="p-6 border-2 border-blue-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option A: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option A]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-  <div class="p-6 border-2 border-amber-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option B: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option B]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-</div>
+<Choice
+  :optionA="{ title: '', keywords: [] }"
+  :optionB="{ title: '', keywords: [] }"
+/>
 
 ---
 layout: center
@@ -295,9 +254,7 @@ layout: center
 
 ## LCP - Largest Contentful Paint
 
-<div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
-
-<VoteButtons :vote-index="1" label-a="[Option A]" label-b="[Option B]" :next-slide="24" />
+<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="1" :next-slide="24" />
 
 ---
 
@@ -348,28 +305,10 @@ layout: center
 
 # Day 3: The Choice
 
-<div class="grid grid-cols-2 gap-8">
-  <div class="p-6 border-2 border-blue-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option A: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option A]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-  <div class="p-6 border-2 border-amber-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option B: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option B]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-</div>
+<Choice
+  :optionA="{ title: '', keywords: [] }"
+  :optionB="{ title: '', keywords: [] }"
+/>
 
 ---
 layout: center
@@ -379,9 +318,7 @@ layout: center
 
 ## FCP - First Contentful Paint
 
-<div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
-
-<VoteButtons :vote-index="2" label-a="[Option A]" label-b="[Option B]" :next-slide="32" />
+<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="2" :next-slide="32" />
 
 ---
 
@@ -432,28 +369,10 @@ layout: center
 
 # Day 4: The Choice
 
-<div class="grid grid-cols-2 gap-8">
-  <div class="p-6 border-2 border-blue-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option A: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option A]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-  <div class="p-6 border-2 border-amber-500 rounded">
-    <span class="text-2xl mb-2 font-light">Option B: </span>
-    <span class="text-lg mb-3 font-bold">[PLACEHOLDER]</span>
-    <div class="text-sm opacity-70 mb-4 italic">[PLACEHOLDER: Description Option B]</div>
-    <div class="text-sm mb-1">Target:</div>
-    <ul class="text-sm">
-      <li>[PLACEHOLDER: Fix 1]</li>
-      <li>[PLACEHOLDER: Fix 2]</li>
-    </ul>
-  </div>
-</div>
+<Choice
+  :optionA="{ title: '', keywords: [] }"
+  :optionB="{ title: '', keywords: [] }"
+/>
 
 ---
 layout: center
@@ -463,9 +382,7 @@ layout: center
 
 ## TBT - Total Blocking Time
 
-<div class="text-4xl pt-4 opacity-50">Choose your optimization</div>
-
-<VoteButtons :vote-index="3" label-a="[Option A]" label-b="[Option B]" :next-slide="40" />
+<Vote titleA="[Option A]" titleB="[Option B]" :vote-index="3" :next-slide="40" />
 
 ---
 
