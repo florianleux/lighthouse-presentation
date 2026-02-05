@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, publishSessionState } from '../setup/main'
 
@@ -39,12 +39,18 @@ const voteNames = ['PERF', 'A11Y', 'BEST PRACTICES', 'SEO']
 const selectedDuration = ref(5)
 const isJoinSessionActive = computed(() => props.joinSessionRemaining > 0)
 
-function startNewSession() {
+async function startNewSession() {
   if (confirm('Start a new session? This will reset the crew and all votes.')) {
-    sessionStore.startNewSession()
-    // Publish session state so vote apps receive the new keynoteId
-    publishSessionState(1, 'intro')
+    // Close panel first to avoid reactivity issues
     emit('close')
+
+    // Wait for panel to close before resetting
+    await nextTick()
+
+    // Reset session
+    sessionStore.startNewSession()
+
+    // Navigate to slide 1 (this will trigger publishSessionState via the watch in global-top)
     go(1)
   }
 }
