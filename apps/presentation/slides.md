@@ -186,10 +186,6 @@ layout: center
 layout: center
 ---
 
-# Day 1: Vote
-
-## CLS - Cumulative Layout Shift
-
 <Vote titleA="First-party assets" titleB="Third-party content" :vote-index="0" :next-slide="16" />
 
 ---
