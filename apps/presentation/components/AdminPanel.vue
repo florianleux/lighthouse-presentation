@@ -2,6 +2,7 @@
 import { computed, ref, nextTick } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, publishSessionState } from '../setup/main'
+import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()
 
@@ -33,7 +34,8 @@ const totalPollVotes = computed(() =>
 
 const isPollDone = computed(() => sessionStore.pollPhase === 'ended')
 
-const voteNames = ['PERF', 'A11Y', 'BEST PRACTICES', 'SEO']
+// Get vote names from metrics data (CLS, FCP, LCP, TBT, SI)
+const voteNames = METRICS_LIST.map(m => m.name)
 
 // Join session controls
 const selectedDuration = ref(5)

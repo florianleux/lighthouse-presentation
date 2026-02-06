@@ -29,7 +29,6 @@ const winner = computed(() => {
     <div class="absolute right-20 bottom-20">
       <LighthouseBuilding />
     </div>
-
   </div>
   <div
     v-else
