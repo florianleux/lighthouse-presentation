@@ -93,9 +93,9 @@ export const METRICS: MetricsData = {
     thresholds: [0.1, 0.25],
     formula: 'Impact fraction × Distance fraction',
     tags: [
-      'Core Web Vital: Impact SEO!',
+      'Core Web Vital: Impacts SEO!',
       'High CLS destroys trust',
-      'User initiated shifts are excluded',
+      'User-initiated shifts are excluded',
       'Only the worst burst of shift counts',
     ],
     businessInfo: [
@@ -122,13 +122,13 @@ export const METRICS: MetricsData = {
     weight: 10,
     thresholds: ['1.8 sec', '3.0 sec'],
     formula: 'Text, image, SVG or canvas',
-    tags: ['All about perception', 'Low FCP is reassuring'],
+    tags: ['Is anything happening?', 'Low FCP is reassuring'],
     businessInfo: [],
     options: {
       a: {
         title: 'TTFB',
         subtitle: 'Reduce the time of delivery',
-        keywords: ['Shorten distances', 'Minimize lost time'],
+        keywords: ['Reduce distance', 'Save time'],
       },
       b: {
         title: 'The critical rendering path',
@@ -146,7 +146,7 @@ export const METRICS: MetricsData = {
     thresholds: ['2.5 sec', '4.0 sec'],
     formula: 'Time to render largest element',
     tags: [
-      'Core Web Vital: Impact SEO!',
+      'Core Web Vital: Impacts SEO!',
       'Measures perceived load speed',
       'Usually hero image or heading',
       'Affected by server response time',

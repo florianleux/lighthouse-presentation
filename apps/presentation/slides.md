@@ -68,7 +68,7 @@ Google's open-source tool for auditing web page quality
 
 ---
 
-# Why Performance matters?
+# Why does Performance matter?
 
 <div class="grid grid-cols-2 gap-6 pt-4">
   <div class="p-4 border rounded">
@@ -154,7 +154,7 @@ One day = one floor = one Performance metric
   </div>
 </div>
 
-At every step, we will decide which optimization to apply, following our instinct!
+At every step, we will decide which optimization to apply, following our instincts!
 
 ---
 

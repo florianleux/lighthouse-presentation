@@ -29,7 +29,7 @@ const facadeVideoCodeExample = `
     <div class="grid grid-cols-2 gap-10">
       <div class="flex flex-col items-center justify-top gap-6">
         <div class="text-center">
-          Everything in the flow can cause shift
+          Everything in the flow can cause shifts
         </div>
         <div class="text-4xl text-center font-bold">Sticky and fixed elements</div>
         <CodeSnippet

@@ -36,7 +36,7 @@ const preloadCodeExample = `<link
         Flash of unstyled text (FOUT)
       </div>
       <div>
-        Flash of invisble text (FOIT) </div>
+        Flash of invisible text (FOIT) </div>
     </div>
     <div class="flex flex-col items-center mt-10 gap-10">
       <div class="grid grid-cols-3 items-center gap-10">

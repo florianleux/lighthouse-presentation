@@ -29,7 +29,7 @@ const cssCodeExample = `
         Images don't have reserved space until loaded
       </div>
       <div>
-        Layout at 0x0 and then expanded </div>
+        Starts at 0×0, then expands </div>
     </div>
     <div class="flex flex-col items-center mt-10 gap-15">
       <div>
