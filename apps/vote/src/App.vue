@@ -452,16 +452,32 @@ onMounted(async () => {
     // Subscribe to vote-started messages
     onVoteStarted((msg) => {
       console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
-      // Clear any previous vote state
-      clearVoteState()
-      activeVoteIndex.value = msg.voteIndex
-      selectedChoice.value = null
-      hasVoted.value = false
-      voteMissed.value = false
-      voteError.value = null
-      isSubmitting.value = false
-      // Start countdown with synchronized time (account for message delay)
-      if (msg.duration > 0) {
+
+      // If it's the same vote and user already voted, ignore sync message
+      if (activeVoteIndex.value === msg.voteIndex && hasVoted.value) {
+        console.log('[App] Already voted for this vote, ignoring sync message')
+        return
+      }
+
+      // If it's the same vote and user missed it, ignore sync message
+      if (activeVoteIndex.value === msg.voteIndex && voteMissed.value) {
+        console.log('[App] Already missed this vote, ignoring sync message')
+        return
+      }
+
+      // If it's a new vote (different index), reset state
+      if (activeVoteIndex.value !== msg.voteIndex) {
+        clearVoteState()
+        activeVoteIndex.value = msg.voteIndex
+        selectedChoice.value = null
+        hasVoted.value = false
+        voteMissed.value = false
+        voteError.value = null
+        isSubmitting.value = false
+      }
+
+      // Update/start countdown for late joiners (only if not voted/missed)
+      if (msg.duration > 0 && !hasVoted.value && !voteMissed.value) {
         const elapsedMs = Date.now() - msg.timestamp
         const elapsedSeconds = Math.floor(elapsedMs / 1000)
         const remainingDuration = Math.max(0, msg.duration - elapsedSeconds)
@@ -552,6 +568,13 @@ async function handleJoin(avatar: string) {
     console.error('Failed to join crew:', err)
     status.value = 'error'
   }
+}
+
+// Direct vote (auto-submit on click)
+async function directVote(choice: 'A' | 'B') {
+  if (hasVoted.value || isSubmitting.value) return
+  selectedChoice.value = choice
+  await submitVote()
 }
 
 // Submit vote
@@ -806,27 +829,21 @@ async function submitPoll(choice: PollChoice) {
         <div class="vote-buttons">
           <button
             :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
-            @click="selectedChoice = 'A'"
+            @click="directVote('A')"
             :disabled="isSubmitting"
           >
             A
           </button>
           <button
             :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
-            @click="selectedChoice = 'B'"
+            @click="directVote('B')"
             :disabled="isSubmitting"
           >
             B
           </button>
         </div>
         <p v-if="voteError" class="vote-error">{{ voteError }}</p>
-        <button
-          class="validate-btn"
-          :disabled="!selectedChoice || isSubmitting"
-          @click="submitVote"
-        >
-          {{ isSubmitting ? 'Sending...' : 'Validate' }}
-        </button>
+        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
       </div>
 
       <!-- State: Joined - Voted -->
@@ -1220,25 +1237,11 @@ input::placeholder {
   color: white;
 }
 
-.validate-btn {
-  padding: 14px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e3a5f;
-  background: #22c55e;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-.validate-btn:hover:not(:disabled) {
-  transform: scale(1.02);
-}
-
-.validate-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.submitting-hint {
+  font-size: 14px;
+  color: #ffd700;
+  opacity: 0.8;
+  margin-top: 8px;
 }
 
 /* Poll styles */
