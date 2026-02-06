@@ -7,7 +7,6 @@ import { METRICS_LIST } from '../../../shared/metrics-data'
 const floors = METRICS_LIST.map(m => ({
   label: m.name,
   index: m.index,
-  color: m.color
 }))
 
 // Reversed for display (SI at top, CLS at bottom)

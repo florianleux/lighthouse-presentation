@@ -57,10 +57,6 @@ export interface MetricConfig {
   name: string // 'CLS', 'FCP', 'LCP', 'TBT', 'SI'
   fullName: string
   weight: number // Percentage (25, 10, 25, 30, 10)
-  color: string // Hex color
-
-  // Presentation structure
-  floor: string // 'Floor 1', 'Floor 2', etc.
 
   // For MetricIntro component
   thresholds: [ThresholdValue, ThresholdValue] // [good, poor] boundaries
@@ -94,8 +90,6 @@ export const METRICS: MetricsData = {
     name: 'CLS',
     fullName: 'Cumulative Layout Shift',
     weight: 25,
-    color: '#f97316',
-    floor: 'Floor 1',
     thresholds: [0.1, 0.25],
     formula: 'Impact fraction × Distance fraction',
     tags: [
@@ -126,21 +120,19 @@ export const METRICS: MetricsData = {
     name: 'FCP',
     fullName: 'First Contentful Paint',
     weight: 10,
-    color: '#22c55e',
-    floor: 'Floor 2',
     thresholds: ['1.8 sec', '3.0 sec'],
     formula: 'Text, image, SVG or canvas',
     tags: ['All about perception', 'Low FCP is reassuring'],
     businessInfo: [],
     options: {
       a: {
-        title: 'The Delivery',
-        subtitle: 'Reduce TTFB',
+        title: 'TTFB',
+        subtitle: 'Reduce the time of delivery',
         keywords: ['Shorten distances', 'Minimize lost time'],
       },
       b: {
-        title: 'The Painting',
-        subtitle: 'Clear the rendering path',
+        title: 'The critical rendering path',
+        subtitle: 'Smooth the painting process',
         keywords: ['Rendering blockers', 'Parsing blockers'],
       },
     },
@@ -151,8 +143,6 @@ export const METRICS: MetricsData = {
     name: 'LCP',
     fullName: 'Largest Contentful Paint',
     weight: 25,
-    color: '#3b82f6',
-    floor: 'Floor 3',
     thresholds: ['2.5 sec', '4.0 sec'],
     formula: 'Time to render largest element',
     tags: [
@@ -181,8 +171,6 @@ export const METRICS: MetricsData = {
     name: 'TBT',
     fullName: 'Total Blocking Time',
     weight: 30,
-    color: '#a855f7',
-    floor: 'Floor 4',
     thresholds: ['200 ms', '600 ms'],
     formula: 'Sum of blocking time beyond 50ms',
     tags: [
@@ -211,8 +199,6 @@ export const METRICS: MetricsData = {
     name: 'SI',
     fullName: 'Speed Index',
     weight: 10,
-    color: '#ec4899',
-    floor: 'Floor 5',
     thresholds: ['3.4 sec', '5.8 sec'],
     formula: 'How quickly content is visually displayed',
     tags: [

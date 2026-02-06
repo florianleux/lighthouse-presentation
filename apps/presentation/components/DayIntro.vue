@@ -13,7 +13,7 @@ const metricData = computed(() => METRICS[props.metric])
 <template>
   <div class="h-full flex flex-col items-center justify-center">
     <div class="text-2xl opacity-70 mb-4">Day {{ day }}</div>
-    <div class="text-8xl font-bold font-title" :style="{ color: metricData.color }">
+    <div class="text-8xl font-bold font-title">
       {{ metricData.name }}
     </div>
     <div class="text-2xl opacity-70 mt-4">
