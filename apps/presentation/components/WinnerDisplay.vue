@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { voteStore } from '../setup/main'
 import { getVoteData } from '../../../shared/metrics-data'
+import LighthouseBuilding from './LighthouseBuilding.vue'
 
 const props = defineProps<{
   voteIndex: number
@@ -26,7 +27,7 @@ const winner = computed(() => {
     <div class="font-bold font-title text-5xl ">{{ winner.title }}</div>
 
     <div class="absolute right-20 bottom-20">
-      <VoteTower />
+      <LighthouseBuilding />
     </div>
 
   </div>

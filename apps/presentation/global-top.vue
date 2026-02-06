@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import VoteTower from './components/VoteTower.vue'
+import LighthouseBuilding from './components/LighthouseBuilding.vue'
 import AdminPanel from './components/AdminPanel.vue'
 import CrewPills from './components/CrewPills.vue'
 import { sessionStore, voteStore, getVoteIndexForSlide, publishSessionState } from './setup/main'
@@ -115,7 +115,7 @@ onUnmounted(() => {
 
 <template>
   <CrewPills :current-slide="currentSlideNo" />
-  <VoteTower />
+  <LighthouseBuilding />
   <AdminPanel
     :visible="showAdminPanel"
     :join-session-remaining="joinSessionRemaining"
