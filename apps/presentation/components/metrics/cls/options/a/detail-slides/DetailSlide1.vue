@@ -20,41 +20,54 @@ const cssCodeExample = `
 
 
 <template>
-  <DetailSlide
-    metric="cls"
-    option="a"
-  >
-    <div class="items-center flex-grow justify-center flex  text-2xl gap-20">
-      <div>
-        Images don't have reserved space until loaded
+  <div class="slide-background">
+    <DetailSlide
+      metric="cls"
+      option="a"
+    >
+      <div class="items-center flex-grow justify-center flex  text-2xl gap-20">
+        <div>
+          Images don't have reserved space until loaded
+        </div>
+        <div>
+          Starts at 0×0, then expands </div>
       </div>
-      <div>
-        Starts at 0×0, then expands </div>
-    </div>
-    <div class="flex flex-col items-center mt-10 gap-15">
-      <div>
-        <div class="text-4xl font-bold">Specify dimensions</div>
-      </div>
-      <div class="flex items-center gap-20">
-        <CodeSnippet
-          language="html"
-          :code="htmlBeforeCodeExample"
-          size="small"
-        />
-        <div class="flex items-center gap-2">
+      <div class="flex flex-col items-center mt-10 gap-15">
+        <div>
+          <div class="text-4xl font-bold">Specify dimensions</div>
+        </div>
+        <div class="flex items-center gap-20">
           <CodeSnippet
             language="html"
-            :code="htmlAfterCodeExample"
+            :code="htmlBeforeCodeExample"
             size="small"
           />
-          <CodeSnippet
-            language="css"
-            :code="cssCodeExample"
-            size="small"
-          />
-        </div>
+          <div class="flex items-center gap-2">
+            <CodeSnippet
+              language="html"
+              :code="htmlAfterCodeExample"
+              size="small"
+            />
+            <CodeSnippet
+              language="css"
+              :code="cssCodeExample"
+              size="small"
+            />
+          </div>
 
+        </div>
       </div>
-    </div>
-  </DetailSlide>
+    </DetailSlide>
+  </div>
 </template>
+
+<style scoped>
+.slide-background {
+  position: absolute;
+  inset: 0;
+  background-image: url('/backgrounds/cls-detail-1.webp');
+  background-size: cover;
+  background-position: center;
+  padding: 2rem;
+}
+</style>

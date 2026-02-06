@@ -6,12 +6,19 @@
   /* Fonts */
   --font-title: 'Germania One', serif;
   --font-body: 'Crimson Text', serif;
+
+  /* Transition duration (default is ~300ms) */
+  --slidev-transition-duration: 1300ms;
 }
 
 /* Fond général */
 .slidev-layout {
-  background: #ffffff;
+  background: transparent;
   font-family: var(--font-body);
+}
+
+.slidev-page {
+  background: #d1bfa6;
 }
 
 /* Fonts utilities */

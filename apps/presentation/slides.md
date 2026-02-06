@@ -213,6 +213,10 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
+<DetailSlideLoader metric="fcp" :slide-index="3" />
+
+---
+
 <DayIntro :day="3" metric="lcp" />
 
 ---
