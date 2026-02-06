@@ -162,13 +162,7 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
-<MetricIntro metric="cls">
-  <template #right>
-    <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
-      Video Placeholder - CLS
-    </div>
-  </template>
-</MetricIntro>
+<MetricIntroLoader metric="cls" />
 
 ---
 
@@ -196,52 +190,7 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
-<MetricIntro metric="fcp">
-  <template #bottom>
-    <div class="mt-20 relative">
-          <div class="flex justify-around mb-2 text-sm font-semibold">
-        <span class="text-blue-500">TTFB</span>
-        <span class="text-green-500">Rendering path</span>
-      </div>
-      <!-- Timeline bar -->
-      <div class="h-2 bg-gray-300 rounded-full relative">
-        <!-- TTFB section -->
-        <div class="absolute left-0 w-1/2 h-full bg-blue-400 rounded-l-full"></div>
-        <!-- Rendering path section -->
-        <div class="absolute left-1/2 w-1/2 h-full bg-green-400 rounded-r-full"></div>
-      </div>
-      <!-- Markers -->
-      <div class="flex justify-between mt-1">
-        <div class="flex flex-col items-center">
-          <span class="text-sm mt-1">Navigation</span>
-        </div>
-        <div class="flex flex-col text-center">
-          <div class="text-[0.6em]"> DNS - TCP - TLS </div>
-          <div class="text-[0.6em]"> Request sent</div>
-          <div class="text-[0.6em]"> Server</div>
-          <div class="text-[0.6em]"> Transit </div>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="text-sm mt-1">First byte</span>
-        </div>  
-        <div class="flex flex-col text-center">
-          <div class="text-[0.6em]"> Parsing HTML - CSS </div>
-          <div class="text-[0.6em]"> Render Tree</div>
-          <div class="text-[0.6em]"> Layout</div>
-          <div class="text-[0.6em]"> Paint </div>
-        </div>
-        <div class="flex flex-col items-center">
-          <span class="text-sm mt-1">FCP</span>
-        </div>
-      </div>
-    </div>
-  </template>
-  <template #right>
-    <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
-      Video Placeholder - FCP
-    </div>
-  </template>
-</MetricIntro>
+<MetricIntroLoader metric="fcp" />
 
 ---
 <ChoiceFromMetric :metric-index="1" />
@@ -268,7 +217,7 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
-<MetricIntro metric="lcp" />
+<MetricIntroLoader metric="lcp" />
 
 ---
 
@@ -296,7 +245,7 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
-<MetricIntro metric="tbt" />
+<MetricIntroLoader metric="tbt" />
 
 ---
 
@@ -323,7 +272,7 @@ At every step, we will decide which optimization to apply, following our instinc
 
 ---
 
-<MetricIntro metric="si" />
+<MetricIntroLoader metric="si" />
 
 ---
 
