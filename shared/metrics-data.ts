@@ -42,7 +42,7 @@ export interface BusinessInfo {
   comment: string
 }
 
-/**
+/**q
  * Threshold values for metric scoring
  * Can be numbers (e.g., 0.1) or strings (e.g., '1.8 sec')
  */

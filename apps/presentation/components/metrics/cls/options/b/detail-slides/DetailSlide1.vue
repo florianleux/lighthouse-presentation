@@ -8,7 +8,10 @@ const codeExample = `<div
 </script>
 
 <template>
-  <DetailSlide metric="cls" option="b">
+  <DetailSlide
+    metric="cls"
+    option="b"
+  >
     <div class="items-center flex-grow justify-center flex mt-5 text-2xl gap-12">
       <div>
         Not designed by us
@@ -20,10 +23,10 @@ const codeExample = `<div
         Possible dynamic content
       </div>
     </div>
-    <div class="flex flex-col items-center gap-8">
-      <div>
-        <div class="text-4xl font-bold">Reserve space</div>
-      </div>
+    <div class="flex flex-col items-center gap-8 mt-8">
+
+      <div class="text-4xl font-bold">Reserve space</div>
+
       <div>
         <CodeSnippet
           language="html"

@@ -213,13 +213,25 @@ At every step, we will decide which optimization to apply, following our instinc
       <!-- Markers -->
       <div class="flex justify-between mt-1">
         <div class="flex flex-col items-center">
-          <span class="text-sm mt-1">Request</span>
+          <span class="text-sm mt-1">Navigation</span>
+        </div>
+        <div class="flex flex-col text-center">
+          <div class="text-[0.6em]"> DNS - TCP - TLS </div>
+          <div class="text-[0.6em]"> Request sent</div>
+          <div class="text-[0.6em]"> Server</div>
+          <div class="text-[0.6em]"> Transit </div>
         </div>
         <div class="flex flex-col items-center">
           <span class="text-sm mt-1">First byte</span>
+        </div>  
+        <div class="flex flex-col text-center">
+          <div class="text-[0.6em]"> Parsing HTML - CSS </div>
+          <div class="text-[0.6em]"> Render Tree</div>
+          <div class="text-[0.6em]"> Layout</div>
+          <div class="text-[0.6em]"> Paint </div>
         </div>
         <div class="flex flex-col items-center">
-          <span class="text-sm mt-1">Display</span>
+          <span class="text-sm mt-1">FCP</span>
         </div>
       </div>
     </div>
