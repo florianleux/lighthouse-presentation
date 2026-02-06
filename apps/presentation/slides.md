@@ -7,7 +7,7 @@ info: |
   Together, we'll transform a struggling website into a high-performance beacon.
 drawings:
   persist: false
-transition: slide-left
+transition: slide-up
 mdc: true
 fonts:
   sans: 'Crimson Text'
