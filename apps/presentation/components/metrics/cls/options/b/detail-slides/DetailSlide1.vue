@@ -45,9 +45,9 @@ const codeExample = `<div
 .slide-background {
   position: absolute;
   inset: 0;
-  background-image: url('/backgrounds/cls-detail-3.webp');
-  background-size: cover;
-  background-position: center;
+  background-image: url('/backgrounds/parchment.png');
+  background-size: 200% 200%;
+  background-position: 100% 0%;
   padding: 2rem;
 }
 </style>

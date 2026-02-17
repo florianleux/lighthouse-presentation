@@ -66,9 +66,9 @@ const cssCodeExample = `
 .slide-background {
   position: absolute;
   inset: 0;
-  background-image: url('/backgrounds/cls-detail-1.webp');
-  background-size: cover;
-  background-position: center;
+  background-image: url('/backgrounds/parchment.png');
+  background-size: 200% 200%;
+  background-position: 0% 0%;
   padding: 2rem;
 }
 </style>

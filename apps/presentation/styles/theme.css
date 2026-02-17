@@ -94,3 +94,24 @@ kbd {
     transform: scale(1.05);
   }
 }
+
+/* Custom dynamic horizontal slide transition */
+/* Direction is controlled by --slide-direction CSS variable: 1 = left-to-right, -1 = right-to-left */
+:root {
+  --slide-direction: 1;
+}
+
+.slidev-vt-slide-horizontal-enter-active,
+.slidev-vt-slide-horizontal-leave-active {
+  transition: all var(--slidev-transition-duration) ease;
+}
+
+.slidev-vt-slide-horizontal-enter-from {
+  opacity: 0;
+  transform: translateX(calc(var(--slide-direction) * 100%));
+}
+
+.slidev-vt-slide-horizontal-leave-to {
+  opacity: 0;
+  transform: translateX(calc(var(--slide-direction) * -100%));
+}

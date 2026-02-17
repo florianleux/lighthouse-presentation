@@ -34,7 +34,11 @@ const cssVars = computed(() => ({
 </script>
 
 <template>
-  <div class="code-snippet" :style="cssVars" v-html="highlightedCode" />
+  <div
+    class="code-snippet"
+    :style="cssVars"
+    v-html="highlightedCode"
+  />
 </template>
 
 <style>
@@ -56,13 +60,20 @@ const cssVars = computed(() => ({
 .code-snippet span[style*="#FE4450"] {
   color: #ffffff !important;
 }
+
 .code-snippet span[style*="#848BBD"] {
   color: #ffffff !important;
 }
+
 .code-snippet span[style*="#F97E72"] {
   color: #70ff46 !important;
 }
+
 .code-snippet span[style*="#BBBBBB"] {
   color: #ffffff !important;
+}
+
+.code-snippet span[style*="#FF8B39"] {
+  color: #70ff47 !important;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineAsyncComponent, type Component } from 'vue'
+import { computed, defineAsyncComponent, watch, onMounted, type Component } from 'vue'
 import { voteStore } from '../setup/main'
 import type { MetricName } from '../../../shared/metrics-data'
 
@@ -17,6 +17,20 @@ const metricIndexMap: Record<MetricName, number> = {
 }
 
 const winner = computed(() => voteStore.getChoice(metricIndexMap[props.metric]))
+
+// Set CSS variable for dynamic horizontal transition direction
+// Option A: left-to-right = direction 1 (content enters from right)
+// Option B: right-to-left = direction -1 (content enters from left)
+const updateSlideDirection = () => {
+  if (props.slideIndex >= 3) {
+    const option = winner.value?.toLowerCase()
+    const direction = option === 'a' ? '1' : '-1'
+    document.documentElement.style.setProperty('--slide-direction', direction)
+  }
+}
+
+watch(winner, updateSlideDirection, { immediate: true })
+onMounted(updateSlideDirection)
 
 const DetailComponent = computed<Component | null>(() => {
   if (!winner.value) return null

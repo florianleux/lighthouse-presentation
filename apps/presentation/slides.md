@@ -157,17 +157,25 @@ transition: slide-up
 <VoteFromMetric :metric-index="1" />
 
 ---
+transition: fade
+---
 
 <WinnerDisplay :vote-index="1" />
 
+---
+transition: slide-up
 ---
 
 <DetailSlideLoader metric="fcp" :slide-index="1" />
 
 ---
+transition: slide-right
+---
 
 <DetailSlideLoader metric="fcp" :slide-index="2" />
 
+---
+transition: slide-horizontal
 ---
 
 <DetailSlideLoader metric="fcp" :slide-index="3" />
@@ -189,13 +197,19 @@ transition: slide-up
 <VoteFromMetric :metric-index="2" />
 
 ---
+transition: fade
+---
 
 <WinnerDisplay :vote-index="2" />
 
 ---
+transition: slide-up
+---
 
 <DetailSlideLoader metric="lcp" :slide-index="1" />
 
+---
+transition: slide-up
 ---
 
 <DetailSlideLoader metric="lcp" :slide-index="2" />
@@ -216,13 +230,19 @@ transition: slide-up
 <VoteFromMetric :metric-index="3" />
 
 ---
+transition: fade
+---
 
 <WinnerDisplay :vote-index="3" />
 
 ---
+transition: slide-up
+---
 
 <DetailSlideLoader metric="tbt" :slide-index="1" />
 
+---
+transition: slide-up
 ---
 
 <DetailSlideLoader metric="tbt" :slide-index="2" />
@@ -244,13 +264,19 @@ transition: slide-up
 <VoteFromMetric :metric-index="4" />
 
 ---
+transition: fade
+---
 
 <WinnerDisplay :vote-index="4" />
 
 ---
+transition: slide-up
+---
 
 <DetailSlideLoader metric="si" :slide-index="1" />
 
+---
+transition: slide-up
 ---
 
 <DetailSlideLoader metric="si" :slide-index="2" />

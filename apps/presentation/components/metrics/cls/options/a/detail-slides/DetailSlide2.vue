@@ -81,9 +81,9 @@ const preloadCodeExample = `<link
 .slide-background {
   position: absolute;
   inset: 0;
-  background-image: url('/backgrounds/cls-detail-2.webp');
-  background-size: cover;
-  background-position: center;
+  background-image: url('/backgrounds/parchment.png');
+  background-size: 200% 200%;
+  background-position: 0% 100%;
   padding: 2rem;
 }
 </style>
