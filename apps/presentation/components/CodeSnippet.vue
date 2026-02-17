@@ -24,7 +24,7 @@ const highlightedCode = ref('')
 watchEffect(async () => {
   highlightedCode.value = await codeToHtml(props.code.trim(), {
     lang: props.language || 'text',
-    theme: 'github-dark',
+    theme: 'synthwave-84',
   })
 })
 
@@ -44,10 +44,25 @@ const cssVars = computed(() => ({
   overflow-x: auto;
   font-size: var(--code-font-size);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background-color: rgba(62, 48, 17, 0.5) !important;
 }
 
 .code-snippet code {
   font-size: inherit;
   font-family: inherit;
+}
+
+/* Color overrides */
+.code-snippet span[style*="#FE4450"] {
+  color: #ffffff !important;
+}
+.code-snippet span[style*="#848BBD"] {
+  color: #ffffff !important;
+}
+.code-snippet span[style*="#F97E72"] {
+  color: #70ff46 !important;
+}
+.code-snippet span[style*="#BBBBBB"] {
+  color: #ffffff !important;
 }
 </style>

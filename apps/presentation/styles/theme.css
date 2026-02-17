@@ -8,8 +8,13 @@
   --font-body: 'Crimson Text', serif;
 
   /* Transition duration (default is ~300ms) */
-  --slidev-transition-duration: 1300ms;
+  --slidev-transition-duration: 2900ms;
+
+  /* Slide container background (prevents white gap during transitions) */
+  --slidev-slide-container-background: #d1bfa6;
 }
+
+
 
 /* Fond général */
 .slidev-layout {
@@ -19,6 +24,15 @@
 
 .slidev-page {
   background: #d1bfa6;
+}
+
+/* Slide background wrapper */
+.slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  padding: 2rem;
 }
 
 /* Fonts utilities */

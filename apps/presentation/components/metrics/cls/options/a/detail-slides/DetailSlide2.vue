@@ -29,17 +29,18 @@ const preloadCodeExample = `<link
 <template>
   <div class="slide-background">
     <DetailSlide
+      class="pl-10"
       metric="cls"
       option="a"
     >
-      <div class="items-center flex-grow justify-center flex mt-5 text-2xl gap-20">
+      <div class="items-center flex-grow justify-center flex mt-10 text-2xl gap-20">
         <div>
           Flash of unstyled text (FOUT)
         </div>
         <div>
           Flash of invisible text (FOIT) </div>
       </div>
-      <div class="flex flex-col items-center mt-10 gap-10">
+      <div class="flex flex-col items-center mt-10 gap-5">
         <div class="grid grid-cols-3 items-center gap-10">
           <div class="flex flex-col items-center">
             <div class="text-4xl text-center font-bold">Optional fallback</div>

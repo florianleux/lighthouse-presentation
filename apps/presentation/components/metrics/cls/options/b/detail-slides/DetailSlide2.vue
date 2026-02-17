@@ -22,40 +22,54 @@ const facadeVideoCodeExample = `
 </script>
 
 <template>
-  <DetailSlide
-    metric="cls"
-    option="b"
-  >
-    <div class="grid grid-cols-2 gap-10">
-      <div class="flex flex-col items-center justify-top gap-6">
-        <div class="text-center">
-          Everything in the flow can cause shifts
-        </div>
-        <div class="text-4xl text-center font-bold">Sticky and fixed elements</div>
-        <CodeSnippet
-          language="css"
-          :code="stickyPositionCodeExample"
-          size="small"
-        />
-
-
-      </div>
-      <div class="flex flex-col items-cente justify-top gap-6">
-        <div class="text-center">
-          Static content loads faster
-        </div>
-        <div class="text-4xl text-center font-bold">Facade videos</div>
-        <div class="px-10">
+  <div class="slide-background">
+    <DetailSlide
+      class="ml-10"
+      metric="cls"
+      option="b"
+    >
+      <div class="grid grid-cols-2">
+        <div class="flex flex-col items-center justify-top gap-6">
+          <div class="text-center">
+            Everything in the flow can cause shifts
+          </div>
+          <div class="text-4xl text-center font-bold">Sticky and fixed elements</div>
           <CodeSnippet
-            language="html"
-            :code="facadeVideoCodeExample"
+            language="css"
+            :code="stickyPositionCodeExample"
             size="small"
           />
+
+
+        </div>
+        <div class="flex flex-col items-cente justify-top gap-6 pr-10">
+          <div class="text-center">
+            Static content loads faster
+          </div>
+          <div class="text-4xl text-center font-bold">Facade videos</div>
+          <div class="px-10">
+            <CodeSnippet
+              language="html"
+              :code="facadeVideoCodeExample"
+              size="small"
+            />
+          </div>
+
         </div>
 
       </div>
 
-    </div>
-
-  </DetailSlide>
+    </DetailSlide>
+  </div>
 </template>
+
+<style scoped>
+.slide-background {
+  position: absolute;
+  inset: 0;
+  background-image: url('/backgrounds/cls-detail-4.webp');
+  background-size: cover;
+  background-position: center;
+  padding: 2rem;
+}
+</style>

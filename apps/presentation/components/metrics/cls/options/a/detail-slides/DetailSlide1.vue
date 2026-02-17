@@ -22,6 +22,7 @@ const cssCodeExample = `
 <template>
   <div class="slide-background">
     <DetailSlide
+      class="pl-10 pt-5"
       metric="cls"
       option="a"
     >
