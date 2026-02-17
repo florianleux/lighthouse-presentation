@@ -20,14 +20,14 @@ css: unocss
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home-2.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/1.png')">
 </div>
 
 ---
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home-4.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/2.png')">
 
 </div>
 
@@ -35,7 +35,7 @@ transition: slide-down
 transition: slide-right
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home-3.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/3.png')">
 <div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
 <div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-md">
@@ -50,7 +50,7 @@ transition: slide-right
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home-1.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.png')">
 
 <div class="text-4xl text-shadow-md text-white font-title">Why does performance matters ?</div>
 
@@ -85,64 +85,27 @@ transition: slide-up
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home2-middle.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/5.png')"></div>
 
 ---
+transition: slide-up
+---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home2-bottom.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/6.png')"></div>
 
   <div class="w-[68%] absolute right-[16%] top-[16%] aspect-[1960/1250] -rotate-1">
     <BlackMarketIframe />
   </div>
 
 ---
+transition: slide-left
+---
 
-# Our starting point
-
-The Performance score of our BlackMarket website is pretty low
-
-<div class="text-center pt-8">
-  <div class="text-8xl font-bold text-red-500">38<span class="text-2xl text-white opacity-50">/100</span></div>
-  <div class="mt-4 text-2xl">Performance</div>
-</div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/7.png')"></div>
 
 ---
 
-# Our mission
-
-5 days to build the best lighthouse possible
-
-One day = one floor = one Performance metric
-
-<div class="grid grid-cols-5 gap-3 pt-8 text-center">
-  <div class="p-3 border rounded">
-    <div class="font-bold">Day 1</div>
-    <div>CLS</div>
-    <div class="text-xs opacity-70">Layout Shift</div>
-  </div>
-  <div class="p-3 border rounded">
-    <div class="font-bold">Day 2</div>
-    <div>FCP</div>
-    <div class="text-xs opacity-70">First Paint</div>
-  </div>
-  <div class="p-3 border rounded">
-    <div class="font-bold">Day 3</div>
-    <div>LCP</div>
-    <div class="text-xs opacity-70">Largest Paint</div>
-  </div>
-  <div class="p-3 border rounded">
-    <div class="font-bold">Day 4</div>
-    <div>TBT</div>
-    <div class="text-xs opacity-70">Blocking Time</div>
-  </div>
-  <div class="p-3 border rounded">
-    <div class="font-bold">Day 5</div>
-    <div>SI</div>
-    <div class="text-xs opacity-70">Speed Index</div>
-  </div>
-</div>
-
-At every step, we will decide which optimization to apply, following our instincts!
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/8.png')"></div>
 
 ---
 
