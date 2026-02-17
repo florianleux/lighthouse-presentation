@@ -232,6 +232,12 @@ transition: fade
 <VoteFromMetric :metric-index="3" />
 
 ---
+transition: fade
+---
+
+<WinnerDisplay :vote-index="3" />
+
+---
 transition: slide-up
 ---
 

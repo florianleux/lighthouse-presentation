@@ -2,8 +2,12 @@
 </script>
 
 <template>
-  <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 0%;">
+  <div
+    class="slide-bg-quadrant"
+    style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 0%;"
+  >
     <DetailSlide
+      class="pl-10 pt-5"
       metric="fcp"
       option="a"
     >
@@ -41,4 +45,3 @@
     </DetailSlide>
   </div>
 </template>
-

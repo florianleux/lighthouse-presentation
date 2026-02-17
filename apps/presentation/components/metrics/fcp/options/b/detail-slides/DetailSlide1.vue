@@ -1,20 +1,17 @@
 <script setup lang="ts">
 const s = 'script'
-const htmlCode = `<!DOCTYPE html>
-<html lang="en">
+const htmlCode = `
+...
 <head>
   <meta charset="UTF-8">
   <title>BlackMarket</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+
   <link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4/dist/tailwind.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="stylesheet" href="/css/components.css">
 
   <${s} src="https://cdn.jsdelivr.net/npm/lodash@4.17/lodash.min.js"></${s}>
-  <${s} src="https://cdn.jsdelivr.net/npm/axios@1.6/dist/axios.min.js"></${s}>
   <${s} src="/js/analytics.js"></${s}>
-  <${s} src="/js/utils.js"></${s}>
 </head>
 <body>
   <header class="site-header">
@@ -22,32 +19,46 @@ const htmlCode = `<!DOCTYPE html>
 </script>
 
 <template>
-  <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 0%;">
+  <div
+    class="slide-bg-quadrant"
+    style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 0%;"
+  >
     <DetailSlide
+      class="pl-10 pt-5"
       metric="fcp"
       option="b"
     >
-      <div class="grid grid-cols-8">
-        <div class=" col-span-2">
-          <div class="flex items-center gap-2">
-            <span class="text-green-400 font-bold text-sm">Rendering</span>
-            <div class="flex-1 border-t-2 border-dashed border-green-400 min-w-[20px]"></div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-blue-400 font-bold text-sm">Parsing</span>
-            <div class="flex-1 border-t-2 border-dashed border-blue-400 min-w-[20px]"></div>
-          </div>
+      <div class="gap-5 flex flex-col items-center">
+        <div class="text-2xl">The browser needs both DOM and CSSOM to render the page
         </div>
 
-        <div class="col-span-6">
-          <CodeSnippet
-            :code="htmlCode"
-            language="html"
-            size="tiny"
-          />
+        <div class="grid grid-cols-8">
+          <div class=" col-span-2 relative">
+            <div class="absolute left-0 right-0 items-center  mt-10">
+              <span class=" font-bold">Render</span>
+              <div class="flex-1 border-t-2 border-dashed border-black min-w-[20px]"></div>
+            </div>
+            <div class="absolute left-0 right-0 top-[50%] items-center ">
+              <span class="font-bold">HTML Parser</span>
+              <div class="flex-1 border-t-2 border-dashed border-black min-w-[20px]"></div>
+              <span class="italic text-sm">Builds the DOM</span>
+            </div>
+            <div class="absolute left-0 right-0 top-[80%] items-center ">
+              <span class="font-bold">Preload scanner</span>
+              <div class="flex-1 border-t-2 border-dashed border-black min-w-[20px]"></div>
+              <span class="italic text-sm ">Triggers the downloads</span>
+            </div>
+          </div>
+
+          <div class="col-span-6">
+            <CodeSnippet
+              :code="htmlCode"
+              language="html"
+              size="tiny"
+            />
+          </div>
         </div>
       </div>
     </DetailSlide>
   </div>
 </template>
-

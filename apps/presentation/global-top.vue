@@ -1,25 +1,18 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import AdminPanel from './components/AdminPanel.vue'
 import CrewPills from './components/CrewPills.vue'
-import { sessionStore, voteStore, getVoteIndexForSlide, publishSessionState } from './setup/main'
+import { sessionStore, publishSessionState } from './setup/main'
 
-const { go, currentSlideNo } = useNav()
+const { currentSlideNo } = useNav()
 
-// Track slide changes to persist last slide and auto-skip completed votes
+// Track slide changes to persist last slide
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
     sessionStore.updateLastSlide(slide)
     // Publish session state on every slide change so late joiners get the current state
     publishSessionState(slide, 'intro')
-  }
-
-  // Auto-skip completed vote slides
-  const voteIndex = getVoteIndexForSlide(slide)
-  if (voteIndex !== undefined && voteStore.path[voteIndex] !== null) {
-    // Vote already done, skip forward
-    nextTick(() => go(slide + 1))
   }
 })
 
