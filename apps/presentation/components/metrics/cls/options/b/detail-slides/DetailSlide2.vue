@@ -22,7 +22,7 @@ const facadeVideoCodeExample = `
 </script>
 
 <template>
-  <div class="slide-background">
+  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-4.webp');">
     <DetailSlide
       class="ml-10"
       metric="cls"
@@ -63,13 +63,3 @@ const facadeVideoCodeExample = `
   </div>
 </template>
 
-<style scoped>
-.slide-background {
-  position: absolute;
-  inset: 0;
-  background-image: url('/backgrounds/parchment.png');
-  background-size: 200% 200%;
-  background-position: 100% 100%;
-  padding: 2rem;
-}
-</style>

@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="slide-background">
+  <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 100%;">
     <DetailSlide metric="tbt" option="b">
       <div class="max-w-4xl w-full mx-auto">
         <p class="text-xl text-gray-300 text-center">
@@ -13,13 +13,3 @@
   </div>
 </template>
 
-<style scoped>
-.slide-background {
-  position: absolute;
-  inset: 0;
-  background-image: url('/backgrounds/parchment.png');
-  background-size: 200% 200%;
-  background-position: 100% 100%;
-  padding: 2rem;
-}
-</style>

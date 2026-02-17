@@ -101,11 +101,11 @@ transition: slide-up
 transition: slide-left
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/7.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/score-2.png');"></div>
 
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/8.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/score-3.png');"></div>
 
 ---
 
@@ -136,7 +136,7 @@ transition: slide-up
 <DetailSlideLoader metric="cls" :slide-index="1" />
 
 ---
-transition: slide-up
+transition: fade
 ---
 
 <DetailSlideLoader metric="cls" :slide-index="2" />
@@ -150,6 +150,7 @@ transition: slide-up
 <MetricIntroLoader metric="fcp" />
 
 ---
+
 <ChoiceFromMetric :metric-index="1" />
 
 ---
@@ -169,13 +170,13 @@ transition: slide-up
 <DetailSlideLoader metric="fcp" :slide-index="1" />
 
 ---
-transition: slide-right
+transition: slide-left
 ---
 
 <DetailSlideLoader metric="fcp" :slide-index="2" />
 
 ---
-transition: slide-horizontal
+transition: fade
 ---
 
 <DetailSlideLoader metric="fcp" :slide-index="3" />
@@ -209,7 +210,7 @@ transition: slide-up
 <DetailSlideLoader metric="lcp" :slide-index="1" />
 
 ---
-transition: slide-up
+transition: fade
 ---
 
 <DetailSlideLoader metric="lcp" :slide-index="2" />
@@ -227,13 +228,8 @@ transition: slide-up
 <ChoiceFromMetric :metric-index="3" />
 
 ---
+
 <VoteFromMetric :metric-index="3" />
-
----
-transition: fade
----
-
-<WinnerDisplay :vote-index="3" />
 
 ---
 transition: slide-up
@@ -242,7 +238,7 @@ transition: slide-up
 <DetailSlideLoader metric="tbt" :slide-index="1" />
 
 ---
-transition: slide-up
+transition: fade
 ---
 
 <DetailSlideLoader metric="tbt" :slide-index="2" />
@@ -276,7 +272,7 @@ transition: slide-up
 <DetailSlideLoader metric="si" :slide-index="1" />
 
 ---
-transition: slide-up
+transition: fade
 ---
 
 <DetailSlideLoader metric="si" :slide-index="2" />

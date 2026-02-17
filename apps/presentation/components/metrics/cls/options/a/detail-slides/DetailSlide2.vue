@@ -27,7 +27,7 @@ const preloadCodeExample = `<link
 </script>
 
 <template>
-  <div class="slide-background">
+  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-2.webp');">
     <DetailSlide
       class="pl-10"
       metric="cls"
@@ -77,13 +77,3 @@ const preloadCodeExample = `<link
   </div>
 </template>
 
-<style scoped>
-.slide-background {
-  position: absolute;
-  inset: 0;
-  background-image: url('/backgrounds/parchment.png');
-  background-size: 200% 200%;
-  background-position: 0% 100%;
-  padding: 2rem;
-}
-</style>

@@ -20,7 +20,7 @@ const cssCodeExample = `
 
 
 <template>
-  <div class="slide-background">
+  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-1.webp');">
     <DetailSlide
       class="pl-10 pt-5"
       metric="cls"
@@ -62,13 +62,3 @@ const cssCodeExample = `
   </div>
 </template>
 
-<style scoped>
-.slide-background {
-  position: absolute;
-  inset: 0;
-  background-image: url('/backgrounds/parchment.png');
-  background-size: 200% 200%;
-  background-position: 0% 0%;
-  padding: 2rem;
-}
-</style>
