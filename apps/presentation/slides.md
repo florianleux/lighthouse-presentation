@@ -104,21 +104,31 @@ transition: slide-left
 <div class="slide-bg" style="background-image: url('/backgrounds/score-2.png');"></div>
 
 ---
+transition: fade
+---
 
 <div class="slide-bg" style="background-image: url('/backgrounds/score-3.png');"></div>
 
+---
+transition: fade
 ---
 
 <DayIntro :day="1" metric="cls" />
 
 ---
+transition: slide-left
+---
 
 <MetricIntroLoader metric="cls" />
 
 ---
+transition: slide-up
+---
 
 <ChoiceFromMetric :metric-index="0" />
 
+---
+transition: slide-right
 ---
 
 <VoteFromMetric :metric-index="0" />
@@ -142,17 +152,25 @@ transition: fade
 <DetailSlideLoader metric="cls" :slide-index="2" />
 
 ---
+transition: fade
+---
 
 <DayIntro :day="2" metric="fcp" />
 
+---
+transition: slide-left
 ---
 
 <MetricIntroLoader metric="fcp" />
 
 ---
+transition: slide-up
+---
 
 <ChoiceFromMetric :metric-index="1" />
 
+---
+transition: slide-right
 ---
 
 <VoteFromMetric :metric-index="1" />
@@ -182,17 +200,25 @@ transition: fade
 <DetailSlideLoader metric="fcp" :slide-index="3" />
 
 ---
+transition: fade
+---
 
 <DayIntro :day="3" metric="lcp" />
 
+---
+transition: slide-left
 ---
 
 <MetricIntroLoader metric="lcp" />
 
 ---
+transition: slide-up
+---
 
 <ChoiceFromMetric :metric-index="2" />
 
+---
+transition: slide-right
 ---
 
 <VoteFromMetric :metric-index="2" />
@@ -216,17 +242,25 @@ transition: fade
 <DetailSlideLoader metric="lcp" :slide-index="2" />
 
 ---
+transition: fade
+---
 
 <DayIntro :day="4" metric="tbt" />
 
+---
+transition: slide-left
 ---
 
 <MetricIntroLoader metric="tbt" />
 
 ---
+transition: slide-up
+---
 
 <ChoiceFromMetric :metric-index="3" />
 
+---
+transition: slide-right
 ---
 
 <VoteFromMetric :metric-index="3" />
@@ -250,17 +284,25 @@ transition: fade
 <DetailSlideLoader metric="tbt" :slide-index="2" />
 
 ---
+transition: fade
+---
 
 <DayIntro :day="5" metric="si" />
 
+---
+transition: slide-left
 ---
 
 <MetricIntroLoader metric="si" />
 
 ---
+transition: slide-up
+---
 
 <ChoiceFromMetric :metric-index="4" />
 
+---
+transition: slide-right
 ---
 
 <VoteFromMetric :metric-index="4" />

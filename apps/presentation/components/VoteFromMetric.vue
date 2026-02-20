@@ -10,10 +10,15 @@ const voteProps = computed(() => getVoteProps(props.metricIndex))
 </script>
 
 <template>
-  <Vote
-    v-if="voteProps"
-    :title-a="voteProps.titleA"
-    :title-b="voteProps.titleB"
-    :vote-index="voteProps.voteIndex"
-  />
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/metric-intro-br.webp');"
+  >
+    <Vote
+      v-if="voteProps"
+      :title-a="voteProps.titleA"
+      :title-b="voteProps.titleB"
+      :vote-index="voteProps.voteIndex"
+    />
+  </div>
 </template>

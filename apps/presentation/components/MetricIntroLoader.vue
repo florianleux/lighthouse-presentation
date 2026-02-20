@@ -15,5 +15,10 @@ const IntroComponent = computed<Component | null>(() => {
 </script>
 
 <template>
-  <component v-if="IntroComponent" :is="IntroComponent" />
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/metric-intro-tl.webp');"
+  >
+    <component v-if="IntroComponent" :is="IntroComponent" />
+  </div>
 </template>

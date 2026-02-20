@@ -15,19 +15,23 @@ defineProps<{
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-8 h-full">
-    <ChoiceOption
-      letter="A"
-      :title="optionA.title"
-      :subtitle="optionA.subtitle"
-      :keywords="optionA.keywords"
-    />
 
-    <ChoiceOption
-      letter="B"
-      :title="optionB.title"
-      :subtitle="optionB.subtitle"
-      :keywords="optionB.keywords"
-    />
-  </div>
+  <ChoiceOption
+    class="absolute top-[18%] left-[9%]"
+    style="transform: rotate(-13deg)"
+    letter="A"
+    :title="optionA.title"
+    :subtitle="optionA.subtitle"
+    :keywords="optionA.keywords"
+  />
+
+  <ChoiceOption
+    class="absolute top-[16%] right-[8%]"
+    style="transform: rotate(14deg)"
+    letter="B"
+    :title="optionB.title"
+    :subtitle="optionB.subtitle"
+    :keywords="optionB.keywords"
+  />
+
 </template>

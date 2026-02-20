@@ -1,5 +1,3 @@
-<script setup lang="ts">
-</script>
 
 <template>
   <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 100%;">

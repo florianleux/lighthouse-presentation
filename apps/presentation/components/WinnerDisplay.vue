@@ -20,20 +20,25 @@ const winner = computed(() => {
 
 <template>
   <div
-    v-if="choice && winner"
-    class=" flex flex-col items-left h-full"
+    class="slide-bg"
+    style="background-image: url('/backgrounds/metric-intro-bl.webp');"
   >
-    <div>The crew has voted for</div>
-    <div class="font-bold font-title text-5xl ">{{ winner.title }}</div>
+    <div
+      v-if="choice && winner"
+      class="flex flex-col items-left h-full"
+    >
+      <div>The crew has voted for</div>
+      <div class="font-bold font-title text-5xl">{{ winner.title }}</div>
 
-    <div class="absolute right-20 bottom-20">
-      <LighthouseBuilding />
+      <div class="absolute right-20 bottom-20">
+        <LighthouseBuilding />
+      </div>
     </div>
-  </div>
-  <div
-    v-else
-    class="mt-4 p-6 border rounded-lg text-center opacity-50"
-  >
-    No vote recorded - go back to the vote slide
+    <div
+      v-else
+      class="mt-4 p-6 border rounded-lg text-center opacity-50"
+    >
+      No vote recorded - go back to the vote slide
+    </div>
   </div>
 </template>
