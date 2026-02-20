@@ -23,10 +23,13 @@ const isVisible = computed(() => {
       <div
         v-for="member in crew"
         :key="member.odientId"
-        class="crew-member"
+        class="crew-member animate-sway"
       >
-        <AvatarPreview :avatar="member.avatar || ''" :size="60" />
-        <div class="name-pill">{{ member.name }}</div>
+        <AvatarPreview
+          class="animate-bounce animate-duration-600"
+          :avatar="member.avatar || ''"
+          :size="40"
+        />
       </div>
     </TransitionGroup>
   </div>
@@ -50,17 +53,6 @@ const isVisible = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.name-pill {
-  padding: 1px 6px;
-  background: rgba(255, 215, 0, 0.2);
-  border-radius: 10px;
-  color: #ffd700;
-  margin-top: 4px;
-  font-size: 9px;
-  font-weight: 600;
-  border: 1px solid #ffd700;
 }
 
 

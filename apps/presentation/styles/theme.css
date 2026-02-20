@@ -103,3 +103,19 @@ kbd {
   }
 }
 
+/* Horizontal sway (aller-retour) */
+@keyframes sway {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(1vw);
+  }
+}
+
+.animate-sway {
+  animation: sway 2s ease-in-out infinite;
+}

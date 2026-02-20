@@ -123,7 +123,11 @@ const isValidAvatar = computed(() => parsedAvatar.value !== null && layers.value
       :style="{ zIndex: layer.zIndex }"
     />
   </div>
-  <div v-else class="avatar-fallback" :style="{ width: size + 'px', height: size + 'px', fontSize: (size * 0.6) + 'px' }">
+  <div
+    v-else
+    class="avatar-fallback"
+    :style="{ width: size + 'px', height: size + 'px', fontSize: (size * 0.6) + 'px' }"
+  >
     👤
   </div>
 </template>
@@ -134,14 +138,7 @@ const isValidAvatar = computed(() => parsedAvatar.value !== null && layers.value
   background: transparent;
   /* Multiple drop-shadows create a solid outline following the PNG shape */
   filter:
-    drop-shadow(1px 0 0 white)
-    drop-shadow(-1px 0 0 white)
-    drop-shadow(0 1px 0 white)
-    drop-shadow(0 -1px 0 white)
-    drop-shadow(1px 1px 0 white)
-    drop-shadow(-1px -1px 0 white)
-    drop-shadow(1px -1px 0 white)
-    drop-shadow(-1px 1px 0 white);
+    drop-shadow(0px 1px 1px black)
 }
 
 .avatar-layer {
