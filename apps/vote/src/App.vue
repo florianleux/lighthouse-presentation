@@ -528,6 +528,34 @@ onMounted(async () => {
             // Same keynote - restore session
             status.value = 'joined'
             console.log('[App] Same keynote, restoring session')
+
+            // Restore vote state from localStorage (fixes refresh after voting)
+            restoreVoteState()
+
+            // Apply slide context from this session-state message
+            currentSlideType.value = msg.slideType ?? 'other'
+            if (msg.voteContext) {
+              activeVoteIndex.value = msg.voteContext.voteIndex
+              if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
+                voteEndedData.value = {
+                  winner: msg.voteContext.winner,
+                  resultsA: msg.voteContext.resultsA ?? 0,
+                  resultsB: msg.voteContext.resultsB ?? 0,
+                }
+              }
+            }
+            if (msg.pollContext) {
+              activePollId.value = msg.pollContext.pollId
+              if (msg.pollContext.pollPhase === 'ended') {
+                pollPhase.value = 'ended'
+              }
+            }
+
+            // If we restored vote state but slideType is unknown, infer it
+            if (currentSlideType.value === 'other' && activeVoteIndex.value !== null) {
+              currentSlideType.value = 'vote'
+            }
+
             // Re-announce to presentation so it re-registers us in the crew
             joinCrew(savedMember.name, newKeynoteId, savedMember.avatar)
               .then(() => console.log('[App] Re-announced on initial restore'))
