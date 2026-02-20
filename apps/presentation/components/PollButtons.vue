@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { sessionStore, getAbly } from '../setup/main'
+import { useNav } from '@slidev/client'
+import { sessionStore, getAbly, registerPollSlide, publishSessionState } from '../setup/main'
 import { ABLY_CHANNELS, POLL_CONFIG } from '../../../shared/constants'
-import type { PollStartedMessage } from '../../../shared/types'
+import type { PollStartedMessage, PollEndedMessage } from '../../../shared/types'
 
 const props = defineProps<{
   pollId: string
 }>()
+
+const { currentSlideNo } = useNav()
 
 // Is this poll currently active?
 const isPollActive = computed(() =>
@@ -99,6 +102,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  registerPollSlide(currentSlideNo.value, props.pollId)
   window.addEventListener('keydown', handleKeydown)
 })
 
@@ -124,13 +128,30 @@ async function startPollSession() {
     await ably.publish(ABLY_CHANNELS.SESSION, message)
     console.log('[PollButtons] Poll session started for', props.pollId)
   }
+
+  // Publish enriched session state so vote apps get pollContext
+  publishSessionState(currentSlideNo.value, 'voting')
 }
 
 // Stop poll session
-function stopPollSession() {
+async function stopPollSession() {
   clearTimer()
   sessionStore.pollPhase = 'ended'
-  console.log('[PollButtons] Poll session stopped for', props.pollId)
+
+  // Publish PollEndedMessage so vote apps show "Poll closed!"
+  const ably = getAbly()
+  if (ably) {
+    const message: PollEndedMessage = {
+      type: 'poll-ended',
+      pollId: props.pollId,
+      timestamp: Date.now(),
+    }
+    await ably.publish(ABLY_CHANNELS.SESSION, message)
+    console.log('[PollButtons] Poll ended published for', props.pollId)
+  }
+
+  // Publish enriched session state with pollContext.pollPhase = 'ended'
+  publishSessionState(currentSlideNo.value, 'voting')
 }
 </script>
 

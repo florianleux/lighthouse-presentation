@@ -20,6 +20,7 @@ interface PersistedVoteState {
   voteMissed: boolean
   countdownEndTimestamp: number | null
   keynoteId: string | null
+  voteEndedData?: { winner: 'A' | 'B'; resultsA: number; resultsB: number } | null
 }
 
 const {
@@ -31,7 +32,9 @@ const {
   restoreSession,
   onSessionState,
   onVoteStarted,
+  onVoteEnded,
   onPollStarted,
+  onPollEnded,
   sendVote,
   sendPoll,
   setOnReconnect,
@@ -56,10 +59,26 @@ const hasVoted = ref(false)
 const voteMissed = ref(false)
 const voteError = ref<string | null>(null)
 const isSubmitting = ref(false)
+// Track completed vote indices to prevent re-triggering from stale messages
+const completedVotes = new Set<number>()
 
 // Poll state
 const activePollId = ref<string | null>(null)
 const hasPollVoted = ref(false)
+
+// Slide type & enriched state from session-state messages
+const currentSlideType = ref<'vote' | 'poll' | 'other'>('other')
+const voteEndedData = ref<{ winner: 'A' | 'B'; resultsA: number; resultsB: number } | null>(null)
+const pollPhase = ref<'pending' | 'polling' | 'submitted' | 'ended' | null>(null)
+
+// Computed percentages for vote-ended screen
+const percentageA = computed(() => {
+  if (!voteEndedData.value) return 50
+  const total = voteEndedData.value.resultsA + voteEndedData.value.resultsB
+  if (total === 0) return 50
+  return Math.round((voteEndedData.value.resultsA / total) * 100)
+})
+const percentageB = computed(() => 100 - percentageA.value)
 
 // Timer state
 const timeRemaining = ref(0)
@@ -70,10 +89,14 @@ const unsubscribes: (() => void)[] = []
 
 // Watch for vote state changes and persist to localStorage
 watch(
-  [activeVoteIndex, selectedChoice, hasVoted, voteMissed],
+  [activeVoteIndex, selectedChoice, hasVoted, voteMissed, voteEndedData],
   () => {
     if (status.value === 'joined' && activeVoteIndex.value !== null) {
       saveVoteState()
+      // Track completed votes to prevent stale messages from re-triggering
+      if (hasVoted.value || voteMissed.value) {
+        completedVotes.add(activeVoteIndex.value)
+      }
     }
   }
 )
@@ -175,6 +198,7 @@ function saveVoteState() {
         ? Date.now() + (timeRemaining.value * 1000)
         : null,
       keynoteId: activeKeynoteId.value,
+      voteEndedData: voteEndedData.value,
     }
     localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(state))
   } catch (e) {
@@ -212,6 +236,11 @@ function restoreVoteState() {
     console.log('[App] Vote state keynote mismatch, clearing')
     clearVoteState()
     return false
+  }
+
+  // Restore voteEndedData if present
+  if (saved.voteEndedData) {
+    voteEndedData.value = saved.voteEndedData
   }
 
   // Don't restore if already voted or missed
@@ -313,10 +342,12 @@ let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 function debouncedRequestStateSync() {
   if (syncDebounceTimer) clearTimeout(syncDebounceTimer)
+  // Jittered delay (500ms - 2500ms) to spread thundering herd of 100+ reconnections
+  const jitter = 500 + Math.floor(Math.random() * 2000)
   syncDebounceTimer = setTimeout(() => {
     syncDebounceTimer = null
     requestStateSync()
-  }, 500)
+  }, jitter)
 }
 
 async function requestStateSync() {
@@ -341,7 +372,7 @@ async function requestStateSync() {
   const restoredFromStorage = restoreVoteState()
 
   // Fetch recent history to catch any missed messages
-  const { sessionState, voteStarted } = await fetchSessionHistory()
+  const { sessionState, voteStarted, voteEnded, pollStarted, pollEnded } = await fetchSessionHistory()
 
   if (sessionState) {
     // Update keynoteId if different
@@ -354,7 +385,49 @@ async function requestStateSync() {
       selectedChoice.value = null
       hasVoted.value = false
       voteMissed.value = false
+      voteEndedData.value = null
     }
+
+    // Apply enriched session state context
+    if (sessionState.slideType) {
+      currentSlideType.value = sessionState.slideType
+    }
+    if (sessionState.voteContext) {
+      activeVoteIndex.value = sessionState.voteContext.voteIndex
+      if (sessionState.voteContext.votePhase === 'ended' && sessionState.voteContext.winner) {
+        voteEndedData.value = {
+          winner: sessionState.voteContext.winner,
+          resultsA: sessionState.voteContext.resultsA ?? 0,
+          resultsB: sessionState.voteContext.resultsB ?? 0,
+        }
+        clearCountdown()
+      }
+    }
+    if (sessionState.pollContext) {
+      activePollId.value = sessionState.pollContext.pollId
+      if (sessionState.pollContext.pollPhase === 'ended') {
+        pollPhase.value = 'ended'
+        clearCountdown()
+      }
+    }
+  }
+
+  // Apply voteEnded from history (takes priority over session state for results)
+  if (voteEnded && !restoredFromStorage) {
+    voteEndedData.value = {
+      winner: voteEnded.winner,
+      resultsA: voteEnded.results.A,
+      resultsB: voteEnded.results.B,
+    }
+    activeVoteIndex.value = voteEnded.voteIndex
+    clearCountdown()
+  }
+
+  // Apply pollEnded from history
+  if (pollEnded) {
+    activePollId.value = pollEnded.pollId
+    pollPhase.value = 'ended'
+    clearCountdown()
   }
 
   // Re-announce to the presentation AFTER validating keynoteId from session history
@@ -368,13 +441,31 @@ async function requestStateSync() {
     }
   }
 
-  if (voteStarted && !restoredFromStorage) {
-    // A vote might be in progress that we missed
+  if (voteStarted && !restoredFromStorage && !voteEnded) {
+    // A vote might be in progress that we missed (only if not already ended)
     handleVoteStartedSync(voteStarted)
+  }
+
+  // Apply pollStarted from history (only if not already ended)
+  if (pollStarted && !pollEnded && !hasPollVoted.value) {
+    activePollId.value = pollStarted.pollId
+    pollPhase.value = 'polling'
+    const elapsedMs = Date.now() - pollStarted.timestamp
+    const elapsedSeconds = Math.floor(elapsedMs / 1000)
+    const remainingDuration = Math.max(0, pollStarted.duration - elapsedSeconds)
+    if (remainingDuration > 0) {
+      startCountdown(remainingDuration)
+    }
   }
 }
 
 function handleVoteStartedSync(msg: VoteStartedMessage) {
+  // Ignore stale messages for votes we already completed
+  if (completedVotes.has(msg.voteIndex)) {
+    console.log('[App] Vote', msg.voteIndex, 'already completed, ignoring sync')
+    return
+  }
+
   // Calculate remaining time based on timestamp
   const elapsedMs = Date.now() - msg.timestamp
   const elapsedSeconds = Math.floor(elapsedMs / 1000)
@@ -474,6 +565,63 @@ onMounted(async () => {
         selectedAvatar.value = null
         currentStep.value = 'name'
         status.value = newKeynoteId ? 'idle' : 'waiting'
+        return
+      }
+
+      // --- Handle session-state updates for joined users ---
+      if (status.value === 'joined') {
+        const prevSlideType = currentSlideType.value
+        currentSlideType.value = msg.slideType ?? 'other'
+
+        // Vote slide context
+        if (currentSlideType.value === 'vote' && msg.voteContext) {
+          activeVoteIndex.value = msg.voteContext.voteIndex
+
+          if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
+            voteEndedData.value = {
+              winner: msg.voteContext.winner,
+              resultsA: msg.voteContext.resultsA ?? 0,
+              resultsB: msg.voteContext.resultsB ?? 0,
+            }
+            clearCountdown()
+          }
+          // Don't override local timer for 'voting' phase (timer comes from vote-started message)
+          // Don't override local state for 'pending' if we have an active vote/timer
+        }
+
+        // Poll slide context
+        if (currentSlideType.value === 'poll' && msg.pollContext) {
+          activePollId.value = msg.pollContext.pollId
+
+          if (msg.pollContext.pollPhase === 'ended') {
+            pollPhase.value = 'ended'
+            clearCountdown()
+          }
+          // Don't override local timer for 'polling' phase
+        }
+
+        // Cleanup when leaving a vote slide
+        if (prevSlideType === 'vote' && currentSlideType.value !== 'vote') {
+          if (activeVoteIndex.value !== null && completedVotes.has(activeVoteIndex.value)) {
+            console.log('[App] Left vote slide, cleaning up vote state')
+            voteEndedData.value = null
+            hasVoted.value = false
+            voteMissed.value = false
+            selectedChoice.value = null
+            activeVoteIndex.value = null
+            clearVoteState()
+          }
+        }
+
+        // Cleanup when leaving a poll slide
+        if (prevSlideType === 'poll' && currentSlideType.value !== 'poll') {
+          if (pollPhase.value === 'ended' || hasPollVoted.value) {
+            console.log('[App] Left poll slide, cleaning up poll state')
+            pollPhase.value = null
+            hasPollVoted.value = false
+            activePollId.value = null
+          }
+        }
       }
     }))
 
@@ -481,15 +629,9 @@ onMounted(async () => {
     unsubscribes.push(onVoteStarted((msg) => {
       console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
 
-      // If it's the same vote and user already voted, ignore sync message
-      if (activeVoteIndex.value === msg.voteIndex && hasVoted.value) {
-        console.log('[App] Already voted for this vote, ignoring sync message')
-        return
-      }
-
-      // If it's the same vote and user missed it, ignore sync message
-      if (activeVoteIndex.value === msg.voteIndex && voteMissed.value) {
-        console.log('[App] Already missed this vote, ignoring sync message')
+      // Ignore stale messages for votes we already completed (voted or missed)
+      if (completedVotes.has(msg.voteIndex)) {
+        console.log('[App] Vote', msg.voteIndex, 'already completed, ignoring')
         return
       }
 
@@ -502,7 +644,9 @@ onMounted(async () => {
         voteMissed.value = false
         voteError.value = null
         isSubmitting.value = false
+        voteEndedData.value = null
       }
+      currentSlideType.value = 'vote'
 
       // Update/start countdown for late joiners (only if not voted/missed)
       if (msg.duration > 0 && !hasVoted.value && !voteMissed.value) {
@@ -519,6 +663,8 @@ onMounted(async () => {
     unsubscribes.push(onPollStarted((msg) => {
       console.log('[App] Poll started:', msg.pollId, 'duration:', msg.duration)
       activePollId.value = msg.pollId
+      currentSlideType.value = 'poll'
+      pollPhase.value = 'polling'
       hasPollVoted.value = false
       voteError.value = null
       isSubmitting.value = false
@@ -530,6 +676,51 @@ onMounted(async () => {
         if (remainingDuration > 0) {
           startCountdown(remainingDuration)
         }
+      }
+    }))
+
+    // Subscribe to vote-ended messages
+    unsubscribes.push(onVoteEnded((msg) => {
+      console.log('[App] Vote ended:', msg.voteIndex, 'winner:', msg.winner)
+
+      // Wait for any in-flight submission to complete before applying ended state
+      const applyVoteEnded = () => {
+        voteEndedData.value = {
+          winner: msg.winner,
+          resultsA: msg.results.A,
+          resultsB: msg.results.B,
+        }
+        activeVoteIndex.value = msg.voteIndex
+        currentSlideType.value = 'vote'
+        clearCountdown()
+        // Mark as missed if user hadn't voted
+        if (!hasVoted.value && !isSubmitting.value) {
+          voteMissed.value = true
+        }
+        completedVotes.add(msg.voteIndex)
+      }
+
+      if (isSubmitting.value) {
+        // Poll until submission finishes (max 3s)
+        let waited = 0
+        const poll = setInterval(() => {
+          waited += 100
+          if (!isSubmitting.value || waited >= 3000) {
+            clearInterval(poll)
+            applyVoteEnded()
+          }
+        }, 100)
+      } else {
+        applyVoteEnded()
+      }
+    }))
+
+    // Subscribe to poll-ended messages
+    unsubscribes.push(onPollEnded((msg) => {
+      console.log('[App] Poll ended:', msg.pollId)
+      if (activePollId.value === msg.pollId) {
+        pollPhase.value = 'ended'
+        clearCountdown()
       }
     }))
 
@@ -683,6 +874,7 @@ async function submitPoll(choice: PollChoice) {
   try {
     await sendPoll(activePollId.value, choice, keynoteId)
     hasPollVoted.value = true
+    pollPhase.value = 'submitted'
     clearCountdown()
     console.log('[App] Poll submitted:', choice)
   } catch (err) {
@@ -699,7 +891,7 @@ async function submitPoll(choice: PollChoice) {
     <div class="card">
       <h1>Lighthouse Pirates</h1>
 
-      <!-- State: Connecting -->
+      <!-- #1 Connecting -->
       <div
         v-if="status === 'connecting'"
         class="status"
@@ -708,7 +900,7 @@ async function submitPoll(choice: PollChoice) {
         <p>Connecting...</p>
       </div>
 
-      <!-- State: Waiting for presentation -->
+      <!-- #2 Waiting for presentation -->
       <div
         v-else-if="status === 'waiting'"
         class="status"
@@ -718,7 +910,7 @@ async function submitPoll(choice: PollChoice) {
         <p class="hint">The presentation hasn't started yet</p>
       </div>
 
-      <!-- State: Error -->
+      <!-- #3 Error -->
       <div
         v-else-if="status === 'error'"
         class="status error"
@@ -727,7 +919,7 @@ async function submitPoll(choice: PollChoice) {
         <p class="hint">Check your internet connection</p>
       </div>
 
-      <!-- State: Form - Name Step -->
+      <!-- #4 Form - Name Step -->
       <div
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
         class="form"
@@ -756,7 +948,7 @@ async function submitPoll(choice: PollChoice) {
         </button>
       </div>
 
-      <!-- State: Form - Avatar Step -->
+      <!-- #5 Form - Avatar Step -->
       <div
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
         class="avatar-step"
@@ -779,33 +971,112 @@ async function submitPoll(choice: PollChoice) {
         </div>
       </div>
 
-      <!-- State: Joined - Waiting -->
+      <!-- #6 Vote ended - show winner + percentages -->
       <div
-        v-else-if="status === 'joined' && activeVoteIndex === null && activePollId === null"
-        class="joined-waiting"
+        v-else-if="status === 'joined' && currentSlideType === 'vote' && voteEndedData"
+        class="vote-ended"
       >
-        <div class="avatar-wrapper-large">
-          <AvatarPreview
-            v-if="selectedAvatar"
-            :avatar="selectedAvatar"
-            :size="400"
-            class="responsive-avatar"
-          />
+        <h2>Vote closed!</h2>
+        <p class="winner-text">Option {{ voteEndedData.winner }} wins!</p>
+        <div class="results-bar">
+          <div class="results-a" :style="{ width: percentageA + '%' }">
+            <span v-if="percentageA >= 15">A - {{ percentageA }}%</span>
+          </div>
+          <div class="results-b" :style="{ width: percentageB + '%' }">
+            <span v-if="percentageB >= 15">B - {{ percentageB }}%</span>
+          </div>
         </div>
-        <div class="name-pill">{{ joinedName }}</div>
-        <p class="hint">Wait for the captain's instructions...</p>
+        <p v-if="hasVoted" class="hint">You voted {{ selectedChoice }}</p>
+        <p v-else class="hint">You missed this vote</p>
       </div>
 
-      <!-- State: Joined - Poll Active -->
+      <!-- #7 Voted - waiting for results -->
       <div
-        v-else-if="status === 'joined' && activePollId !== null && !hasPollVoted"
+        v-else-if="status === 'joined' && currentSlideType === 'vote' && hasVoted"
+        class="success"
+      >
+        <div class="checkmark">✓</div>
+        <h2>Vote recorded!</h2>
+        <p>You voted for option {{ selectedChoice }}</p>
+        <p class="hint">Wait for the results...</p>
+      </div>
+
+      <!-- #8 Missed vote -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'vote' && voteMissed"
+        class="missed"
+      >
+        <div class="missed-icon">X</div>
+        <h2>Too late!</h2>
+        <p>You missed the vote</p>
+        <p class="hint">Wait for the results...</p>
+      </div>
+
+      <!-- #9 Voting in progress -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'vote' && timeRemaining > 0 && activeVoteIndex !== null"
+        class="voting"
+      >
+        <h2>Vote now!</h2>
+        <div class="countdown">{{ timeRemaining }}s</div>
+        <p class="vote-hint">Choose your option</p>
+        <div class="vote-buttons">
+          <button
+            :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
+            @click="directVote('A')"
+            :disabled="isSubmitting"
+          >
+            A
+          </button>
+          <button
+            :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
+            @click="directVote('B')"
+            :disabled="isSubmitting"
+          >
+            B
+          </button>
+        </div>
+        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
+        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
+      </div>
+
+      <!-- #10 Vote slide - pending (get ready!) -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'vote'"
+        class="vote-pending"
+      >
+        <h2>Get ready to vote!</h2>
+        <p class="hint">The vote will start soon...</p>
+      </div>
+
+      <!-- #11 Poll ended -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'poll' && pollPhase === 'ended'"
+        class="poll-ended"
+      >
+        <div class="checkmark">✓</div>
+        <h2>Poll closed!</h2>
+        <p v-if="hasPollVoted" class="hint">Your response has been recorded</p>
+        <p v-else class="hint">You missed this poll</p>
+      </div>
+
+      <!-- #12 Poll submitted -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'poll' && hasPollVoted"
+        class="success"
+      >
+        <div class="checkmark">✓</div>
+        <h2>Thanks!</h2>
+        <p class="hint">Your response has been recorded</p>
+      </div>
+
+      <!-- #13 Poll in progress -->
+      <div
+        v-else-if="status === 'joined' && currentSlideType === 'poll' && activePollId && timeRemaining > 0"
         class="polling"
       >
         <h2>Quick question!</h2>
-        <div
-          v-if="timeRemaining > 0"
-          class="countdown"
-        >{{ timeRemaining }}s</div>
+        <div class="countdown">{{ timeRemaining }}s</div>
         <p class="poll-hint">What's your Lighthouse knowledge level?</p>
         <p v-if="voteError" class="vote-error">{{ voteError }}</p>
         <div class="poll-buttons">
@@ -836,67 +1107,30 @@ async function submitPoll(choice: PollChoice) {
         </div>
       </div>
 
-      <!-- State: Joined - Poll Submitted -->
+      <!-- #14 Poll slide - pending (get ready!) -->
       <div
-        v-else-if="status === 'joined' && hasPollVoted && activeVoteIndex === null"
-        class="success"
+        v-else-if="status === 'joined' && currentSlideType === 'poll'"
+        class="poll-pending"
       >
-        <div class="checkmark">✓</div>
-        <h2>Thanks!</h2>
-        <p class="hint">Your response has been recorded</p>
+        <h2>Get ready!</h2>
+        <p class="hint">A quick question is coming...</p>
       </div>
 
-      <!-- State: Joined - Voting -->
+      <!-- #15 Joined - default (between votes) -->
       <div
-        v-else-if="status === 'joined' && activeVoteIndex !== null && !hasVoted"
-        class="voting"
+        v-else-if="status === 'joined'"
+        class="joined-waiting"
       >
-        <h2>Vote now!</h2>
-        <div
-          v-if="timeRemaining > 0"
-          class="countdown"
-        >{{ timeRemaining }}s</div>
-        <p class="vote-hint">Choose your option</p>
-        <div class="vote-buttons">
-          <button
-            :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
-            @click="directVote('A')"
-            :disabled="isSubmitting"
-          >
-            A
-          </button>
-          <button
-            :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
-            @click="directVote('B')"
-            :disabled="isSubmitting"
-          >
-            B
-          </button>
+        <div class="avatar-wrapper-large">
+          <AvatarPreview
+            v-if="selectedAvatar"
+            :avatar="selectedAvatar"
+            :size="400"
+            class="responsive-avatar"
+          />
         </div>
-        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
-        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
-      </div>
-
-      <!-- State: Joined - Voted -->
-      <div
-        v-else-if="status === 'joined' && hasVoted && activeVoteIndex !== null"
-        class="success"
-      >
-        <div class="checkmark">✓</div>
-        <h2>Vote recorded!</h2>
-        <p>You voted for option {{ selectedChoice }}</p>
-        <p class="hint">Wait for the results...</p>
-      </div>
-
-      <!-- State: Joined - Missed vote -->
-      <div
-        v-else-if="status === 'joined' && voteMissed"
-        class="missed"
-      >
-        <div class="missed-icon">X</div>
-        <h2>Too late!</h2>
-        <p>You missed the vote</p>
-        <p class="hint">Wait for the next one...</p>
+        <div class="name-pill">{{ joinedName }}</div>
+        <p class="hint">The captain will let you know about the next vote!</p>
       </div>
     </div>
 
@@ -1342,5 +1576,75 @@ input::placeholder {
 
 .poll-captain:hover {
   background: #a855f7;
+}
+
+/* Vote ended styles */
+.vote-ended {
+  padding: 20px 0;
+}
+
+.vote-ended h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+.winner-text {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.results-bar {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.results-a {
+  background: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  transition: width 0.5s ease;
+}
+
+.results-b {
+  background: #f59e0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+  transition: width 0.5s ease;
+}
+
+/* Vote/Poll pending styles */
+.vote-pending,
+.poll-pending {
+  padding: 40px 0;
+}
+
+.vote-pending h2,
+.poll-pending h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+/* Poll ended styles */
+.poll-ended {
+  padding: 20px 0;
+}
+
+.poll-ended h2 {
+  color: #ffd700;
+  margin-bottom: 8px;
 }
 </style>

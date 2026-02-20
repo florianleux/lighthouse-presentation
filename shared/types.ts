@@ -74,6 +74,19 @@ export interface PollCastMessage {
 
 export type SessionPhase = 'intro' | 'voting' | 'results' | 'application' | 'recap'
 
+export interface VoteContext {
+  voteIndex: number
+  votePhase: 'pending' | 'voting' | 'ended'
+  winner?: 'A' | 'B'
+  resultsA?: number
+  resultsB?: number
+}
+
+export interface PollContext {
+  pollId: string
+  pollPhase: 'pending' | 'polling' | 'ended'
+}
+
 export interface SessionStateMessage {
   type: 'session-state'
   keynoteId: string | null
@@ -83,6 +96,10 @@ export interface SessionStateMessage {
   phase: SessionPhase
   activeVoteIndex: number | null
   timestamp: number
+  // Enriched fields for vote app screen state (optional for backward compat)
+  slideType?: 'vote' | 'poll' | 'other'
+  voteContext?: VoteContext | null
+  pollContext?: PollContext | null
 }
 
 export interface VoteStartedMessage {
@@ -107,6 +124,12 @@ export interface PollStartedMessage {
   timestamp: number
 }
 
+export interface PollEndedMessage {
+  type: 'poll-ended'
+  pollId: string
+  timestamp: number
+}
+
 // ===========================================
 // Union types for strict typing
 // ===========================================
@@ -121,6 +144,7 @@ export type OutgoingMessage =
   | VoteStartedMessage
   | VoteEndedMessage
   | PollStartedMessage
+  | PollEndedMessage
 
 // ===========================================
 // Session state (stored locally)

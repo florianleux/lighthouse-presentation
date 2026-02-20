@@ -8,7 +8,9 @@ import type {
   PollCastMessage,
   SessionStateMessage,
   VoteStartedMessage,
+  VoteEndedMessage,
   PollStartedMessage,
+  PollEndedMessage,
   PollChoice,
 } from './types'
 
@@ -100,6 +102,28 @@ export function isPollStartedMessage(data: unknown): data is PollStartedMessage 
     data.type === 'poll-started' &&
     isString(data.pollId) &&
     isNumber(data.duration) &&
+    isNumber(data.timestamp)
+  )
+}
+
+export function isVoteEndedMessage(data: unknown): data is VoteEndedMessage {
+  if (!isObject(data)) return false
+  return (
+    data.type === 'vote-ended' &&
+    isNumber(data.voteIndex) &&
+    (data.winner === 'A' || data.winner === 'B') &&
+    isObject(data.results) &&
+    isNumber((data.results as Record<string, unknown>).A) &&
+    isNumber((data.results as Record<string, unknown>).B) &&
+    isNumber(data.timestamp)
+  )
+}
+
+export function isPollEndedMessage(data: unknown): data is PollEndedMessage {
+  if (!isObject(data)) return false
+  return (
+    data.type === 'poll-ended' &&
+    isString(data.pollId) &&
     isNumber(data.timestamp)
   )
 }

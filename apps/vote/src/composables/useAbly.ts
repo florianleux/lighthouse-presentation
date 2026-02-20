@@ -6,14 +6,18 @@ import type {
   SessionStateMessage,
   VoteCastMessage,
   VoteStartedMessage,
+  VoteEndedMessage,
   PollStartedMessage,
+  PollEndedMessage,
   PollCastMessage,
   PollChoice,
 } from '../../../../shared/types'
 import {
   isSessionStateMessage,
   isVoteStartedMessage,
+  isVoteEndedMessage,
   isPollStartedMessage,
+  isPollEndedMessage,
 } from '../../../../shared/validators'
 
 // Connection timeout in milliseconds
@@ -60,6 +64,11 @@ function setupConnectionStateListeners(
       console.log('[Ably] Reconnected')
       state.value = { ...state.value, isConnected: true }
       isConnected.value = true
+      // Re-enter presence on reconnect
+      const presenceChannel = client.channels.get(ABLY_CHANNELS.PRESENCE)
+      presenceChannel.presence.enter().catch((err) => {
+        console.warn('[Ably] Failed to re-enter presence on reconnect:', err)
+      })
       // Trigger reconnection callback if set
       if (onReconnectCallback) {
         onReconnectCallback()
@@ -246,6 +255,60 @@ export function useAbly() {
   }
 
   /**
+   * Subscribe to vote-ended messages from the presentation
+   * Returns an unsubscribe function
+   */
+  function onVoteEnded(callback: (msg: VoteEndedMessage) => void): () => void {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot subscribe to vote-ended - not connected')
+      return () => {}
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    const handler = (message: Ably.Message) => {
+      if (isVoteEndedMessage(message.data)) {
+        try {
+          callback(message.data)
+        } catch (err) {
+          console.error('[Ably] Error in vote-ended callback:', err)
+        }
+      }
+    }
+    channel.subscribe('message', handler)
+
+    console.log('[Ably] Subscribed to vote-ended messages')
+    return () => { channel.unsubscribe('message', handler) }
+  }
+
+  /**
+   * Subscribe to poll-ended messages from the presentation
+   * Returns an unsubscribe function
+   */
+  function onPollEnded(callback: (msg: PollEndedMessage) => void): () => void {
+    const { client } = state.value
+    if (!client) {
+      console.warn('[Ably] Cannot subscribe to poll-ended - not connected')
+      return () => {}
+    }
+
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    const handler = (message: Ably.Message) => {
+      if (isPollEndedMessage(message.data)) {
+        try {
+          callback(message.data)
+        } catch (err) {
+          console.error('[Ably] Error in poll-ended callback:', err)
+        }
+      }
+    }
+    channel.subscribe('message', handler)
+
+    console.log('[Ably] Subscribed to poll-ended messages')
+    return () => { channel.unsubscribe('message', handler) }
+  }
+
+  /**
    * Send a vote to the presentation
    */
   async function sendVote(voteIndex: number, choice: 'A' | 'B', keynoteId: string): Promise<void> {
@@ -350,11 +413,14 @@ export function useAbly() {
   async function fetchSessionHistory(): Promise<{
     sessionState: SessionStateMessage | null
     voteStarted: VoteStartedMessage | null
+    voteEnded: VoteEndedMessage | null
+    pollStarted: PollStartedMessage | null
+    pollEnded: PollEndedMessage | null
   }> {
     const { client } = state.value
     if (!client) {
       console.warn('[Ably] Cannot fetch history - not connected')
-      return { sessionState: null, voteStarted: null }
+      return { sessionState: null, voteStarted: null, voteEnded: null, pollStarted: null, pollEnded: null }
     }
 
     try {
@@ -363,24 +429,25 @@ export function useAbly() {
 
       let sessionState: SessionStateMessage | null = null
       let voteStarted: VoteStartedMessage | null = null
+      let voteEnded: VoteEndedMessage | null = null
+      let pollStarted: PollStartedMessage | null = null
+      let pollEnded: PollEndedMessage | null = null
 
-      // Find the most recent session-state and vote-started messages
+      // Find the most recent of each message type
       for (const msg of history.items) {
-        if (!sessionState && isSessionStateMessage(msg.data)) {
-          sessionState = msg.data
-        }
-        if (!voteStarted && isVoteStartedMessage(msg.data)) {
-          voteStarted = msg.data
-        }
-        // Stop once we have both
-        if (sessionState && voteStarted) break
+        if (!sessionState && isSessionStateMessage(msg.data)) sessionState = msg.data
+        if (!voteStarted && isVoteStartedMessage(msg.data)) voteStarted = msg.data
+        if (!voteEnded && isVoteEndedMessage(msg.data)) voteEnded = msg.data
+        if (!pollStarted && isPollStartedMessage(msg.data)) pollStarted = msg.data
+        if (!pollEnded && isPollEndedMessage(msg.data)) pollEnded = msg.data
+        if (sessionState && voteStarted && voteEnded && pollStarted && pollEnded) break
       }
 
-      console.log('[Ably] Fetched history - sessionState:', !!sessionState, 'voteStarted:', !!voteStarted)
-      return { sessionState, voteStarted }
+      console.log('[Ably] Fetched history - sessionState:', !!sessionState, 'voteStarted:', !!voteStarted, 'voteEnded:', !!voteEnded)
+      return { sessionState, voteStarted, voteEnded, pollStarted, pollEnded }
     } catch (err) {
       console.error('[Ably] Failed to fetch history:', err)
-      return { sessionState: null, voteStarted: null }
+      return { sessionState: null, voteStarted: null, voteEnded: null, pollStarted: null, pollEnded: null }
     }
   }
 
@@ -409,7 +476,9 @@ export function useAbly() {
     restoreSession,
     onSessionState,
     onVoteStarted,
+    onVoteEnded,
     onPollStarted,
+    onPollEnded,
     sendVote,
     sendPoll,
     setOnReconnect,

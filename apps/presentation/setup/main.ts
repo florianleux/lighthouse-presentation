@@ -17,6 +17,8 @@ import type {
   PollChoice,
   SessionStateMessage,
   SessionPhase,
+  VoteContext,
+  PollContext,
 } from '../../../shared/types'
 
 // Session data persistence
@@ -67,6 +69,22 @@ export function isVoteSlide(slideNo: number): boolean {
 
 export function clearVoteSlideRegistry() {
   voteSlideRegistry.clear()
+}
+
+// Dynamic poll slide registry (slideNo → pollId)
+// Populated at runtime when Poll components mount
+export const pollSlideRegistry = reactive(new Map<number, string>())
+
+export function registerPollSlide(slideNo: number, pollId: string) {
+  pollSlideRegistry.set(slideNo, pollId)
+}
+
+export function isPollSlide(slideNo: number): boolean {
+  return pollSlideRegistry.has(slideNo)
+}
+
+export function clearPollSlideRegistry() {
+  pollSlideRegistry.clear()
 }
 
 // Global vote store (5 votes for 5 metrics: CLS, FCP, LCP, TBT, SI)
@@ -210,6 +228,7 @@ export const sessionStore = reactive({
     this.manualMode = debugMode // Keep manual mode in debug
     voteStore.reset()
     clearVoteSlideRegistry()
+    clearPollSlideRegistry()
   },
 
   // Start a new session with a new keynoteId (called from admin panel)
@@ -352,6 +371,46 @@ export default defineAppSetup(({ app }) => {
 export function publishSessionState(currentSlide: number, phase: SessionPhase) {
   if (!ablyInstance || !sessionStore.isAblyConnected) return
 
+  // Determine slideType from registries
+  let slideType: 'vote' | 'poll' | 'other' = 'other'
+  if (voteSlideRegistry.has(currentSlide)) slideType = 'vote'
+  else if (pollSlideRegistry.has(currentSlide)) slideType = 'poll'
+
+  // Build voteContext when on a vote slide
+  let voteContext: VoteContext | null = null
+  if (slideType === 'vote') {
+    const voteIdx = voteSlideRegistry.get(currentSlide)!
+    const isThisVoteActive = sessionStore.activeVoteIndex === voteIdx
+    let votePhase: VoteContext['votePhase'] = 'pending'
+    if (isThisVoteActive && sessionStore.votePhase === 'voting') votePhase = 'voting'
+    else if (isThisVoteActive && sessionStore.votePhase === 'ended') votePhase = 'ended'
+
+    voteContext = { voteIndex: voteIdx, votePhase }
+
+    if (votePhase === 'ended') {
+      const results = sessionStore.voteResults[voteIdx]
+      if (results) {
+        const aLen = results.A.length
+        const bLen = results.B.length
+        voteContext.winner = bLen > aLen ? 'B' : 'A'
+        voteContext.resultsA = aLen
+        voteContext.resultsB = bLen
+      }
+    }
+  }
+
+  // Build pollContext when on a poll slide
+  let pollContext: PollContext | null = null
+  if (slideType === 'poll') {
+    const pollId = pollSlideRegistry.get(currentSlide)!
+    const isThisPollActive = sessionStore.activePollId === pollId
+    let pollPhase: PollContext['pollPhase'] = 'pending'
+    if (isThisPollActive && sessionStore.pollPhase === 'polling') pollPhase = 'polling'
+    else if (isThisPollActive && sessionStore.pollPhase === 'ended') pollPhase = 'ended'
+
+    pollContext = { pollId, pollPhase }
+  }
+
   const message: SessionStateMessage = {
     type: 'session-state',
     keynoteId: sessionStore.keynoteId,
@@ -361,6 +420,9 @@ export function publishSessionState(currentSlide: number, phase: SessionPhase) {
     phase,
     activeVoteIndex: sessionStore.activeVoteIndex,
     timestamp: Date.now(),
+    slideType,
+    voteContext,
+    pollContext,
   }
 
   ablyInstance.publish(ABLY_CHANNELS.SESSION, message)

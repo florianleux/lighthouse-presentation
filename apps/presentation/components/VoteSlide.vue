@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { registerVoteSlide, sessionStore, voteStore, getAbly } from '../setup/main'
+import { registerVoteSlide, sessionStore, voteStore, getAbly, publishSessionState } from '../setup/main'
 import { getVoteProps } from '../../../shared/metrics-data'
 import { ABLY_CHANNELS, VOTE_CONFIG } from '../../../shared/constants'
-import type { VoteStartedMessage } from '../../../shared/types'
+import type { VoteStartedMessage, VoteEndedMessage } from '../../../shared/types'
 
 const props = defineProps<{
   metricIndex: number
@@ -154,12 +154,34 @@ async function startVoteSession() {
     await ably.publish(ABLY_CHANNELS.SESSION, message)
     console.log('[VoteSlide] Vote session started for vote', voteIndex.value)
   }
+
+  // Publish enriched session state so vote apps get voteContext
+  publishSessionState(currentSlideNo.value, 'voting')
 }
 
-function stopVoteSession() {
+async function stopVoteSession() {
   clearTimer()
   sessionStore.votePhase = 'ended'
-  console.log('[VoteSlide] Vote session stopped for vote', voteIndex.value)
+
+  // Publish VoteEndedMessage so vote apps show "Vote closed!" with results
+  const ably = getAbly()
+  if (ably) {
+    const r = sessionStore.voteResults[voteIndex.value]
+    const aLen = r?.A.length ?? 0
+    const bLen = r?.B.length ?? 0
+    const message: VoteEndedMessage = {
+      type: 'vote-ended',
+      voteIndex: voteIndex.value,
+      winner: bLen > aLen ? 'B' : 'A',
+      results: { A: aLen, B: bLen },
+      timestamp: Date.now(),
+    }
+    await ably.publish(ABLY_CHANNELS.SESSION, message)
+    console.log('[VoteSlide] Vote ended published for vote', voteIndex.value)
+  }
+
+  // Publish enriched session state with voteContext.votePhase = 'ended'
+  publishSessionState(currentSlideNo.value, 'voting')
 }
 
 function continueWithWinner() {
