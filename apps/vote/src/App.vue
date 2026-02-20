@@ -2,7 +2,7 @@
 import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
-import type { PollChoice, VoteStartedMessage } from '../../../shared/types'
+import type { PollChoice, VoteStartedMessage, SessionStateMessage } from '../../../shared/types'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
 
@@ -493,6 +493,69 @@ function handleVoteStartedSync(msg: VoteStartedMessage) {
   }
 }
 
+// ===========================================
+// Initial session-state processing (shared between live handler and history bootstrap)
+// ===========================================
+
+function processInitialSessionState(msg: SessionStateMessage, savedMember: SavedMember): void {
+  const newKeynoteId = msg.keynoteId
+  activeKeynoteId.value = newKeynoteId
+
+  if (newKeynoteId && savedMember.keynoteId === newKeynoteId) {
+    // Same keynote - restore session
+    status.value = 'joined'
+    console.log('[App] Same keynote, restoring session')
+
+    // Restore vote state from localStorage
+    restoreVoteState()
+
+    // Apply slide context from this session-state message
+    currentSlideType.value = msg.slideType ?? 'other'
+    if (msg.voteContext) {
+      activeVoteIndex.value = msg.voteContext.voteIndex
+      if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
+        voteEndedData.value = {
+          winner: msg.voteContext.winner,
+          resultsA: msg.voteContext.resultsA ?? 0,
+          resultsB: msg.voteContext.resultsB ?? 0,
+        }
+      }
+    }
+    if (msg.pollContext) {
+      activePollId.value = msg.pollContext.pollId
+      if (msg.pollContext.pollPhase === 'ended') {
+        pollPhase.value = 'ended'
+      }
+    }
+
+    // If we restored vote state but slideType is unknown, infer it
+    if (currentSlideType.value === 'other' && activeVoteIndex.value !== null) {
+      currentSlideType.value = 'vote'
+    }
+
+    // Re-announce to presentation so it re-registers us in the crew
+    joinCrew(savedMember.name, newKeynoteId, savedMember.avatar)
+      .then(() => console.log('[App] Re-announced on initial restore'))
+      .catch((err) => console.error('[App] Failed to re-announce on restore:', err))
+  } else if (newKeynoteId) {
+    // Different keynote active - clear and show form
+    console.log('[App] Different keynote, clearing session')
+    clearSavedMember()
+    joinedName.value = ''
+    selectedAvatar.value = null
+    currentStep.value = 'name'
+    status.value = 'idle'
+  } else {
+    // No keynote active - clear and wait
+    console.log('[App] No keynote active, clearing session')
+    clearSavedMember()
+    joinedName.value = ''
+    selectedAvatar.value = null
+    currentStep.value = 'name'
+    status.value = 'waiting'
+  }
+}
+
 // Connect on mount
 onMounted(async () => {
   const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
@@ -524,61 +587,9 @@ onMounted(async () => {
       // Only handle initial sync when in 'connecting' state
       if (status.value === 'connecting') {
         if (savedMember) {
-          if (newKeynoteId && savedMember.keynoteId === newKeynoteId) {
-            // Same keynote - restore session
-            status.value = 'joined'
-            console.log('[App] Same keynote, restoring session')
-
-            // Restore vote state from localStorage (fixes refresh after voting)
-            restoreVoteState()
-
-            // Apply slide context from this session-state message
-            currentSlideType.value = msg.slideType ?? 'other'
-            if (msg.voteContext) {
-              activeVoteIndex.value = msg.voteContext.voteIndex
-              if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
-                voteEndedData.value = {
-                  winner: msg.voteContext.winner,
-                  resultsA: msg.voteContext.resultsA ?? 0,
-                  resultsB: msg.voteContext.resultsB ?? 0,
-                }
-              }
-            }
-            if (msg.pollContext) {
-              activePollId.value = msg.pollContext.pollId
-              if (msg.pollContext.pollPhase === 'ended') {
-                pollPhase.value = 'ended'
-              }
-            }
-
-            // If we restored vote state but slideType is unknown, infer it
-            if (currentSlideType.value === 'other' && activeVoteIndex.value !== null) {
-              currentSlideType.value = 'vote'
-            }
-
-            // Re-announce to presentation so it re-registers us in the crew
-            joinCrew(savedMember.name, newKeynoteId, savedMember.avatar)
-              .then(() => console.log('[App] Re-announced on initial restore'))
-              .catch((err) => console.error('[App] Failed to re-announce on restore:', err))
-          } else if (newKeynoteId) {
-            // Different keynote active - clear and show form
-            console.log('[App] Different keynote, clearing session')
-            clearSavedMember()
-            joinedName.value = ''
-            selectedAvatar.value = null
-            currentStep.value = 'name'
-            status.value = 'idle'
-          } else {
-            // No keynote active - clear and wait
-            console.log('[App] No keynote active, clearing session')
-            clearSavedMember()
-            joinedName.value = ''
-            selectedAvatar.value = null
-            currentStep.value = 'name'
-            status.value = 'waiting'
-          }
+          processInitialSessionState(msg, savedMember)
         } else {
-          // No saved member
+          activeKeynoteId.value = newKeynoteId
           status.value = newKeynoteId ? 'idle' : 'waiting'
         }
         return
@@ -761,14 +772,30 @@ onMounted(async () => {
     // Enter Ably Presence so the presentation tracks us as active
     enterPresence()
 
-    // After connecting, stay in 'connecting' until we receive session-state
-    // Just restore the data, don't set final status yet
+    // Restore display data immediately
     if (savedMember) {
       joinedName.value = savedMember.name
       selectedAvatar.value = savedMember.avatar
-      console.log('[App] Restored data for', savedMember.name, ', waiting for session-state')
     }
-    // Stay in 'connecting' - will transition when session-state is received
+
+    // Bootstrap from Ably history instead of waiting for a live session-state
+    // (the presentation has no periodic heartbeat — only publishes on events)
+    if (savedMember) {
+      try {
+        const { sessionState } = await fetchSessionHistory()
+        // Only process if still waiting (no live message beat us)
+        if (status.value === 'connecting' && sessionState) {
+          // keynoteId validation happens inside processInitialSessionState
+          processInitialSessionState(sessionState, savedMember)
+        } else if (status.value === 'connecting') {
+          // No history at all — presentation never published anything
+          // Stay in 'connecting', a live message will arrive eventually
+          console.log('[App] No session history, waiting for live message')
+        }
+      } catch (err) {
+        console.warn('[App] Failed to fetch initial history:', err)
+      }
+    }
   } catch (err) {
     status.value = 'error'
   }
