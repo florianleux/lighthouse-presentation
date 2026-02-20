@@ -28,7 +28,7 @@ export type Avatar = string
 
 // Participant (crew pirate)
 export interface CrewMember {
-  odientId: string
+  participantId: string
   name: string
   avatar: Avatar | null
   joinedAt: number
@@ -41,7 +41,7 @@ export interface CrewMember {
 export interface AvatarCreatedMessage {
   type: 'avatar-created'
   keynoteId: string
-  odientId: string
+  participantId: string
   name: string
   avatar: Avatar | null
   timestamp: number
@@ -50,7 +50,7 @@ export interface AvatarCreatedMessage {
 export interface VoteCastMessage {
   type: 'vote-cast'
   keynoteId: string
-  odientId: string
+  participantId: string
   voteIndex: number
   choice: 'A' | 'B'
   timestamp: number
@@ -62,15 +62,9 @@ export type PollChoice = 'cabin_boy' | 'quartermaster' | 'captain'
 export interface PollCastMessage {
   type: 'poll-cast'
   keynoteId: string
-  odientId: string
+  participantId: string
   pollId: string
   choice: PollChoice
-  timestamp: number
-}
-
-export interface HeartbeatResponseMessage {
-  type: 'heartbeat-response'
-  odientId: string
   timestamp: number
 }
 
@@ -88,11 +82,6 @@ export interface SessionStateMessage {
   path: (string | null)[]
   phase: SessionPhase
   activeVoteIndex: number | null
-  timestamp: number
-}
-
-export interface HeartbeatRequestMessage {
-  type: 'heartbeat-request'
   timestamp: number
 }
 
@@ -126,11 +115,9 @@ export type IncomingMessage =
   | AvatarCreatedMessage
   | VoteCastMessage
   | PollCastMessage
-  | HeartbeatResponseMessage
 
 export type OutgoingMessage =
   | SessionStateMessage
-  | HeartbeatRequestMessage
   | VoteStartedMessage
   | VoteEndedMessage
   | PollStartedMessage
@@ -140,8 +127,8 @@ export type OutgoingMessage =
 // ===========================================
 
 export interface VoteResults {
-  A: string[]  // List of odientIds who voted A
-  B: string[]  // List of odientIds who voted B
+  A: string[]  // List of participantIds who voted A
+  B: string[]  // List of participantIds who voted B
   winner: 'A' | 'B' | null
 }
 
@@ -158,6 +145,6 @@ export interface SessionState {
   currentSlide: number
   path: (string | null)[]
   crew: CrewMember[]
-  activeCrew: string[]  // odientIds of active participants (recent heartbeat)
+  activeCrew: string[]  // participantIds of active participants (via Ably Presence)
   votes: Record<number, VoteResults>  // voteIndex → résultats
 }

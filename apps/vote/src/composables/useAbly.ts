@@ -9,14 +9,11 @@ import type {
   PollStartedMessage,
   PollCastMessage,
   PollChoice,
-  HeartbeatResponseMessage,
-  HeartbeatRequestMessage,
 } from '../../../../shared/types'
 import {
   isSessionStateMessage,
   isVoteStartedMessage,
   isPollStartedMessage,
-  isHeartbeatRequestMessage,
 } from '../../../../shared/validators'
 
 // Connection timeout in milliseconds
@@ -82,7 +79,7 @@ const state = shallowRef<AblyState>({
 })
 
 // Unique ID for this participant
-let odientId: string | null = null
+let participantId: string | null = null
 
 // Callback for reconnection events
 let onReconnectCallback: (() => void) | null = null
@@ -97,9 +94,9 @@ export function useAbly() {
   /**
    * Connect to Ably server
    * @param apiKey - Ably API key
-   * @param savedOdientId - Optional saved ID to restore session
+   * @param savedParticipantId - Optional saved ID to restore session
    */
-  async function connect(apiKey: string, savedOdientId?: string): Promise<void> {
+  async function connect(apiKey: string, savedParticipantId?: string): Promise<void> {
     if (state.value.client) {
       console.log('[Ably] Already connected')
       return
@@ -107,18 +104,18 @@ export function useAbly() {
 
     try {
       // Use saved ID or generate a new one (cryptographically secure)
-      odientId = savedOdientId || 'pirate-' + crypto.randomUUID()
+      participantId = savedParticipantId || 'pirate-' + crypto.randomUUID()
 
       const client = new Ably.Realtime({
         key: apiKey,
-        clientId: odientId,
+        clientId: participantId,
       })
 
       // Connection with timeout
       const connectionPromise = new Promise<void>((resolve, reject) => {
         // Initial connection handler
         const onInitialConnect = () => {
-          console.log('[Ably] Connected as', odientId)
+          console.log('[Ably] Connected as', participantId)
           state.value = { client, isConnected: true }
           isConnected.value = true
           hasConnectedOnce = true
@@ -160,7 +157,7 @@ export function useAbly() {
    */
   async function joinCrew(name: string, keynoteId: string, avatar: string | null): Promise<void> {
     const { client } = state.value
-    if (!client || !odientId) {
+    if (!client || !participantId) {
       throw new Error('Not connected to Ably')
     }
 
@@ -169,7 +166,7 @@ export function useAbly() {
     const message: AvatarCreatedMessage = {
       type: 'avatar-created',
       keynoteId,
-      odientId,
+      participantId,
       name,
       avatar,
       timestamp: Date.now(),
@@ -182,16 +179,16 @@ export function useAbly() {
   /**
    * Returns the participant's ID
    */
-  function getOdientId(): string | null {
-    return odientId
+  function getParticipantId(): string | null {
+    return participantId
   }
 
   /**
-   * Restore session with a saved odientId (called after connect with savedOdientId)
+   * Restore session with a saved participantId (called after connect with savedParticipantId)
    */
-  function restoreSession(savedOdientId: string) {
-    odientId = savedOdientId
-    console.log('[Ably] Session restored for', savedOdientId)
+  function restoreSession(savedParticipantId: string) {
+    participantId = savedParticipantId
+    console.log('[Ably] Session restored for', savedParticipantId)
   }
 
   /**
@@ -253,7 +250,7 @@ export function useAbly() {
    */
   async function sendVote(voteIndex: number, choice: 'A' | 'B', keynoteId: string): Promise<void> {
     const { client } = state.value
-    if (!client || !odientId) {
+    if (!client || !participantId) {
       throw new Error('Not connected to Ably')
     }
 
@@ -262,7 +259,7 @@ export function useAbly() {
     const message: VoteCastMessage = {
       type: 'vote-cast',
       keynoteId,
-      odientId,
+      participantId,
       voteIndex,
       choice,
       timestamp: Date.now(),
@@ -304,7 +301,7 @@ export function useAbly() {
    */
   async function sendPoll(pollId: string, choice: PollChoice, keynoteId: string): Promise<void> {
     const { client } = state.value
-    if (!client || !odientId) {
+    if (!client || !participantId) {
       throw new Error('Not connected to Ably')
     }
 
@@ -313,7 +310,7 @@ export function useAbly() {
     const message: PollCastMessage = {
       type: 'poll-cast',
       keynoteId,
-      odientId,
+      participantId,
       pollId,
       choice,
       timestamp: Date.now(),
@@ -331,46 +328,19 @@ export function useAbly() {
   }
 
   /**
-   * Setup heartbeat listener to respond to heartbeat requests from the presentation
+   * Enter presence on the presence channel to signal this voter is active.
+   * Ably automatically handles leave on disconnect.
    */
-  function setupHeartbeatListener(): void {
+  async function enterPresence(): Promise<void> {
     const { client } = state.value
-    if (!client || !odientId) {
-      console.warn('[Ably] Cannot setup heartbeat listener - not connected')
+    if (!client || !participantId) {
+      console.warn('[Ably] Cannot enter presence - not connected or no participantId')
       return
     }
 
-    const channel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
-    channel.subscribe('message', async (message) => {
-      if (isHeartbeatRequestMessage(message.data)) {
-        console.log('[Ably] Received heartbeat request, responding...')
-        await sendHeartbeatResponse()
-      }
-    })
-
-    console.log('[Ably] Heartbeat listener setup')
-  }
-
-  /**
-   * Send heartbeat response to indicate this participant is still active
-   */
-  async function sendHeartbeatResponse(): Promise<void> {
-    const { client } = state.value
-    if (!client || !odientId) {
-      console.warn('[Ably] Cannot send heartbeat - not connected or no odientId')
-      return
-    }
-
-    const channel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
-
-    const message: HeartbeatResponseMessage = {
-      type: 'heartbeat-response',
-      odientId,
-      timestamp: Date.now(),
-    }
-
-    await channel.publish('message', message)
-    console.log('[Ably] Heartbeat response sent')
+    const channel = client.channels.get(ABLY_CHANNELS.PRESENCE)
+    await channel.presence.enter()
+    console.log('[Ably] Entered presence')
   }
 
   /**
@@ -423,7 +393,7 @@ export function useAbly() {
       client.close()
       state.value = { client: null, isConnected: false }
       isConnected.value = false
-      odientId = null
+      participantId = null
       hasConnectedOnce = false
       onReconnectCallback = null
       console.log('[Ably] Disconnected')
@@ -435,7 +405,7 @@ export function useAbly() {
     error,
     connect,
     joinCrew,
-    getOdientId,
+    getParticipantId,
     restoreSession,
     onSessionState,
     onVoteStarted,
@@ -443,8 +413,7 @@ export function useAbly() {
     sendVote,
     sendPoll,
     setOnReconnect,
-    setupHeartbeatListener,
-    sendHeartbeatResponse,
+    enterPresence,
     fetchSessionHistory,
     disconnect,
   }

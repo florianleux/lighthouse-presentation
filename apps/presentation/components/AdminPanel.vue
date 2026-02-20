@@ -123,7 +123,7 @@ async function startNewSession() {
                 :disabled="!keynoteId"
                 @click="emit('sendHeartbeat')"
               >
-                Send Heartbeat (sync all)
+                Sync Session State
               </button>
             </div>
 

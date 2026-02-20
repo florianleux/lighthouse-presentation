@@ -22,7 +22,7 @@ const isVisible = computed(() => {
     <TransitionGroup name="pill">
       <div
         v-for="member in crew"
-        :key="member.odientId"
+        :key="member.participantId"
         class="crew-member animate-sway"
       >
         <AvatarPreview

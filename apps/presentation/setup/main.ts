@@ -129,26 +129,26 @@ export const sessionStore = reactive({
 
   // Actions
   addCrewMember(member: CrewMember) {
-    if (!this.crew.find(m => m.odientId === member.odientId)) {
+    if (!this.crew.find(m => m.participantId === member.participantId)) {
       this.crew.push(member)
       persistSession()
     }
   },
 
-  recordVote(odientId: string, voteIndex: number, choice: 'A' | 'B') {
+  recordVote(participantId: string, voteIndex: number, choice: 'A' | 'B') {
     const results = this.voteResults[voteIndex]
     if (!results) return
 
     // Avoid duplicates
-    if (results.A.includes(odientId) || results.B.includes(odientId)) {
+    if (results.A.includes(participantId) || results.B.includes(participantId)) {
       return
     }
 
-    results[choice].push(odientId)
+    results[choice].push(participantId)
     persistSession()
   },
 
-  recordPollVote(odientId: string, pollId: string, choice: PollChoice) {
+  recordPollVote(participantId: string, pollId: string, choice: PollChoice) {
     let results = this.pollResults[pollId]
     if (!results) {
       results = { cabin_boy: [], quartermaster: [], captain: [] }
@@ -156,24 +156,25 @@ export const sessionStore = reactive({
     }
 
     // Avoid duplicates
-    if (results.cabin_boy.includes(odientId) ||
-        results.quartermaster.includes(odientId) ||
-        results.captain.includes(odientId)) {
+    if (results.cabin_boy.includes(participantId) ||
+        results.quartermaster.includes(participantId) ||
+        results.captain.includes(participantId)) {
       return
     }
 
-    results[choice].push(odientId)
+    results[choice].push(participantId)
     persistSession()
   },
 
-  updateActiveCrew(odientId: string) {
-    if (!this.activeCrew.includes(odientId)) {
-      this.activeCrew.push(odientId)
+  updateActiveCrew(participantId: string) {
+    if (!this.activeCrew.includes(participantId)) {
+      this.activeCrew.push(participantId)
     }
   },
 
-  clearActiveCrew() {
-    this.activeCrew = []
+  removeActiveCrew(participantId: string) {
+    const idx = this.activeCrew.indexOf(participantId)
+    if (idx > -1) this.activeCrew.splice(idx, 1)
   },
 
   // Update last slide and persist
@@ -301,7 +302,7 @@ export default defineAppSetup(({ app }) => {
             return
           }
           sessionStore.addCrewMember({
-            odientId: msg.odientId,
+            participantId: msg.participantId,
             name: msg.name,
             avatar: msg.avatar,
             joinedAt: msg.timestamp,
@@ -314,7 +315,7 @@ export default defineAppSetup(({ app }) => {
             console.warn('[Session] Ignoring vote for different keynote:', msg.keynoteId)
             return
           }
-          sessionStore.recordVote(msg.odientId, msg.voteIndex, msg.choice)
+          sessionStore.recordVote(msg.participantId, msg.voteIndex, msg.choice)
         })
 
         // Listen for polls (validate keynoteId to prevent cross-session contamination)
@@ -323,12 +324,20 @@ export default defineAppSetup(({ app }) => {
             console.warn('[Session] Ignoring poll for different keynote:', msg.keynoteId)
             return
           }
-          sessionStore.recordPollVote(msg.odientId, msg.pollId, msg.choice)
+          sessionStore.recordPollVote(msg.participantId, msg.pollId, msg.choice)
         })
 
-        // Listen for heartbeats
-        ablyInstance!.onHeartbeatResponse((msg) => {
-          sessionStore.updateActiveCrew(msg.odientId)
+        // Track active crew via Ably Presence
+        ablyInstance!.onPresenceEnter((participantId) => {
+          sessionStore.updateActiveCrew(participantId)
+        })
+        ablyInstance!.onPresenceLeave((participantId) => {
+          sessionStore.removeActiveCrew(participantId)
+        })
+
+        // Sync current presence members (voters who joined before us)
+        ablyInstance!.getPresenceMembers().then((members) => {
+          members.forEach((id) => sessionStore.updateActiveCrew(id))
         })
       })
       .catch((err) => {
@@ -338,13 +347,6 @@ export default defineAppSetup(({ app }) => {
     console.warn('[Session] VITE_ABLY_API_KEY not set - running in offline mode')
   }
 })
-
-// Send heartbeat request and clear stale active crew
-export async function sendHeartbeat() {
-  if (!ablyInstance || !sessionStore.isAblyConnected) return
-  sessionStore.clearActiveCrew()
-  await ablyInstance.sendHeartbeatRequest()
-}
 
 // Helper to publish session state
 export function publishSessionState(currentSlide: number, phase: SessionPhase) {

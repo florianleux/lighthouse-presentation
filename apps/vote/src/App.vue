@@ -8,7 +8,7 @@ import AvatarPreview from './components/AvatarPreview.vue'
 
 interface SavedMember {
   name: string
-  odientId: string
+  participantId: string
   keynoteId: string
   avatar: string | null
 }
@@ -27,7 +27,7 @@ const {
   error,
   connect,
   joinCrew,
-  getOdientId,
+  getParticipantId,
   restoreSession,
   onSessionState,
   onVoteStarted,
@@ -35,7 +35,7 @@ const {
   sendVote,
   sendPoll,
   setOnReconnect,
-  setupHeartbeatListener,
+  enterPresence,
   fetchSessionHistory,
 } = useAbly()
 
@@ -138,11 +138,11 @@ function loadSavedMember(): SavedMember | null {
 }
 
 // Save crew member to localStorage
-function saveMember(memberName: string, odientId: string, keynoteId: string, avatar: string | null) {
+function saveMember(memberName: string, participantId: string, keynoteId: string, avatar: string | null) {
   try {
     localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify({
       name: memberName,
-      odientId,
+      participantId,
       keynoteId,
       avatar
     }))
@@ -416,11 +416,11 @@ onMounted(async () => {
   const savedMember = loadSavedMember()
 
   try {
-    // Connect (with saved odientId if available)
-    await connect(apiKey, savedMember?.odientId)
+    // Connect (with saved participantId if available)
+    await connect(apiKey, savedMember?.participantId)
 
     if (savedMember) {
-      restoreSession(savedMember.odientId)
+      restoreSession(savedMember.participantId)
     }
 
     // Subscribe to session state to get keynoteId
@@ -539,8 +539,8 @@ onMounted(async () => {
       debouncedRequestStateSync()
     })
 
-    // Setup heartbeat listener to respond to presentation
-    setupHeartbeatListener()
+    // Enter Ably Presence so the presentation tracks us as active
+    enterPresence()
 
     // After connecting, stay in 'connecting' until we receive session-state
     // Just restore the data, don't set final status yet
@@ -591,9 +591,9 @@ async function handleJoin(avatar: string) {
     status.value = 'joined'
 
     // Save to localStorage with keynoteId
-    const odientId = getOdientId()
-    if (odientId) {
-      saveMember(name.value.trim(), odientId, activeKeynoteId.value, avatar)
+    const participantId = getParticipantId()
+    if (participantId) {
+      saveMember(name.value.trim(), participantId, activeKeynoteId.value, avatar)
     }
   } catch (err) {
     console.error('Failed to join crew:', err)

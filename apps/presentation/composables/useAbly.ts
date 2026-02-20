@@ -2,19 +2,15 @@ import Ably from 'ably'
 import { ref, shallowRef } from 'vue'
 import { ABLY_CHANNELS } from '../../../shared/constants'
 import type {
-  IncomingMessage,
   OutgoingMessage,
   AvatarCreatedMessage,
   VoteCastMessage,
   PollCastMessage,
-  HeartbeatResponseMessage,
-  HeartbeatRequestMessage,
 } from '../../../shared/types'
 import {
   isAvatarCreatedMessage,
   isVoteCastMessage,
   isPollCastMessage,
-  isHeartbeatResponseMessage,
   validateMessage,
 } from '../../../shared/validators'
 
@@ -47,7 +43,12 @@ const callbacks = {
   'avatar-created': [] as MessageCallback<AvatarCreatedMessage>[],
   'vote-cast': [] as MessageCallback<VoteCastMessage>[],
   'poll-cast': [] as MessageCallback<PollCastMessage>[],
-  'heartbeat-response': [] as MessageCallback<HeartbeatResponseMessage>[],
+}
+
+// Presence callbacks
+const presenceCallbacks = {
+  'enter': [] as MessageCallback<string>[],
+  'leave': [] as MessageCallback<string>[],
 }
 
 export function useAbly() {
@@ -154,23 +155,29 @@ export function useAbly() {
     })
     state.value.channels.set(ABLY_CHANNELS.VOTES, votesChannel)
 
-    // Channel HEARTBEAT
-    const heartbeatChannel = client.channels.get(ABLY_CHANNELS.HEARTBEAT)
-    heartbeatChannel.subscribe((message) => {
-      const data = validateMessage(message.data, isHeartbeatResponseMessage, 'heartbeat-response')
-      if (data) {
-        callbacks['heartbeat-response'].forEach((cb) => {
-          try {
-            cb(data)
-          } catch (err) {
-            console.error('[Ably] Error in heartbeat-response callback:', err)
-          }
-        })
-      }
+    // Presence channel - track active voters
+    const presenceChannel = client.channels.get(ABLY_CHANNELS.PRESENCE)
+    presenceChannel.presence.subscribe('enter', (member) => {
+      const participantId = member.clientId
+      console.log('[Ably] Presence enter:', participantId)
+      presenceCallbacks['enter'].forEach((cb) => {
+        try { cb(participantId) } catch (err) {
+          console.error('[Ably] Error in presence-enter callback:', err)
+        }
+      })
     })
-    state.value.channels.set(ABLY_CHANNELS.HEARTBEAT, heartbeatChannel)
+    presenceChannel.presence.subscribe('leave', (member) => {
+      const participantId = member.clientId
+      console.log('[Ably] Presence leave:', participantId)
+      presenceCallbacks['leave'].forEach((cb) => {
+        try { cb(participantId) } catch (err) {
+          console.error('[Ably] Error in presence-leave callback:', err)
+        }
+      })
+    })
+    state.value.channels.set(ABLY_CHANNELS.PRESENCE, presenceChannel)
 
-    console.log('[Ably] Subscribed to incoming channels')
+    console.log('[Ably] Subscribed to incoming channels and presence')
   }
 
   /**
@@ -220,23 +227,31 @@ export function useAbly() {
     }
   }
 
-  function onHeartbeatResponse(callback: MessageCallback<HeartbeatResponseMessage>): () => void {
-    callbacks['heartbeat-response'].push(callback)
+  function onPresenceEnter(callback: MessageCallback<string>): () => void {
+    presenceCallbacks['enter'].push(callback)
     return () => {
-      const idx = callbacks['heartbeat-response'].indexOf(callback)
-      if (idx > -1) callbacks['heartbeat-response'].splice(idx, 1)
+      const idx = presenceCallbacks['enter'].indexOf(callback)
+      if (idx > -1) presenceCallbacks['enter'].splice(idx, 1)
+    }
+  }
+
+  function onPresenceLeave(callback: MessageCallback<string>): () => void {
+    presenceCallbacks['leave'].push(callback)
+    return () => {
+      const idx = presenceCallbacks['leave'].indexOf(callback)
+      if (idx > -1) presenceCallbacks['leave'].splice(idx, 1)
     }
   }
 
   /**
-   * Send a heartbeat request to all connected voters
+   * Get current presence members (for initial sync)
    */
-  async function sendHeartbeatRequest(): Promise<void> {
-    const message: HeartbeatRequestMessage = {
-      type: 'heartbeat-request',
-      timestamp: Date.now(),
-    }
-    await publish(ABLY_CHANNELS.HEARTBEAT, message)
+  async function getPresenceMembers(): Promise<string[]> {
+    const { client } = state.value
+    if (!client) return []
+    const channel = client.channels.get(ABLY_CHANNELS.PRESENCE)
+    const members = await channel.presence.get()
+    return members.map(m => m.clientId)
   }
 
   /**
@@ -264,14 +279,17 @@ export function useAbly() {
     // Actions
     connect,
     publish,
-    sendHeartbeatRequest,
     disconnect,
 
     // Subscriptions
     onAvatarCreated,
     onVoteCast,
     onPollCast,
-    onHeartbeatResponse,
+
+    // Presence
+    onPresenceEnter,
+    onPresenceLeave,
+    getPresenceMembers,
 
     // Channels constants (for convenience)
     CHANNELS: ABLY_CHANNELS,

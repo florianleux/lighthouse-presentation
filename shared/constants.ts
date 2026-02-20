@@ -13,8 +13,8 @@ export const ABLY_CHANNELS = {
   // Avatars created (vote app → presentation)
   AVATARS: 'lighthouse:avatars',
 
-  // Heartbeat/presence (bidirectional)
-  HEARTBEAT: 'lighthouse:heartbeat',
+  // Presence tracking (Ably Presence API)
+  PRESENCE: 'lighthouse:presence',
 } as const
 
 // Vote phases
@@ -38,12 +38,6 @@ export const POLL_CONFIG = {
   TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
   KNOWLEDGE_POLL_ID: 'knowledge-level',
   CHOICES: ['cabin_boy', 'quartermaster', 'captain'] as const,
-} as const
-
-// Heartbeat configuration
-export const HEARTBEAT_CONFIG = {
-  INTERVAL_MS: 10000,     // Interval between requests (10s)
-  TIMEOUT_MS: 15000,      // Timeout to consider a participant inactive (15s)
 } as const
 
 // Performance metrics - Re-exported from centralized metrics-data.ts

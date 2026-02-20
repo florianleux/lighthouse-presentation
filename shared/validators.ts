@@ -6,8 +6,6 @@ import type {
   AvatarCreatedMessage,
   VoteCastMessage,
   PollCastMessage,
-  HeartbeatResponseMessage,
-  HeartbeatRequestMessage,
   SessionStateMessage,
   VoteStartedMessage,
   PollStartedMessage,
@@ -38,7 +36,7 @@ export function isAvatarCreatedMessage(data: unknown): data is AvatarCreatedMess
   return (
     data.type === 'avatar-created' &&
     isString(data.keynoteId) &&
-    isString(data.odientId) &&
+    isString(data.participantId) &&
     isString(data.name) &&
     (data.avatar === null || isString(data.avatar)) &&
     isNumber(data.timestamp)
@@ -50,7 +48,7 @@ export function isVoteCastMessage(data: unknown): data is VoteCastMessage {
   return (
     data.type === 'vote-cast' &&
     isString(data.keynoteId) &&
-    isString(data.odientId) &&
+    isString(data.participantId) &&
     isNumber(data.voteIndex) &&
     (data.choice === 'A' || data.choice === 'B') &&
     isNumber(data.timestamp)
@@ -63,26 +61,9 @@ export function isPollCastMessage(data: unknown): data is PollCastMessage {
   return (
     data.type === 'poll-cast' &&
     isString(data.keynoteId) &&
-    isString(data.odientId) &&
+    isString(data.participantId) &&
     isString(data.pollId) &&
     validChoices.includes(data.choice as PollChoice) &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isHeartbeatResponseMessage(data: unknown): data is HeartbeatResponseMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'heartbeat-response' &&
-    isString(data.odientId) &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isHeartbeatRequestMessage(data: unknown): data is HeartbeatRequestMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'heartbeat-request' &&
     isNumber(data.timestamp)
   )
 }
