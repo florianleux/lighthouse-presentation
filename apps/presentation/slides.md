@@ -28,7 +28,7 @@ transition: slide-down
 ---
 
 <div class="slide-bg" style="background-image: url('/backgrounds/intro/2.png')">
-
+  <PollButtons poll-id="knowledge-level" />
 </div>
 
 ---
@@ -131,7 +131,7 @@ transition: slide-up
 transition: slide-right
 ---
 
-<VoteFromMetric :metric-index="0" />
+<VoteSlide :metric-index="0" />
 
 ---
 transition: fade
@@ -173,7 +173,7 @@ transition: slide-up
 transition: slide-right
 ---
 
-<VoteFromMetric :metric-index="1" />
+<VoteSlide :metric-index="1" />
 
 ---
 transition: fade
@@ -221,7 +221,7 @@ transition: slide-up
 transition: slide-right
 ---
 
-<VoteFromMetric :metric-index="2" />
+<VoteSlide :metric-index="2" />
 
 ---
 transition: fade
@@ -263,7 +263,7 @@ transition: slide-up
 transition: slide-right
 ---
 
-<VoteFromMetric :metric-index="3" />
+<VoteSlide :metric-index="3" />
 
 ---
 transition: fade
@@ -305,7 +305,7 @@ transition: slide-up
 transition: slide-right
 ---
 
-<VoteFromMetric :metric-index="4" />
+<VoteSlide :metric-index="4" />
 
 ---
 transition: fade

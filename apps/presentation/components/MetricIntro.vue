@@ -13,7 +13,7 @@ const hasRightSlot = computed(() => !!slots.right)
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-8 h-full">
+  <div class="grid grid-cols-3 gap-8 h-full pt-6 pl-10 pr-5 pb-6">
     <div :class="[hasRightSlot ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
       <div>
         <div class="flex justify-between items-baseline">

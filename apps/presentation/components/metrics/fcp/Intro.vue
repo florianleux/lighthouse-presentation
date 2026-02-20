@@ -7,7 +7,7 @@ import MetricIntro from '../../MetricIntro.vue'
     <template #bottom>
       <div class="mt-20 relative">
         <div class="pb-2 grid grid-cols-2 gap-2 text-center text-xl">
-          <span class=" text-blue-500">TTFB</span>
+          <span class="text-option-a">TTFB</span>
           <span class="text-green-500">Rendering path</span>
         </div>
         <!-- Timeline bar -->

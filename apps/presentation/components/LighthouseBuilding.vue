@@ -20,7 +20,7 @@ function getColor(index: number) {
   const choice = voteStore.path[index]
   if (!choice) return 'bg-gray-700 text-gray-400'
   if (choice === 'A') return 'bg-blue-600 text-white'
-  return 'bg-amber-500 text-white'
+  return 'bg-option-b text-white'
 }
 </script>
 

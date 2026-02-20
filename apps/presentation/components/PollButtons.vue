@@ -20,13 +20,6 @@ const results = computed(() => sessionStore.pollResults[props.pollId] || {
   captain: []
 })
 
-// Total votes
-const totalVotes = computed(() =>
-  results.value.cabin_boy.length +
-  results.value.quartermaster.length +
-  results.value.captain.length
-)
-
 // Timer - use shared constants for consistency
 const POLL_DURATION = POLL_CONFIG.DURATION_SECONDS
 const GRACE_PERIOD = POLL_CONFIG.GRACE_PERIOD_SECONDS
@@ -142,77 +135,23 @@ function stopPollSession() {
 </script>
 
 <template>
-  <div class="poll-container">
-    <!-- Start poll button -->
+  <div>
+    <div class="absolute top-[88%] left-[21%] p-1 px-2 text-center -translate-x-1/2">
+      <div class="text-4xl font-bold font-title">{{ results.cabin_boy.length }}</div>
+    </div>
+    <div class="absolute top-[88%] left-[54%] p-1 px-2 text-center -translate-x-1/2">
+      <div class="text-4xl font-bold font-title ">{{ results.quartermaster.length }}</div>
+    </div>
+    <div class="absolute top-[87.6%] left-[86.4%] p-1 px-2 text-center -translate-x-1/2">
+      <div class="text-4xl font-bold font-title">{{ results.captain.length }}</div>
+    </div>
 
-
-    <!-- Polling in progress + Timer + Stop button -->
-    <div
-      v-if="isPollActive"
-      class="mb-6 text-center flex items-center justify-center gap-4"
+    <button
+      v-if="sessionStore.pollPhase !== 'ended'"
+      class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
+      @click="isPollActive ? stopPollSession() : startPollSession()"
     >
-      <span class="text-4xl font-bold text-white min-w-16">{{ timeRemaining }}s</span>
-      <span
-        v-if="!isInGracePeriod"
-        class="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-semibold animate-pulse"
-      >
-        Polling in progress...
-      </span>
-      <span
-        v-else
-        class="px-4 py-2 bg-yellow-600 text-white rounded-full text-sm font-semibold animate-pulse"
-      >
-        Accepting late votes...
-      </span>
-      <button
-        class="px-6 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-all cursor-pointer"
-        @click="stopPollSession"
-      >
-        Stop Poll
-      </button>
-    </div>
-
-    <!-- Poll ended indicator -->
-    <div
-      v-if="sessionStore.pollPhase === 'ended'"
-      class="mb-6 text-center"
-    >
-      <span class="px-4 py-2 bg-gray-600 text-white rounded-full text-sm font-semibold">
-        Poll ended - {{ totalVotes }} responses
-      </span>
-    </div>
-
-    <!-- Real-time poll results (always visible) -->
-    <div class="grid grid-cols-3 gap-6 pt-4">
-      <div class="p-6 rounded-lg text-center">
-        <div class="text-5xl mb-3">🪣</div>
-        <div class="text-lg font-semibold">Cabin Boy</div>
-        <div class="text-xs mb-4 font-light italic">Never heard of it until today</div>
-        <div class="text-3xl font-bold text-blue-500">{{ results.cabin_boy.length }}</div>
-      </div>
-      <div class="p-6 rounded-lg text-center">
-        <div class="text-5xl mb-3">⚓</div>
-        <div class="text-lg font-semibold">Quartermaster</div>
-        <div class="text-xs mb-4 font-light italic">Know the concepts roughly</div>
-        <div class="text-3xl font-bold text-amber-500">{{ results.quartermaster.length }}</div>
-      </div>
-      <div class="p-6 rounded-lg text-center">
-        <div class="text-5xl mb-3">🏴‍☠️</div>
-        <div class="text-lg font-semibold">Captain</div>
-        <div class="text-xs mb-4 font-light italic">Worked on it several times</div>
-        <div class="text-3xl font-bold text-purple-500">{{ results.captain.length }}</div>
-      </div>
-    </div>
-    <div
-      v-if="!isPollActive && sessionStore.pollPhase !== 'ended'"
-      class="mb-6 text-center"
-    >
-      <button
-        class="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition-all cursor-pointer text-lg"
-        @click="startPollSession"
-      >
-        Start Poll
-      </button>
-    </div>
+      {{ isPollActive ? 'Stop' : 'Start' }}
+    </button>
   </div>
 </template>

@@ -61,9 +61,6 @@ export function isVoteSlide(slideNo: number): boolean {
   return voteSlideRegistry.has(slideNo)
 }
 
-export function getVoteIndexForSlide(slideNo: number): number | undefined {
-  return voteSlideRegistry.get(slideNo)
-}
 
 export function clearVoteSlideRegistry() {
   voteSlideRegistry.clear()
