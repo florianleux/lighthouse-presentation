@@ -80,11 +80,15 @@ export interface VoteContext {
   winner?: 'A' | 'B'
   resultsA?: number
   resultsB?: number
+  duration?: number         // Vote duration in seconds (when voting)
+  startTimestamp?: number   // When the vote started (when voting)
 }
 
 export interface PollContext {
   pollId: string
   pollPhase: 'pending' | 'polling' | 'ended'
+  duration?: number         // Poll duration in seconds (when polling)
+  startTimestamp?: number   // When the poll started (when polling)
 }
 
 export interface SessionStateMessage {

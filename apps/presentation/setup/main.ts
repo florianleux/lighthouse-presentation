@@ -1,7 +1,7 @@
 import { reactive, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { useAbly } from '../composables/useAbly'
-import { ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
+import { ABLY_CHANNELS, STORAGE_KEYS, POLL_CONFIG, VOTE_CONFIG } from '../../../shared/constants'
 
 // Debug mode detection (?debug in URL)
 function isDebugMode(): boolean {
@@ -131,6 +131,7 @@ export const sessionStore = reactive({
   // Current vote state
   activeVoteIndex: null as number | null,
   votePhase: 'waiting' as 'waiting' | 'voting' | 'ended',
+  voteStartTimestamp: null as number | null,
 
   // Poll results (restored from localStorage)
   pollResults: (initialSessionData?.pollResults ?? {
@@ -140,6 +141,7 @@ export const sessionStore = reactive({
   // Current poll state
   activePollId: null as string | null,
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
+  pollStartTimestamp: null as number | null,
 
   // Manual mode (presenter picks A/B directly, no audience vote)
   // Enabled by default in debug mode (?debug URL param)
@@ -220,11 +222,13 @@ export const sessionStore = reactive({
     }
     this.activeVoteIndex = null
     this.votePhase = 'waiting'
+    this.voteStartTimestamp = null
     this.pollResults = {
       [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
+    this.pollStartTimestamp = null
     this.manualMode = debugMode // Keep manual mode in debug
     voteStore.reset()
     clearVoteSlideRegistry()
@@ -387,6 +391,11 @@ export function publishSessionState(currentSlide: number, phase: SessionPhase) {
 
     voteContext = { voteIndex: voteIdx, votePhase }
 
+    if (votePhase === 'voting' && sessionStore.voteStartTimestamp) {
+      voteContext.startTimestamp = sessionStore.voteStartTimestamp
+      voteContext.duration = VOTE_CONFIG.DURATION_SECONDS
+    }
+
     if (votePhase === 'ended') {
       const results = sessionStore.voteResults[voteIdx]
       if (results) {
@@ -409,6 +418,11 @@ export function publishSessionState(currentSlide: number, phase: SessionPhase) {
     else if (isThisPollActive && sessionStore.pollPhase === 'ended') pollPhase = 'ended'
 
     pollContext = { pollId, pollPhase }
+
+    if (pollPhase === 'polling' && sessionStore.pollStartTimestamp) {
+      pollContext.startTimestamp = sessionStore.pollStartTimestamp
+      pollContext.duration = POLL_CONFIG.DURATION_SECONDS
+    }
   }
 
   const message: SessionStateMessage = {

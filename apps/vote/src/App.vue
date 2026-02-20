@@ -519,12 +519,36 @@ function processInitialSessionState(msg: SessionStateMessage, savedMember: Saved
           resultsA: msg.voteContext.resultsA ?? 0,
           resultsB: msg.voteContext.resultsB ?? 0,
         }
+      } else if (msg.voteContext.votePhase === 'voting' && !hasVoted.value && !voteMissed.value) {
+        // Start countdown if vote is active (refresh during vote)
+        if (msg.voteContext.duration && msg.voteContext.startTimestamp) {
+          const elapsedMs = Date.now() - msg.voteContext.startTimestamp
+          const elapsedSeconds = Math.floor(elapsedMs / 1000)
+          const remaining = Math.max(0, msg.voteContext.duration - elapsedSeconds)
+          if (remaining > 0) {
+            console.log('[App] Bootstrap: starting vote countdown, remaining:', remaining)
+            voteEndedData.value = null
+            startCountdown(remaining)
+          }
+        }
       }
     }
     if (msg.pollContext) {
       activePollId.value = msg.pollContext.pollId
       if (msg.pollContext.pollPhase === 'ended') {
         pollPhase.value = 'ended'
+      } else if (msg.pollContext.pollPhase === 'polling' && !hasPollVoted.value) {
+        // Start countdown if poll is active (refresh during poll)
+        if (msg.pollContext.duration && msg.pollContext.startTimestamp) {
+          const elapsedMs = Date.now() - msg.pollContext.startTimestamp
+          const elapsedSeconds = Math.floor(elapsedMs / 1000)
+          const remaining = Math.max(0, msg.pollContext.duration - elapsedSeconds)
+          if (remaining > 0) {
+            console.log('[App] Bootstrap: starting poll countdown, remaining:', remaining)
+            pollPhase.value = 'polling'
+            startCountdown(remaining)
+          }
+        }
       }
     }
 
@@ -600,9 +624,21 @@ onMounted(async () => {
         // Keynote changed - kick back to form
         console.log('[App] Keynote changed, clearing session')
         clearSavedMember()
+        clearVoteState()
+        completedVotes.clear()
         joinedName.value = ''
         selectedAvatar.value = null
         currentStep.value = 'name'
+        voteEndedData.value = null
+        pollPhase.value = null
+        hasPollVoted.value = false
+        activePollId.value = null
+        activeVoteIndex.value = null
+        hasVoted.value = false
+        voteMissed.value = false
+        selectedChoice.value = null
+        currentSlideType.value = 'other'
+        clearCountdown()
         status.value = newKeynoteId ? 'idle' : 'waiting'
         return
       }
@@ -614,6 +650,10 @@ onMounted(async () => {
 
         // Vote slide context
         if (currentSlideType.value === 'vote' && msg.voteContext) {
+          // Clear old ended data when moving to a different vote
+          if (msg.voteContext.voteIndex !== activeVoteIndex.value) {
+            voteEndedData.value = null
+          }
           activeVoteIndex.value = msg.voteContext.voteIndex
 
           if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
@@ -623,9 +663,19 @@ onMounted(async () => {
               resultsB: msg.voteContext.resultsB ?? 0,
             }
             clearCountdown()
+          } else if (msg.voteContext.votePhase === 'voting' && timeRemaining.value === 0 && !hasVoted.value && !voteMissed.value) {
+            // Fallback: start countdown from session-state if VoteStartedMessage was missed
+            if (msg.voteContext.duration && msg.voteContext.startTimestamp) {
+              const elapsedMs = Date.now() - msg.voteContext.startTimestamp
+              const elapsedSeconds = Math.floor(elapsedMs / 1000)
+              const remaining = Math.max(0, msg.voteContext.duration - elapsedSeconds)
+              if (remaining > 0) {
+                console.log('[App] Fallback: starting vote countdown from session-state, remaining:', remaining)
+                voteEndedData.value = null
+                startCountdown(remaining)
+              }
+            }
           }
-          // Don't override local timer for 'voting' phase (timer comes from vote-started message)
-          // Don't override local state for 'pending' if we have an active vote/timer
         }
 
         // Poll slide context
@@ -635,15 +685,29 @@ onMounted(async () => {
           if (msg.pollContext.pollPhase === 'ended') {
             pollPhase.value = 'ended'
             clearCountdown()
+          } else if (msg.pollContext.pollPhase === 'polling' && timeRemaining.value === 0 && !hasPollVoted.value) {
+            // Fallback: start countdown from session-state if PollStartedMessage was missed
+            if (msg.pollContext.duration && msg.pollContext.startTimestamp) {
+              const elapsedMs = Date.now() - msg.pollContext.startTimestamp
+              const elapsedSeconds = Math.floor(elapsedMs / 1000)
+              const remaining = Math.max(0, msg.pollContext.duration - elapsedSeconds)
+              if (remaining > 0) {
+                console.log('[App] Fallback: starting poll countdown from session-state, remaining:', remaining)
+                pollPhase.value = 'polling'
+                startCountdown(remaining)
+              }
+            }
           }
-          // Don't override local timer for 'polling' phase
         }
 
         // Cleanup when leaving a vote slide
+        // NOTE: Don't clear voteEndedData here — screen #6 requires currentSlideType === 'vote'
+        // so it won't show on non-vote slides. Clearing it here causes a race condition
+        // when VoteEndedMessage and slide-change session-state arrive in the same Vue tick.
+        // voteEndedData is cleared when a NEW vote starts (different voteIndex) in onVoteStarted.
         if (prevSlideType === 'vote' && currentSlideType.value !== 'vote') {
           if (activeVoteIndex.value !== null && completedVotes.has(activeVoteIndex.value)) {
             console.log('[App] Left vote slide, cleaning up vote state')
-            voteEndedData.value = null
             hasVoted.value = false
             voteMissed.value = false
             selectedChoice.value = null
@@ -782,11 +846,32 @@ onMounted(async () => {
     // (the presentation has no periodic heartbeat — only publishes on events)
     if (savedMember) {
       try {
-        const { sessionState } = await fetchSessionHistory()
+        const { sessionState, voteStarted, voteEnded, pollStarted, pollEnded } = await fetchSessionHistory()
         // Only process if still waiting (no live message beat us)
         if (status.value === 'connecting' && sessionState) {
           // keynoteId validation happens inside processInitialSessionState
           processInitialSessionState(sessionState, savedMember)
+
+          // Also process voteStarted/pollStarted from history if vote/poll is active
+          // (processInitialSessionState may have started a countdown from session-state context,
+          //  but if the session-state didn't have duration/startTimestamp, we need this fallback)
+          // Note: processInitialSessionState may have changed status to 'joined'
+          const currentStatus = status.value as string
+          if (currentStatus === 'joined' && timeRemaining.value === 0) {
+            if (voteStarted && !voteEnded && !hasVoted.value && !voteMissed.value) {
+              handleVoteStartedSync(voteStarted)
+            }
+            if (pollStarted && !pollEnded && !hasPollVoted.value) {
+              activePollId.value = pollStarted.pollId
+              pollPhase.value = 'polling'
+              const elapsedMs = Date.now() - pollStarted.timestamp
+              const elapsedSeconds = Math.floor(elapsedMs / 1000)
+              const remaining = Math.max(0, pollStarted.duration - elapsedSeconds)
+              if (remaining > 0) {
+                startCountdown(remaining)
+              }
+            }
+          }
         } else if (status.value === 'connecting') {
           // No history at all — presentation never published anything
           // Stay in 'connecting', a live message will arrive eventually

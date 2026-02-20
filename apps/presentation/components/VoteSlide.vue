@@ -141,6 +141,7 @@ function handleKeydown(e: KeyboardEvent) {
 async function startVoteSession() {
   sessionStore.activeVoteIndex = voteIndex.value
   sessionStore.votePhase = 'voting'
+  sessionStore.voteStartTimestamp = Date.now()
   startTimer()
 
   const ably = getAbly()
@@ -163,6 +164,10 @@ async function stopVoteSession() {
   clearTimer()
   sessionStore.votePhase = 'ended'
 
+  // Capture slide number BEFORE the async publish — the presenter might click
+  // "Continue" during the await, which changes currentSlideNo via next()
+  const slideNo = currentSlideNo.value
+
   // Publish VoteEndedMessage so vote apps show "Vote closed!" with results
   const ably = getAbly()
   if (ably) {
@@ -181,7 +186,7 @@ async function stopVoteSession() {
   }
 
   // Publish enriched session state with voteContext.votePhase = 'ended'
-  publishSessionState(currentSlideNo.value, 'voting')
+  publishSessionState(slideNo, 'voting')
 }
 
 function continueWithWinner() {

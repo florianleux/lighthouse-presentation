@@ -115,6 +115,7 @@ onUnmounted(() => {
 async function startPollSession() {
   sessionStore.activePollId = props.pollId
   sessionStore.pollPhase = 'polling'
+  sessionStore.pollStartTimestamp = Date.now()
   startTimer()
 
   const ably = getAbly()
