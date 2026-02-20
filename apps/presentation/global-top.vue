@@ -12,7 +12,7 @@ watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
     sessionStore.updateLastSlide(slide)
     // Publish session state on every slide change so late joiners get the current state
-    publishSessionState(slide, 'intro')
+    publishSessionState(slide)
   }
 })
 
@@ -27,7 +27,7 @@ function startBroadcast() {
   if (broadcastInterval) return
   broadcastInterval = setInterval(() => {
     if (sessionStore.keynoteId && currentSlideNo.value) {
-      publishSessionState(currentSlideNo.value, 'intro')
+      publishSessionState(currentSlideNo.value)
     }
   }, 3000)
 }
@@ -63,13 +63,13 @@ function handleStartJoinSession(durationMinutes: number) {
   startBroadcast()
   // Send immediate session state
   if (sessionStore.keynoteId && currentSlideNo.value) {
-    publishSessionState(currentSlideNo.value, 'intro')
+    publishSessionState(currentSlideNo.value)
   }
 }
 
 function handleSendHeartbeat() {
   if (sessionStore.keynoteId && currentSlideNo.value) {
-    publishSessionState(currentSlideNo.value, 'intro')
+    publishSessionState(currentSlideNo.value)
   }
 }
 

@@ -131,7 +131,7 @@ async function startPollSession() {
   }
 
   // Publish enriched session state so vote apps get pollContext
-  publishSessionState(currentSlideNo.value, 'voting')
+  publishSessionState(currentSlideNo.value)
 }
 
 // Stop poll session
@@ -152,7 +152,7 @@ async function stopPollSession() {
   }
 
   // Publish enriched session state with pollContext.pollPhase = 'ended'
-  publishSessionState(currentSlideNo.value, 'voting')
+  publishSessionState(currentSlideNo.value)
 }
 </script>
 

@@ -17,13 +17,6 @@ export const ABLY_CHANNELS = {
   PRESENCE: 'lighthouse:presence',
 } as const
 
-// Vote phases
-export const VOTE_PHASES = {
-  WAITING: 'waiting',   // Waiting for next vote
-  VOTING: 'voting',     // Vote in progress
-  ENDED: 'ended',       // Vote ended
-} as const
-
 // Vote configuration
 export const VOTE_CONFIG = {
   DURATION_SECONDS: 30,  // Duration of a vote in seconds

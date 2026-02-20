@@ -16,7 +16,6 @@ import type {
   PollResults,
   PollChoice,
   SessionStateMessage,
-  SessionPhase,
   VoteContext,
   PollContext,
 } from '../../../shared/types'
@@ -372,7 +371,7 @@ export default defineAppSetup(({ app }) => {
 })
 
 // Helper to publish session state
-export function publishSessionState(currentSlide: number, phase: SessionPhase) {
+export function publishSessionState(currentSlide: number) {
   if (!ablyInstance || !sessionStore.isAblyConnected) return
 
   // Determine slideType from registries
@@ -431,8 +430,6 @@ export function publishSessionState(currentSlide: number, phase: SessionPhase) {
     sessionId: sessionStore.sessionId,
     currentSlide,
     path: voteStore.path,
-    phase,
-    activeVoteIndex: sessionStore.activeVoteIndex,
     timestamp: Date.now(),
     slideType,
     voteContext,

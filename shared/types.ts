@@ -72,8 +72,6 @@ export interface PollCastMessage {
 // OUTGOING Messages (presentation → vote app)
 // ===========================================
 
-export type SessionPhase = 'intro' | 'voting' | 'results' | 'application' | 'recap'
-
 export interface VoteContext {
   voteIndex: number
   votePhase: 'pending' | 'voting' | 'ended'
@@ -97,8 +95,6 @@ export interface SessionStateMessage {
   sessionId: string
   currentSlide: number
   path: (string | null)[]
-  phase: SessionPhase
-  activeVoteIndex: number | null
   timestamp: number
   // Enriched fields for vote app screen state (optional for backward compat)
   slideType?: 'vote' | 'poll' | 'other'
@@ -166,13 +162,3 @@ export interface PollResults {
   captain: string[]
 }
 
-export interface SessionState {
-  keynoteId: string | null
-  sessionId: string
-  startedAt: number
-  currentSlide: number
-  path: (string | null)[]
-  crew: CrewMember[]
-  activeCrew: string[]  // participantIds of active participants (via Ably Presence)
-  votes: Record<number, VoteResults>  // voteIndex → résultats
-}

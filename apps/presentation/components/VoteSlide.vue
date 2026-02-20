@@ -157,7 +157,7 @@ async function startVoteSession() {
   }
 
   // Publish enriched session state so vote apps get voteContext
-  publishSessionState(currentSlideNo.value, 'voting')
+  publishSessionState(currentSlideNo.value)
 }
 
 async function stopVoteSession() {
@@ -186,7 +186,7 @@ async function stopVoteSession() {
   }
 
   // Publish enriched session state with voteContext.votePhase = 'ended'
-  publishSessionState(slideNo, 'voting')
+  publishSessionState(slideNo)
 }
 
 function continueWithWinner() {
