@@ -25,6 +25,9 @@ interface SessionData {
   createdAt: number
   lastSlide: number
   votePath: (string | null)[]
+  crew: CrewMember[]
+  voteResults: Record<number, VoteResults>
+  pollResults: Record<string, PollResults>
 }
 
 function loadSessionData(): SessionData | null {
@@ -94,27 +97,27 @@ export const sessionStore = reactive({
   startedAt: Date.now(),
   isAblyConnected: false,
 
-  // Crew
-  crew: [] as CrewMember[],
+  // Crew (restored from localStorage)
+  crew: (initialSessionData?.crew ?? []) as CrewMember[],
   activeCrew: [] as string[],
 
-  // Vote results (5 votes for 5 metrics: CLS, FCP, LCP, TBT, SI)
-  voteResults: {
+  // Vote results (5 votes for 5 metrics: CLS, FCP, LCP, TBT, SI) - restored from localStorage
+  voteResults: (initialSessionData?.voteResults ?? {
     0: { A: [], B: [], winner: null },
     1: { A: [], B: [], winner: null },
     2: { A: [], B: [], winner: null },
     3: { A: [], B: [], winner: null },
     4: { A: [], B: [], winner: null },
-  } as Record<number, VoteResults>,
+  }) as Record<number, VoteResults>,
 
   // Current vote state
   activeVoteIndex: null as number | null,
   votePhase: 'waiting' as 'waiting' | 'voting' | 'ended',
 
-  // Poll results
-  pollResults: {
+  // Poll results (restored from localStorage)
+  pollResults: (initialSessionData?.pollResults ?? {
     [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
-  } as Record<string, PollResults>,
+  }) as Record<string, PollResults>,
 
   // Current poll state
   activePollId: null as string | null,
@@ -128,6 +131,7 @@ export const sessionStore = reactive({
   addCrewMember(member: CrewMember) {
     if (!this.crew.find(m => m.odientId === member.odientId)) {
       this.crew.push(member)
+      persistSession()
     }
   },
 
@@ -141,6 +145,7 @@ export const sessionStore = reactive({
     }
 
     results[choice].push(odientId)
+    persistSession()
   },
 
   recordPollVote(odientId: string, pollId: string, choice: PollChoice) {
@@ -158,12 +163,17 @@ export const sessionStore = reactive({
     }
 
     results[choice].push(odientId)
+    persistSession()
   },
 
   updateActiveCrew(odientId: string) {
     if (!this.activeCrew.includes(odientId)) {
       this.activeCrew.push(odientId)
     }
+  },
+
+  clearActiveCrew() {
+    this.activeCrew = []
   },
 
   // Update last slide and persist
@@ -246,6 +256,9 @@ function persistSession() {
     createdAt: sessionStore.createdAt,
     lastSlide: sessionStore.lastSlide,
     votePath: voteStore.path,
+    crew: sessionStore.crew,
+    voteResults: sessionStore.voteResults,
+    pollResults: sessionStore.pollResults,
   })
 }
 
@@ -281,8 +294,12 @@ export default defineAppSetup(({ app }) => {
         sessionStore.isAblyConnected = true
         console.log('[Session] Ably connected, session:', sessionStore.sessionId)
 
-        // Listen for avatar creation
+        // Listen for avatar creation (validate keynoteId to prevent cross-session contamination)
         ablyInstance!.onAvatarCreated((msg) => {
+          if (msg.keynoteId !== sessionStore.keynoteId) {
+            console.warn('[Session] Ignoring avatar for different keynote:', msg.keynoteId)
+            return
+          }
           sessionStore.addCrewMember({
             odientId: msg.odientId,
             name: msg.name,
@@ -291,13 +308,21 @@ export default defineAppSetup(({ app }) => {
           })
         })
 
-        // Listen for votes
+        // Listen for votes (validate keynoteId to prevent cross-session contamination)
         ablyInstance!.onVoteCast((msg) => {
+          if (msg.keynoteId !== sessionStore.keynoteId) {
+            console.warn('[Session] Ignoring vote for different keynote:', msg.keynoteId)
+            return
+          }
           sessionStore.recordVote(msg.odientId, msg.voteIndex, msg.choice)
         })
 
-        // Listen for polls
+        // Listen for polls (validate keynoteId to prevent cross-session contamination)
         ablyInstance!.onPollCast((msg) => {
+          if (msg.keynoteId !== sessionStore.keynoteId) {
+            console.warn('[Session] Ignoring poll for different keynote:', msg.keynoteId)
+            return
+          }
           sessionStore.recordPollVote(msg.odientId, msg.pollId, msg.choice)
         })
 
@@ -313,6 +338,13 @@ export default defineAppSetup(({ app }) => {
     console.warn('[Session] VITE_ABLY_API_KEY not set - running in offline mode')
   }
 })
+
+// Send heartbeat request and clear stale active crew
+export async function sendHeartbeat() {
+  if (!ablyInstance || !sessionStore.isAblyConnected) return
+  sessionStore.clearActiveCrew()
+  await ablyInstance.sendHeartbeatRequest()
+}
 
 // Helper to publish session state
 export function publishSessionState(currentSlide: number, phase: SessionPhase) {

@@ -3,7 +3,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import AdminPanel from './components/AdminPanel.vue'
 import CrewPills from './components/CrewPills.vue'
-import { sessionStore, publishSessionState } from './setup/main'
+import { sessionStore, publishSessionState, sendHeartbeat } from './setup/main'
 
 const { currentSlideNo } = useNav()
 
@@ -20,22 +20,34 @@ const showAdminPanel = ref(false)
 
 // Join session with timed heartbeat
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
+let presenceInterval: ReturnType<typeof setInterval> | null = null
 let countdownInterval: ReturnType<typeof setInterval> | null = null
 const joinSessionRemaining = ref(0)
 
 function startHeartbeat() {
   if (heartbeatInterval) return
+  // Session state broadcast every 3s (for late joiners to discover keynoteId)
   heartbeatInterval = setInterval(() => {
     if (sessionStore.keynoteId && currentSlideNo.value) {
       publishSessionState(currentSlideNo.value, 'intro')
     }
   }, 3000)
+  // Presence heartbeat every 10s (clears activeCrew, waits for responses)
+  presenceInterval = setInterval(() => {
+    sendHeartbeat()
+  }, 10000)
+  // Send immediate presence heartbeat
+  sendHeartbeat()
 }
 
 function stopHeartbeat() {
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval)
     heartbeatInterval = null
+  }
+  if (presenceInterval) {
+    clearInterval(presenceInterval)
+    presenceInterval = null
   }
 }
 
@@ -73,6 +85,7 @@ function handleStartJoinSession(durationMinutes: number) {
 function handleSendHeartbeat() {
   if (sessionStore.keynoteId && currentSlideNo.value) {
     publishSessionState(currentSlideNo.value, 'intro')
+    sendHeartbeat()
   }
 }
 
@@ -100,7 +113,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
-  stopHeartbeat()
+  stopHeartbeat()  // Clears both session-state and presence intervals
   stopCountdown()
 })
 </script>

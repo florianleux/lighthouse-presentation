@@ -65,6 +65,9 @@ const hasPollVoted = ref(false)
 const timeRemaining = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 
+// Ably subscription cleanup functions
+const unsubscribes: (() => void)[] = []
+
 // Watch for vote state changes and persist to localStorage
 watch(
   [activeVoteIndex, selectedChoice, hasVoted, voteMissed],
@@ -294,8 +297,8 @@ function handleVisibilityChange() {
       }
     }
 
-    // Request state sync on visibility restore
-    requestStateSync()
+    // Request state sync on visibility restore (debounced to avoid rapid-fire)
+    debouncedRequestStateSync()
 
     hiddenTimestamp.value = null
     pausedTimeRemaining.value = 0
@@ -305,6 +308,16 @@ function handleVisibilityChange() {
 // ===========================================
 // State sync on reconnection
 // ===========================================
+
+let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+function debouncedRequestStateSync() {
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer)
+  syncDebounceTimer = setTimeout(() => {
+    syncDebounceTimer = null
+    requestStateSync()
+  }, 500)
+}
 
 async function requestStateSync() {
   console.log('[App] Requesting state sync...')
@@ -341,6 +354,17 @@ async function requestStateSync() {
       selectedChoice.value = null
       hasVoted.value = false
       voteMissed.value = false
+    }
+  }
+
+  // Re-announce to the presentation AFTER validating keynoteId from session history
+  const currentKeynoteId = activeKeynoteId.value
+  if (savedMember && currentKeynoteId) {
+    try {
+      await joinCrew(savedMember.name, currentKeynoteId, savedMember.avatar)
+      console.log('[App] Re-announced crew member to presentation')
+    } catch (err) {
+      console.error('[App] Failed to re-announce:', err)
     }
   }
 
@@ -400,7 +424,7 @@ onMounted(async () => {
     }
 
     // Subscribe to session state to get keynoteId
-    onSessionState((msg) => {
+    unsubscribes.push(onSessionState((msg) => {
       const newKeynoteId = msg.keynoteId
       const previousKeynoteId = activeKeynoteId.value
       console.log('[App] Received session state, keynoteId:', newKeynoteId, 'status:', status.value)
@@ -413,6 +437,10 @@ onMounted(async () => {
             // Same keynote - restore session
             status.value = 'joined'
             console.log('[App] Same keynote, restoring session')
+            // Re-announce to presentation so it re-registers us in the crew
+            joinCrew(savedMember.name, newKeynoteId, savedMember.avatar)
+              .then(() => console.log('[App] Re-announced on initial restore'))
+              .catch((err) => console.error('[App] Failed to re-announce on restore:', err))
           } else if (newKeynoteId) {
             // Different keynote active - clear and show form
             console.log('[App] Different keynote, clearing session')
@@ -447,10 +475,10 @@ onMounted(async () => {
         currentStep.value = 'name'
         status.value = newKeynoteId ? 'idle' : 'waiting'
       }
-    })
+    }))
 
     // Subscribe to vote-started messages
-    onVoteStarted((msg) => {
+    unsubscribes.push(onVoteStarted((msg) => {
       console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
 
       // If it's the same vote and user already voted, ignore sync message
@@ -485,10 +513,10 @@ onMounted(async () => {
           startCountdown(remainingDuration)
         }
       }
-    })
+    }))
 
     // Subscribe to poll-started messages
-    onPollStarted((msg) => {
+    unsubscribes.push(onPollStarted((msg) => {
       console.log('[App] Poll started:', msg.pollId, 'duration:', msg.duration)
       activePollId.value = msg.pollId
       hasPollVoted.value = false
@@ -503,12 +531,12 @@ onMounted(async () => {
           startCountdown(remainingDuration)
         }
       }
-    })
+    }))
 
-    // Setup reconnection callback
+    // Setup reconnection callback (debounced to avoid rapid-fire re-announces)
     setOnReconnect(() => {
       console.log('[App] Reconnected - requesting state sync')
-      requestStateSync()
+      debouncedRequestStateSync()
     })
 
     // Setup heartbeat listener to respond to presentation
@@ -533,6 +561,9 @@ onMounted(async () => {
 // Cleanup on unmount
 onBeforeUnmount(() => {
   clearCountdown()
+  if (syncDebounceTimer) clearTimeout(syncDebounceTimer)
+  unsubscribes.forEach(fn => fn())
+  unsubscribes.length = 0
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 

@@ -8,6 +8,7 @@ import type {
   VoteCastMessage,
   PollCastMessage,
   HeartbeatResponseMessage,
+  HeartbeatRequestMessage,
 } from '../../../shared/types'
 import {
   isAvatarCreatedMessage,
@@ -228,6 +229,17 @@ export function useAbly() {
   }
 
   /**
+   * Send a heartbeat request to all connected voters
+   */
+  async function sendHeartbeatRequest(): Promise<void> {
+    const message: HeartbeatRequestMessage = {
+      type: 'heartbeat-request',
+      timestamp: Date.now(),
+    }
+    await publish(ABLY_CHANNELS.HEARTBEAT, message)
+  }
+
+  /**
    * Disconnect from Ably
    */
   function disconnect() {
@@ -252,6 +264,7 @@ export function useAbly() {
     // Actions
     connect,
     publish,
+    sendHeartbeatRequest,
     disconnect,
 
     // Subscriptions

@@ -30,6 +30,9 @@ onUnmounted(() => {
 // --- Vote logic (shared by manual + audience) ---
 
 function applyVote(choice: 'A' | 'B') {
+  // Persist the winner in voteResults so it survives refresh
+  const r = sessionStore.voteResults[voteIndex.value]
+  if (r) r.winner = choice
   voteStore.vote(voteIndex.value, choice)
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null

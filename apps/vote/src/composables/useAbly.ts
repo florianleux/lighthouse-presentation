@@ -196,16 +196,17 @@ export function useAbly() {
 
   /**
    * Subscribe to session state messages from the presentation
+   * Returns an unsubscribe function
    */
-  function onSessionState(callback: (msg: SessionStateMessage) => void): void {
+  function onSessionState(callback: (msg: SessionStateMessage) => void): () => void {
     const { client } = state.value
     if (!client) {
       console.warn('[Ably] Cannot subscribe to session state - not connected')
-      return
+      return () => {}
     }
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
-    channel.subscribe('message', (message) => {
+    const handler = (message: Ably.Message) => {
       if (isSessionStateMessage(message.data)) {
         try {
           callback(message.data)
@@ -213,23 +214,26 @@ export function useAbly() {
           console.error('[Ably] Error in session-state callback:', err)
         }
       }
-    })
+    }
+    channel.subscribe('message', handler)
 
     console.log('[Ably] Subscribed to session state')
+    return () => { channel.unsubscribe('message', handler) }
   }
 
   /**
    * Subscribe to vote-started messages from the presentation
+   * Returns an unsubscribe function
    */
-  function onVoteStarted(callback: (msg: VoteStartedMessage) => void): void {
+  function onVoteStarted(callback: (msg: VoteStartedMessage) => void): () => void {
     const { client } = state.value
     if (!client) {
       console.warn('[Ably] Cannot subscribe to vote-started - not connected')
-      return
+      return () => {}
     }
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
-    channel.subscribe('message', (message) => {
+    const handler = (message: Ably.Message) => {
       if (isVoteStartedMessage(message.data)) {
         try {
           callback(message.data)
@@ -237,9 +241,11 @@ export function useAbly() {
           console.error('[Ably] Error in vote-started callback:', err)
         }
       }
-    })
+    }
+    channel.subscribe('message', handler)
 
     console.log('[Ably] Subscribed to vote-started messages')
+    return () => { channel.unsubscribe('message', handler) }
   }
 
   /**
@@ -268,16 +274,17 @@ export function useAbly() {
 
   /**
    * Subscribe to poll-started messages from the presentation
+   * Returns an unsubscribe function
    */
-  function onPollStarted(callback: (msg: PollStartedMessage) => void): void {
+  function onPollStarted(callback: (msg: PollStartedMessage) => void): () => void {
     const { client } = state.value
     if (!client) {
       console.warn('[Ably] Cannot subscribe to poll-started - not connected')
-      return
+      return () => {}
     }
 
     const channel = client.channels.get(ABLY_CHANNELS.SESSION)
-    channel.subscribe('message', (message) => {
+    const handler = (message: Ably.Message) => {
       if (isPollStartedMessage(message.data)) {
         try {
           callback(message.data)
@@ -285,9 +292,11 @@ export function useAbly() {
           console.error('[Ably] Error in poll-started callback:', err)
         }
       }
-    })
+    }
+    channel.subscribe('message', handler)
 
     console.log('[Ably] Subscribed to poll-started messages')
+    return () => { channel.unsubscribe('message', handler) }
   }
 
   /**
