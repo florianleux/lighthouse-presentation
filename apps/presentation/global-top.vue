@@ -7,18 +7,17 @@ import { sessionStore, publishSessionState } from './setup/main'
 
 const { currentSlideNo } = useNav()
 
-// Track slide changes to persist last slide
+// Track slide changes
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
     sessionStore.updateLastSlide(slide)
-    // Publish session state on every slide change so late joiners get the current state
-    publishSessionState(slide)
+    publishSessionState()
   }
 })
 
 const showAdminPanel = ref(false)
 
-// Session state broadcast for late joiners
+// Session state broadcast (heartbeat every 3s for late joiners / reconnecting phones)
 let broadcastInterval: ReturnType<typeof setInterval> | null = null
 let countdownInterval: ReturnType<typeof setInterval> | null = null
 const joinSessionRemaining = ref(0)
@@ -26,8 +25,8 @@ const joinSessionRemaining = ref(0)
 function startBroadcast() {
   if (broadcastInterval) return
   broadcastInterval = setInterval(() => {
-    if (sessionStore.keynoteId && currentSlideNo.value) {
-      publishSessionState(currentSlideNo.value)
+    if (sessionStore.keynoteId) {
+      publishSessionState()
     }
   }, 3000)
 }
@@ -61,30 +60,20 @@ function handleStartJoinSession(durationMinutes: number) {
   }, 1000)
 
   startBroadcast()
-  // Send immediate session state
-  if (sessionStore.keynoteId && currentSlideNo.value) {
-    publishSessionState(currentSlideNo.value)
-  }
+  publishSessionState()
 }
 
 function handleSendHeartbeat() {
-  if (sessionStore.keynoteId && currentSlideNo.value) {
-    publishSessionState(currentSlideNo.value)
-  }
+  publishSessionState()
 }
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'k' || e.key === 'K') {
-    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-      return
-    }
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
     showAdminPanel.value = !showAdminPanel.value
   }
-
-  if (e.key === 'Escape') {
-    if (showAdminPanel.value) {
-      showAdminPanel.value = false
-    }
+  if (e.key === 'Escape' && showAdminPanel.value) {
+    showAdminPanel.value = false
   }
 }
 

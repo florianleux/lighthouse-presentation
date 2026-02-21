@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, nextTick } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, publishSessionState } from '../setup/main'
+import { sessionStore, voteStore } from '../setup/main'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()

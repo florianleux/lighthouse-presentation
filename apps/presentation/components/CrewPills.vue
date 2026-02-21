@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { sessionStore, isVoteSlide } from '../setup/main'
+import { sessionStore, currentVoteIndex } from '../setup/main'
 
 const props = defineProps<{
   currentSlide: number
@@ -8,9 +8,9 @@ const props = defineProps<{
 
 const crew = computed(() => sessionStore.crew)
 
-// Show only on slide 1 or vote slides
+// Show on slide 1 or when a vote slide is active
 const isVisible = computed(() => {
-  return props.currentSlide === 1 || isVoteSlide(props.currentSlide)
+  return props.currentSlide === 1 || currentVoteIndex.value !== null
 })
 </script>
 

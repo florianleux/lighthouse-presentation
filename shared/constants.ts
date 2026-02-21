@@ -2,33 +2,25 @@
 // Shared constants for Lighthouse Pirates
 // ===========================================
 
-// Ably Channels
+// Ably Channels (2 channels only)
 export const ABLY_CHANNELS = {
-  // Session state (presentation → all)
+  // Session state heartbeat (presentation → vote apps)
   SESSION: 'lighthouse:session',
 
-  // Votes cast (vote app → presentation)
-  VOTES: 'lighthouse:votes',
-
-  // Avatars created (vote app → presentation)
-  AVATARS: 'lighthouse:avatars',
-
-  // Presence tracking (Ably Presence API)
-  PRESENCE: 'lighthouse:presence',
+  // User actions: join, vote, poll (vote apps → presentation)
+  ACTIONS: 'lighthouse:actions',
 } as const
 
 // Vote configuration
 export const VOTE_CONFIG = {
-  DURATION_SECONDS: 30,  // Duration of a vote in seconds
-  GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
-  TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
+  DURATION_SECONDS: 30,
+  GRACE_PERIOD_SECONDS: 3,
 } as const
 
 // Poll configuration
 export const POLL_CONFIG = {
   DURATION_SECONDS: 20,
-  GRACE_PERIOD_SECONDS: 3,  // Extra time to accept late votes due to network lag
-  TIME_SYNC_INTERVAL_SECONDS: 5,  // How often to publish time sync messages
+  GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: 'knowledge-level',
   CHOICES: ['cabin_boy', 'quartermaster', 'captain'] as const,
 } as const
@@ -52,7 +44,6 @@ export const AVATAR_CONFIG = {
   HAIR_COLORS: 5,
   HAT_OPTIONS: 2,
   HAT_COLORS: 4,
-  // Z-index layering order (bottom to top)
   LAYER_ORDER: ['face', 'mouth', 'eyes', 'accessories', 'nose', 'hair', 'hat'] as const,
 } as const
 

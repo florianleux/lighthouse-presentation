@@ -1,136 +1,98 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useAbly } from './composables/useAbly'
 import { STORAGE_KEYS } from '../../../shared/constants'
-import type { PollChoice, VoteStartedMessage, SessionStateMessage } from '../../../shared/types'
+import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
 
-interface SavedMember {
-  name: string
+// ===========================================
+// Persistence helpers
+// ===========================================
+
+interface PersistedCrew {
   participantId: string
+  name: string
+  avatar: string
+}
+
+interface PersistedVotes {
   keynoteId: string
-  avatar: string | null
+  votedRounds: number[]
+  polledIds: string[]
 }
 
-interface PersistedVoteState {
-  activeVoteIndex: number | null
-  selectedChoice: 'A' | 'B' | null
-  hasVoted: boolean
-  voteMissed: boolean
-  countdownEndTimestamp: number | null
-  keynoteId: string | null
-  voteEndedData?: { winner: 'A' | 'B'; resultsA: number; resultsB: number } | null
+function loadCrew(): PersistedCrew | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.CREW_MEMBER)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
 }
 
-const {
-  isConnected,
-  error,
-  connect,
-  joinCrew,
-  getParticipantId,
-  restoreSession,
-  onSessionState,
-  onVoteStarted,
-  onVoteEnded,
-  onPollStarted,
-  onPollEnded,
-  sendVote,
-  sendPoll,
-  setOnReconnect,
-  enterPresence,
-  fetchSessionHistory,
-} = useAbly()
+function saveCrew(crew: PersistedCrew) {
+  try { localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify(crew)) } catch {}
+}
 
-// Form state
-const name = ref('')
-const status = ref<'connecting' | 'waiting' | 'idle' | 'joining' | 'joined' | 'error'>('connecting')
+function loadVotes(): PersistedVotes | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.VOTE_STATE)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function saveVotesData(votes: PersistedVotes) {
+  try { localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(votes)) } catch {}
+}
+
+// ===========================================
+// Ably
+// ===========================================
+
+const { isConnected, connect, onSessionState, publishAction, getParticipantId, reconnect } = useAbly()
+
+// ===========================================
+// State
+// ===========================================
+
+const status = ref<'connecting' | 'waiting' | 'error' | 'idle' | 'joining' | 'joined'>('connecting')
 const currentStep = ref<'name' | 'avatar'>('name')
+const name = ref('')
 const joinedName = ref('')
-const activeKeynoteId = ref<string | null>(null)
-
-// Avatar state (JSON string)
 const selectedAvatar = ref<string | null>(null)
+const keynoteId = ref<string | null>(null)
 
-// Voting state
-const activeVoteIndex = ref<number | null>(null)
-const selectedChoice = ref<'A' | 'B' | null>(null)
-const hasVoted = ref(false)
-const voteMissed = ref(false)
-const voteError = ref<string | null>(null)
+// Last session state from presentation (source of truth for what to display)
+const sessionState = ref<SessionStateMessage | null>(null)
+
+// Vote/poll tracking (persisted)
+const votedRounds = ref<number[]>([])
+const polledIds = ref<string[]>([])
+
 const isSubmitting = ref(false)
-// Track completed vote indices to prevent re-triggering from stale messages
-const completedVotes = new Set<number>()
 
-// Poll state
-const activePollId = ref<string | null>(null)
-const hasPollVoted = ref(false)
+// Re-announce flag (once per keynoteId)
+let hasReannounced = false
 
-// Slide type & enriched state from session-state messages
-const currentSlideType = ref<'vote' | 'poll' | 'other'>('other')
-const voteEndedData = ref<{ winner: 'A' | 'B'; resultsA: number; resultsB: number } | null>(null)
-const pollPhase = ref<'pending' | 'polling' | 'submitted' | 'ended' | null>(null)
+// Timers
+let waitingTimeout: ReturnType<typeof setTimeout> | null = null
+let unsubscribe: (() => void) | null = null
 
-// Computed percentages for vote-ended screen
-const percentageA = computed(() => {
-  if (!voteEndedData.value) return 50
-  const total = voteEndedData.value.resultsA + voteEndedData.value.resultsB
-  if (total === 0) return 50
-  return Math.round((voteEndedData.value.resultsA / total) * 100)
+// ===========================================
+// Computed
+// ===========================================
+
+const phase = computed<SessionPhase | null>(() => sessionState.value?.phase ?? null)
+
+const hasVotedThisRound = computed(() => {
+  const vote = sessionState.value?.vote
+  return vote ? votedRounds.value.includes(vote.index) : false
 })
-const percentageB = computed(() => 100 - percentageA.value)
 
-// Timer state
-const timeRemaining = ref(0)
-let timerInterval: ReturnType<typeof setInterval> | null = null
+const hasPolledThisRound = computed(() => {
+  const poll = sessionState.value?.poll
+  return poll ? polledIds.value.includes(poll.id) : false
+})
 
-// Ably subscription cleanup functions
-const unsubscribes: (() => void)[] = []
-
-// Watch for vote state changes and persist to localStorage
-watch(
-  [activeVoteIndex, selectedChoice, hasVoted, voteMissed, voteEndedData],
-  () => {
-    if (status.value === 'joined' && activeVoteIndex.value !== null) {
-      saveVoteState()
-      // Track completed votes to prevent stale messages from re-triggering
-      if (hasVoted.value || voteMissed.value) {
-        completedVotes.add(activeVoteIndex.value)
-      }
-    }
-  }
-)
-
-function startCountdown(duration: number) {
-  timeRemaining.value = duration
-
-  if (timerInterval) clearInterval(timerInterval)
-
-  timerInterval = setInterval(() => {
-    timeRemaining.value--
-    if (timeRemaining.value <= 0) {
-      clearInterval(timerInterval!)
-      timerInterval = null
-      // Auto-submit if a choice is selected, otherwise mark as missed
-      // IMPORTANT: Check isSubmitting to prevent double-submit if network is slow
-      if (selectedChoice.value && !hasVoted.value && !isSubmitting.value) {
-        submitVote()
-      } else if (!hasVoted.value && !isSubmitting.value) {
-        voteMissed.value = true
-      }
-    }
-  }, 1000)
-}
-
-function clearCountdown() {
-  if (timerInterval) {
-    clearInterval(timerInterval)
-    timerInterval = null
-  }
-  timeRemaining.value = 0
-}
-
-// Validation
 const isValid = computed(() => {
   const trimmed = name.value.trim()
   return trimmed.length >= 2 && trimmed.length <= 20
@@ -144,886 +106,230 @@ const validationMessage = computed(() => {
   return ''
 })
 
-// Can go to next step if name is valid
-const canGoNext = computed(() => isValid.value && activeKeynoteId.value !== null)
-
-// Load saved crew member from localStorage
-function loadSavedMember(): SavedMember | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.CREW_MEMBER)
-    if (saved) {
-      return JSON.parse(saved)
-    }
-  } catch (e) {
-    console.error('[App] Failed to load saved member:', e)
-  }
-  return null
-}
-
-// Save crew member to localStorage
-function saveMember(memberName: string, participantId: string, keynoteId: string, avatar: string | null) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify({
-      name: memberName,
-      participantId,
-      keynoteId,
-      avatar
-    }))
-  } catch (e) {
-    console.error('[App] Failed to save member:', e)
-  }
-}
-
-// Clear saved member from localStorage
-function clearSavedMember() {
-  try {
-    localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER)
-  } catch (e) {
-    console.error('[App] Failed to clear saved member:', e)
-  }
-}
+const canGoNext = computed(() => isValid.value && keynoteId.value !== null)
 
 // ===========================================
-// Vote state persistence
+// Session state handler
 // ===========================================
 
-function saveVoteState() {
-  try {
-    const state: PersistedVoteState = {
-      activeVoteIndex: activeVoteIndex.value,
-      selectedChoice: selectedChoice.value,
-      hasVoted: hasVoted.value,
-      voteMissed: voteMissed.value,
-      countdownEndTimestamp: timeRemaining.value > 0
-        ? Date.now() + (timeRemaining.value * 1000)
-        : null,
-      keynoteId: activeKeynoteId.value,
-      voteEndedData: voteEndedData.value,
-    }
-    localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(state))
-  } catch (e) {
-    console.error('[App] Failed to save vote state:', e)
-  }
-}
+function handleSessionState(msg: SessionStateMessage) {
+  sessionState.value = msg
 
-function loadVoteState(): PersistedVoteState | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEYS.VOTE_STATE)
-    if (saved) {
-      return JSON.parse(saved)
-    }
-  } catch (e) {
-    console.error('[App] Failed to load vote state:', e)
-  }
-  return null
-}
-
-function clearVoteState() {
-  try {
-    localStorage.removeItem(STORAGE_KEYS.VOTE_STATE)
-  } catch (e) {
-    console.error('[App] Failed to clear vote state:', e)
-  }
-}
-
-// Restore vote state from localStorage
-function restoreVoteState() {
-  const saved = loadVoteState()
-  if (!saved) return false
-
-  // Only restore if it's for the same keynote
-  if (saved.keynoteId !== activeKeynoteId.value) {
-    console.log('[App] Vote state keynote mismatch, clearing')
-    clearVoteState()
-    return false
+  // Clear waiting timeout
+  if (waitingTimeout) {
+    clearTimeout(waitingTimeout)
+    waitingTimeout = null
   }
 
-  // Restore voteEndedData if present
-  if (saved.voteEndedData) {
-    voteEndedData.value = saved.voteEndedData
+  // Keynote change: reset voted rounds
+  if (msg.keynoteId !== keynoteId.value) {
+    keynoteId.value = msg.keynoteId
+    hasReannounced = false
+    votedRounds.value = []
+    polledIds.value = []
+    saveVotesData({ keynoteId: msg.keynoteId, votedRounds: [], polledIds: [] })
   }
 
-  // Don't restore if already voted or missed
-  if (saved.hasVoted || saved.voteMissed) {
-    activeVoteIndex.value = saved.activeVoteIndex
-    selectedChoice.value = saved.selectedChoice
-    hasVoted.value = saved.hasVoted
-    voteMissed.value = saved.voteMissed
-    console.log('[App] Restored final vote state:', saved)
-    return true
-  }
-
-  // Restore vote state
-  activeVoteIndex.value = saved.activeVoteIndex
-  selectedChoice.value = saved.selectedChoice
-  hasVoted.value = saved.hasVoted
-  voteMissed.value = saved.voteMissed
-
-  // Restore countdown if still active
-  if (saved.countdownEndTimestamp && saved.activeVoteIndex !== null) {
-    const remainingMs = saved.countdownEndTimestamp - Date.now()
-    if (remainingMs > 0) {
-      startCountdown(Math.ceil(remainingMs / 1000))
-      console.log('[App] Restored countdown with', Math.ceil(remainingMs / 1000), 'seconds')
+  // First session state: transition from connecting/waiting
+  if (status.value === 'connecting' || status.value === 'waiting') {
+    const savedCrew = loadCrew()
+    if (savedCrew) {
+      joinedName.value = savedCrew.name
+      selectedAvatar.value = savedCrew.avatar
+      status.value = 'joined'
     } else {
-      // Time expired while away
-      // Check isSubmitting to prevent double-submit
-      if (saved.selectedChoice && !saved.hasVoted && !isSubmitting.value) {
-        // Auto-submit the selected choice
-        console.log('[App] Time expired, auto-submitting:', saved.selectedChoice)
-        submitVote()
-      } else if (!isSubmitting.value) {
-        voteMissed.value = true
-        console.log('[App] Time expired, vote missed')
-      }
+      status.value = 'idle'
     }
   }
 
-  console.log('[App] Restored vote state:', saved)
-  return true
-}
-
-// ===========================================
-// Page visibility handling
-// ===========================================
-
-const hiddenTimestamp = ref<number | null>(null)
-const pausedTimeRemaining = ref(0)
-
-function handleVisibilityChange() {
-  if (document.hidden) {
-    // Page is now hidden - note timestamp and paused time
-    hiddenTimestamp.value = Date.now()
-    pausedTimeRemaining.value = timeRemaining.value
-    console.log('[App] Page hidden, paused at', pausedTimeRemaining.value, 'seconds')
-  } else {
-    // Page is now visible
-    console.log('[App] Page visible again')
-
-    if (hiddenTimestamp.value && pausedTimeRemaining.value > 0 && activeVoteIndex.value !== null && !hasVoted.value && !voteMissed.value) {
-      // Calculate elapsed time while hidden
-      const elapsedMs = Date.now() - hiddenTimestamp.value
-      const elapsedSeconds = Math.floor(elapsedMs / 1000)
-      const newRemaining = pausedTimeRemaining.value - elapsedSeconds
-
-      if (newRemaining > 0) {
-        // Resume countdown with adjusted time
-        clearCountdown()
-        startCountdown(newRemaining)
-        console.log('[App] Resumed countdown with', newRemaining, 'seconds')
-      } else {
-        // Time expired while hidden
-        clearCountdown()
-        // Check isSubmitting to prevent double-submit
-        if (selectedChoice.value && !isSubmitting.value) {
-          // Auto-submit selected choice
-          submitVote()
-          console.log('[App] Time expired while hidden, auto-submitting')
-        } else if (!isSubmitting.value) {
-          voteMissed.value = true
-          console.log('[App] Time expired while hidden, vote missed')
-        }
-      }
-    }
-
-    // Request state sync on visibility restore (debounced to avoid rapid-fire)
-    debouncedRequestStateSync()
-
-    hiddenTimestamp.value = null
-    pausedTimeRemaining.value = 0
-  }
-}
-
-// ===========================================
-// State sync on reconnection
-// ===========================================
-
-let syncDebounceTimer: ReturnType<typeof setTimeout> | null = null
-
-function debouncedRequestStateSync() {
-  if (syncDebounceTimer) clearTimeout(syncDebounceTimer)
-  // Jittered delay (500ms - 2500ms) to spread thundering herd of 100+ reconnections
-  const jitter = 500 + Math.floor(Math.random() * 2000)
-  syncDebounceTimer = setTimeout(() => {
-    syncDebounceTimer = null
-    requestStateSync()
-  }, jitter)
-}
-
-async function requestStateSync() {
-  console.log('[App] Requesting state sync...')
-
-  if (!isConnected.value) {
-    console.warn('[App] Cannot sync - not connected')
-    return
-  }
-
-  // If we have a saved member and are still 'connecting', restore joined status
-  const savedMember = loadSavedMember()
-  if (savedMember && status.value === 'connecting') {
-    console.log('[App] Restoring joined status for', savedMember.name)
-    status.value = 'joined'
-    joinedName.value = savedMember.name
-    selectedAvatar.value = savedMember.avatar
-    activeKeynoteId.value = savedMember.keynoteId
-  }
-
-  // Restore from localStorage first
-  const restoredFromStorage = restoreVoteState()
-
-  // Fetch recent history to catch any missed messages
-  const { sessionState, voteStarted, voteEnded, pollStarted, pollEnded } = await fetchSessionHistory()
-
-  if (sessionState) {
-    // Update keynoteId if different
-    if (sessionState.keynoteId && sessionState.keynoteId !== activeKeynoteId.value) {
-      console.log('[App] Keynote changed during disconnect')
-      activeKeynoteId.value = sessionState.keynoteId
-      // Clear vote state if keynote changed
-      clearVoteState()
-      activeVoteIndex.value = null
-      selectedChoice.value = null
-      hasVoted.value = false
-      voteMissed.value = false
-      voteEndedData.value = null
-    }
-
-    // Apply enriched session state context
-    if (sessionState.slideType) {
-      currentSlideType.value = sessionState.slideType
-    }
-    if (sessionState.voteContext) {
-      activeVoteIndex.value = sessionState.voteContext.voteIndex
-      if (sessionState.voteContext.votePhase === 'ended' && sessionState.voteContext.winner) {
-        voteEndedData.value = {
-          winner: sessionState.voteContext.winner,
-          resultsA: sessionState.voteContext.resultsA ?? 0,
-          resultsB: sessionState.voteContext.resultsB ?? 0,
-        }
-        clearCountdown()
-      }
-    }
-    if (sessionState.pollContext) {
-      activePollId.value = sessionState.pollContext.pollId
-      if (sessionState.pollContext.pollPhase === 'ended') {
-        pollPhase.value = 'ended'
-        clearCountdown()
-      }
-    }
-  }
-
-  // Apply voteEnded from history (takes priority over session state for results)
-  if (voteEnded && !restoredFromStorage) {
-    voteEndedData.value = {
-      winner: voteEnded.winner,
-      resultsA: voteEnded.results.A,
-      resultsB: voteEnded.results.B,
-    }
-    activeVoteIndex.value = voteEnded.voteIndex
-    clearCountdown()
-  }
-
-  // Apply pollEnded from history
-  if (pollEnded) {
-    activePollId.value = pollEnded.pollId
-    pollPhase.value = 'ended'
-    clearCountdown()
-  }
-
-  // Re-announce to the presentation AFTER validating keynoteId from session history
-  const currentKeynoteId = activeKeynoteId.value
-  if (savedMember && currentKeynoteId) {
-    try {
-      await joinCrew(savedMember.name, currentKeynoteId, savedMember.avatar)
-      console.log('[App] Re-announced crew member to presentation')
-    } catch (err) {
-      console.error('[App] Failed to re-announce:', err)
-    }
-  }
-
-  if (voteStarted && !restoredFromStorage && !voteEnded) {
-    // A vote might be in progress that we missed (only if not already ended)
-    handleVoteStartedSync(voteStarted)
-  }
-
-  // Apply pollStarted from history (only if not already ended)
-  if (pollStarted && !pollEnded && !hasPollVoted.value) {
-    activePollId.value = pollStarted.pollId
-    pollPhase.value = 'polling'
-    const elapsedMs = Date.now() - pollStarted.timestamp
-    const elapsedSeconds = Math.floor(elapsedMs / 1000)
-    const remainingDuration = Math.max(0, pollStarted.duration - elapsedSeconds)
-    if (remainingDuration > 0) {
-      startCountdown(remainingDuration)
+  // Re-announce to presentation (once per keynoteId)
+  if (status.value === 'joined' && !hasReannounced && keynoteId.value) {
+    hasReannounced = true
+    const savedCrew = loadCrew()
+    const pid = getParticipantId()
+    if (savedCrew && pid) {
+      publishAction({
+        type: 'join-crew',
+        participantId: pid,
+        name: savedCrew.name,
+        avatar: savedCrew.avatar,
+        keynoteId: keynoteId.value,
+        timestamp: Date.now(),
+      }).catch((err) => console.error('[App] Failed to re-announce:', err))
     }
   }
 }
 
-function handleVoteStartedSync(msg: VoteStartedMessage) {
-  // Ignore stale messages for votes we already completed
-  if (completedVotes.has(msg.voteIndex)) {
-    console.log('[App] Vote', msg.voteIndex, 'already completed, ignoring sync')
-    return
-  }
-
-  // Calculate remaining time based on timestamp
-  const elapsedMs = Date.now() - msg.timestamp
-  const elapsedSeconds = Math.floor(elapsedMs / 1000)
-  const remainingDuration = msg.duration - elapsedSeconds
-
-  // Don't sync if we already have this vote or already voted
-  if (activeVoteIndex.value === msg.voteIndex && (hasVoted.value || voteMissed.value)) {
-    console.log('[App] Already processed vote', msg.voteIndex)
-    return
-  }
-
-  if (remainingDuration > 0 && !hasVoted.value) {
-    console.log('[App] Syncing with active vote, remaining:', remainingDuration)
-    activeVoteIndex.value = msg.voteIndex
-    selectedChoice.value = null
-    hasVoted.value = false
-    voteMissed.value = false
-    voteError.value = null
-    isSubmitting.value = false
-    startCountdown(remainingDuration)
-  } else if (!hasVoted.value && activeVoteIndex.value !== msg.voteIndex) {
-    console.log('[App] Vote expired during disconnect')
-    activeVoteIndex.value = msg.voteIndex
-    voteMissed.value = true
-  }
-}
-
 // ===========================================
-// Initial session-state processing (shared between live handler and history bootstrap)
+// Navigation
 // ===========================================
 
-function processInitialSessionState(msg: SessionStateMessage, savedMember: SavedMember): void {
-  const newKeynoteId = msg.keynoteId
-  activeKeynoteId.value = newKeynoteId
-
-  if (newKeynoteId && savedMember.keynoteId === newKeynoteId) {
-    // Same keynote - restore session
-    status.value = 'joined'
-    console.log('[App] Same keynote, restoring session')
-
-    // Restore vote state from localStorage
-    restoreVoteState()
-
-    // Apply slide context from this session-state message
-    currentSlideType.value = msg.slideType ?? 'other'
-    if (msg.voteContext) {
-      activeVoteIndex.value = msg.voteContext.voteIndex
-      if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
-        voteEndedData.value = {
-          winner: msg.voteContext.winner,
-          resultsA: msg.voteContext.resultsA ?? 0,
-          resultsB: msg.voteContext.resultsB ?? 0,
-        }
-      } else if (msg.voteContext.votePhase === 'voting' && !hasVoted.value && !voteMissed.value) {
-        // Start countdown if vote is active (refresh during vote)
-        if (msg.voteContext.duration && msg.voteContext.startTimestamp) {
-          const elapsedMs = Date.now() - msg.voteContext.startTimestamp
-          const elapsedSeconds = Math.floor(elapsedMs / 1000)
-          const remaining = Math.max(0, msg.voteContext.duration - elapsedSeconds)
-          if (remaining > 0) {
-            console.log('[App] Bootstrap: starting vote countdown, remaining:', remaining)
-            voteEndedData.value = null
-            startCountdown(remaining)
-          }
-        }
-      }
-    }
-    if (msg.pollContext) {
-      activePollId.value = msg.pollContext.pollId
-      if (msg.pollContext.pollPhase === 'ended') {
-        pollPhase.value = 'ended'
-      } else if (msg.pollContext.pollPhase === 'polling' && !hasPollVoted.value) {
-        // Start countdown if poll is active (refresh during poll)
-        if (msg.pollContext.duration && msg.pollContext.startTimestamp) {
-          const elapsedMs = Date.now() - msg.pollContext.startTimestamp
-          const elapsedSeconds = Math.floor(elapsedMs / 1000)
-          const remaining = Math.max(0, msg.pollContext.duration - elapsedSeconds)
-          if (remaining > 0) {
-            console.log('[App] Bootstrap: starting poll countdown, remaining:', remaining)
-            pollPhase.value = 'polling'
-            startCountdown(remaining)
-          }
-        }
-      }
-    }
-
-    // If we restored vote state but slideType is unknown, infer it
-    if (currentSlideType.value === 'other' && activeVoteIndex.value !== null) {
-      currentSlideType.value = 'vote'
-    }
-
-    // Re-announce to presentation so it re-registers us in the crew
-    joinCrew(savedMember.name, newKeynoteId, savedMember.avatar)
-      .then(() => console.log('[App] Re-announced on initial restore'))
-      .catch((err) => console.error('[App] Failed to re-announce on restore:', err))
-  } else if (newKeynoteId) {
-    // Different keynote active - clear and show form
-    console.log('[App] Different keynote, clearing session')
-    clearSavedMember()
-    joinedName.value = ''
-    selectedAvatar.value = null
-    currentStep.value = 'name'
-    status.value = 'idle'
-  } else {
-    // No keynote active - clear and wait
-    console.log('[App] No keynote active, clearing session')
-    clearSavedMember()
-    joinedName.value = ''
-    selectedAvatar.value = null
-    currentStep.value = 'name'
-    status.value = 'waiting'
-  }
-}
-
-// Connect on mount
-onMounted(async () => {
-  const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
-
-  if (!apiKey) {
-    status.value = 'error'
-    console.error('VITE_ABLY_API_KEY not set')
-    return
-  }
-
-  // Check for saved member
-  const savedMember = loadSavedMember()
-
-  try {
-    // Connect (with saved participantId if available)
-    await connect(apiKey, savedMember?.participantId)
-
-    if (savedMember) {
-      restoreSession(savedMember.participantId)
-    }
-
-    // Subscribe to session state to get keynoteId
-    unsubscribes.push(onSessionState((msg) => {
-      const newKeynoteId = msg.keynoteId
-      const previousKeynoteId = activeKeynoteId.value
-      console.log('[App] Received session state, keynoteId:', newKeynoteId, 'status:', status.value)
-      activeKeynoteId.value = newKeynoteId
-
-      // Only handle initial sync when in 'connecting' state
-      if (status.value === 'connecting') {
-        if (savedMember) {
-          processInitialSessionState(msg, savedMember)
-        } else {
-          activeKeynoteId.value = newKeynoteId
-          status.value = newKeynoteId ? 'idle' : 'waiting'
-        }
-        return
-      }
-
-      // Handle keynote change while already joined/idle
-      if (status.value === 'joined' && previousKeynoteId && newKeynoteId !== previousKeynoteId) {
-        // Keynote changed - kick back to form
-        console.log('[App] Keynote changed, clearing session')
-        clearSavedMember()
-        clearVoteState()
-        completedVotes.clear()
-        joinedName.value = ''
-        selectedAvatar.value = null
-        currentStep.value = 'name'
-        voteEndedData.value = null
-        pollPhase.value = null
-        hasPollVoted.value = false
-        activePollId.value = null
-        activeVoteIndex.value = null
-        hasVoted.value = false
-        voteMissed.value = false
-        selectedChoice.value = null
-        currentSlideType.value = 'other'
-        clearCountdown()
-        status.value = newKeynoteId ? 'idle' : 'waiting'
-        return
-      }
-
-      // --- Handle session-state updates for joined users ---
-      if (status.value === 'joined') {
-        const prevSlideType = currentSlideType.value
-        currentSlideType.value = msg.slideType ?? 'other'
-
-        // Vote slide context
-        if (currentSlideType.value === 'vote' && msg.voteContext) {
-          // Clear old ended data when moving to a different vote
-          if (msg.voteContext.voteIndex !== activeVoteIndex.value) {
-            voteEndedData.value = null
-          }
-          activeVoteIndex.value = msg.voteContext.voteIndex
-
-          if (msg.voteContext.votePhase === 'ended' && msg.voteContext.winner) {
-            voteEndedData.value = {
-              winner: msg.voteContext.winner,
-              resultsA: msg.voteContext.resultsA ?? 0,
-              resultsB: msg.voteContext.resultsB ?? 0,
-            }
-            clearCountdown()
-          } else if (msg.voteContext.votePhase === 'voting' && timeRemaining.value === 0 && !hasVoted.value && !voteMissed.value) {
-            // Fallback: start countdown from session-state if VoteStartedMessage was missed
-            if (msg.voteContext.duration && msg.voteContext.startTimestamp) {
-              const elapsedMs = Date.now() - msg.voteContext.startTimestamp
-              const elapsedSeconds = Math.floor(elapsedMs / 1000)
-              const remaining = Math.max(0, msg.voteContext.duration - elapsedSeconds)
-              if (remaining > 0) {
-                console.log('[App] Fallback: starting vote countdown from session-state, remaining:', remaining)
-                voteEndedData.value = null
-                startCountdown(remaining)
-              }
-            }
-          }
-        }
-
-        // Poll slide context
-        if (currentSlideType.value === 'poll' && msg.pollContext) {
-          activePollId.value = msg.pollContext.pollId
-
-          if (msg.pollContext.pollPhase === 'ended') {
-            pollPhase.value = 'ended'
-            clearCountdown()
-          } else if (msg.pollContext.pollPhase === 'polling' && timeRemaining.value === 0 && !hasPollVoted.value) {
-            // Fallback: start countdown from session-state if PollStartedMessage was missed
-            if (msg.pollContext.duration && msg.pollContext.startTimestamp) {
-              const elapsedMs = Date.now() - msg.pollContext.startTimestamp
-              const elapsedSeconds = Math.floor(elapsedMs / 1000)
-              const remaining = Math.max(0, msg.pollContext.duration - elapsedSeconds)
-              if (remaining > 0) {
-                console.log('[App] Fallback: starting poll countdown from session-state, remaining:', remaining)
-                pollPhase.value = 'polling'
-                startCountdown(remaining)
-              }
-            }
-          }
-        }
-
-        // Cleanup when leaving a vote slide
-        // NOTE: Don't clear voteEndedData here — screen #6 requires currentSlideType === 'vote'
-        // so it won't show on non-vote slides. Clearing it here causes a race condition
-        // when VoteEndedMessage and slide-change session-state arrive in the same Vue tick.
-        // voteEndedData is cleared when a NEW vote starts (different voteIndex) in onVoteStarted.
-        if (prevSlideType === 'vote' && currentSlideType.value !== 'vote') {
-          if (activeVoteIndex.value !== null && completedVotes.has(activeVoteIndex.value)) {
-            console.log('[App] Left vote slide, cleaning up vote state')
-            hasVoted.value = false
-            voteMissed.value = false
-            selectedChoice.value = null
-            activeVoteIndex.value = null
-            clearVoteState()
-          }
-        }
-
-        // Cleanup when leaving a poll slide
-        if (prevSlideType === 'poll' && currentSlideType.value !== 'poll') {
-          if (pollPhase.value === 'ended' || hasPollVoted.value) {
-            console.log('[App] Left poll slide, cleaning up poll state')
-            pollPhase.value = null
-            hasPollVoted.value = false
-            activePollId.value = null
-          }
-        }
-      }
-    }))
-
-    // Subscribe to vote-started messages
-    unsubscribes.push(onVoteStarted((msg) => {
-      console.log('[App] Vote started:', msg.voteIndex, 'duration:', msg.duration)
-
-      // Ignore stale messages for votes we already completed (voted or missed)
-      if (completedVotes.has(msg.voteIndex)) {
-        console.log('[App] Vote', msg.voteIndex, 'already completed, ignoring')
-        return
-      }
-
-      // If it's a new vote (different index), reset state
-      if (activeVoteIndex.value !== msg.voteIndex) {
-        clearVoteState()
-        activeVoteIndex.value = msg.voteIndex
-        selectedChoice.value = null
-        hasVoted.value = false
-        voteMissed.value = false
-        voteError.value = null
-        isSubmitting.value = false
-        voteEndedData.value = null
-      }
-      currentSlideType.value = 'vote'
-
-      // Update/start countdown for late joiners (only if not voted/missed)
-      if (msg.duration > 0 && !hasVoted.value && !voteMissed.value) {
-        const elapsedMs = Date.now() - msg.timestamp
-        const elapsedSeconds = Math.floor(elapsedMs / 1000)
-        const remainingDuration = Math.max(0, msg.duration - elapsedSeconds)
-        if (remainingDuration > 0) {
-          startCountdown(remainingDuration)
-        }
-      }
-    }))
-
-    // Subscribe to poll-started messages
-    unsubscribes.push(onPollStarted((msg) => {
-      console.log('[App] Poll started:', msg.pollId, 'duration:', msg.duration)
-      activePollId.value = msg.pollId
-      currentSlideType.value = 'poll'
-      pollPhase.value = 'polling'
-      hasPollVoted.value = false
-      voteError.value = null
-      isSubmitting.value = false
-      // Start countdown with synchronized time (account for message delay)
-      if (msg.duration > 0) {
-        const elapsedMs = Date.now() - msg.timestamp
-        const elapsedSeconds = Math.floor(elapsedMs / 1000)
-        const remainingDuration = Math.max(0, msg.duration - elapsedSeconds)
-        if (remainingDuration > 0) {
-          startCountdown(remainingDuration)
-        }
-      }
-    }))
-
-    // Subscribe to vote-ended messages
-    unsubscribes.push(onVoteEnded((msg) => {
-      console.log('[App] Vote ended:', msg.voteIndex, 'winner:', msg.winner)
-
-      // Wait for any in-flight submission to complete before applying ended state
-      const applyVoteEnded = () => {
-        voteEndedData.value = {
-          winner: msg.winner,
-          resultsA: msg.results.A,
-          resultsB: msg.results.B,
-        }
-        activeVoteIndex.value = msg.voteIndex
-        currentSlideType.value = 'vote'
-        clearCountdown()
-        // Mark as missed if user hadn't voted
-        if (!hasVoted.value && !isSubmitting.value) {
-          voteMissed.value = true
-        }
-        completedVotes.add(msg.voteIndex)
-      }
-
-      if (isSubmitting.value) {
-        // Poll until submission finishes (max 3s)
-        let waited = 0
-        const poll = setInterval(() => {
-          waited += 100
-          if (!isSubmitting.value || waited >= 3000) {
-            clearInterval(poll)
-            applyVoteEnded()
-          }
-        }, 100)
-      } else {
-        applyVoteEnded()
-      }
-    }))
-
-    // Subscribe to poll-ended messages
-    unsubscribes.push(onPollEnded((msg) => {
-      console.log('[App] Poll ended:', msg.pollId)
-      if (activePollId.value === msg.pollId) {
-        pollPhase.value = 'ended'
-        clearCountdown()
-      }
-    }))
-
-    // Setup reconnection callback (debounced to avoid rapid-fire re-announces)
-    setOnReconnect(() => {
-      console.log('[App] Reconnected - requesting state sync')
-      debouncedRequestStateSync()
-    })
-
-    // Enter Ably Presence so the presentation tracks us as active
-    enterPresence()
-
-    // Restore display data immediately
-    if (savedMember) {
-      joinedName.value = savedMember.name
-      selectedAvatar.value = savedMember.avatar
-    }
-
-    // Bootstrap from Ably history instead of waiting for a live session-state
-    // (the presentation has no periodic heartbeat — only publishes on events)
-    if (savedMember) {
-      try {
-        const { sessionState, voteStarted, voteEnded, pollStarted, pollEnded } = await fetchSessionHistory()
-        // Only process if still waiting (no live message beat us)
-        if (status.value === 'connecting' && sessionState) {
-          // keynoteId validation happens inside processInitialSessionState
-          processInitialSessionState(sessionState, savedMember)
-
-          // Also process voteStarted/pollStarted from history if vote/poll is active
-          // (processInitialSessionState may have started a countdown from session-state context,
-          //  but if the session-state didn't have duration/startTimestamp, we need this fallback)
-          // Note: processInitialSessionState may have changed status to 'joined'
-          const currentStatus = status.value as string
-          if (currentStatus === 'joined' && timeRemaining.value === 0) {
-            if (voteStarted && !voteEnded && !hasVoted.value && !voteMissed.value) {
-              handleVoteStartedSync(voteStarted)
-            }
-            if (pollStarted && !pollEnded && !hasPollVoted.value) {
-              activePollId.value = pollStarted.pollId
-              pollPhase.value = 'polling'
-              const elapsedMs = Date.now() - pollStarted.timestamp
-              const elapsedSeconds = Math.floor(elapsedMs / 1000)
-              const remaining = Math.max(0, pollStarted.duration - elapsedSeconds)
-              if (remaining > 0) {
-                startCountdown(remaining)
-              }
-            }
-          }
-        } else if (status.value === 'connecting') {
-          // No history at all — presentation never published anything
-          // Stay in 'connecting', a live message will arrive eventually
-          console.log('[App] No session history, waiting for live message')
-        }
-      } catch (err) {
-        console.warn('[App] Failed to fetch initial history:', err)
-      }
-    }
-  } catch (err) {
-    status.value = 'error'
-  }
-
-  // Add page visibility change listener
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-})
-
-// Cleanup on unmount
-onBeforeUnmount(() => {
-  clearCountdown()
-  if (syncDebounceTimer) clearTimeout(syncDebounceTimer)
-  unsubscribes.forEach(fn => fn())
-  unsubscribes.length = 0
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-})
-
-// Go to avatar step
 function handleNext() {
   if (!canGoNext.value || status.value !== 'idle') return
   currentStep.value = 'avatar'
 }
 
-// Go back to name step
 function handleBack() {
   currentStep.value = 'name'
 }
 
-// Join the crew (called from AvatarCreator)
-async function handleJoin(avatar: string) {
-  if (status.value !== 'idle' || !activeKeynoteId.value) return
+// ===========================================
+// Join crew
+// ===========================================
 
+async function handleJoin(avatar: string) {
+  if (status.value !== 'idle' || !keynoteId.value) return
   status.value = 'joining'
   selectedAvatar.value = avatar
 
+  const pid = getParticipantId()
+  if (!pid || !keynoteId.value) {
+    status.value = 'error'
+    return
+  }
+
   try {
-    await joinCrew(name.value.trim(), activeKeynoteId.value, avatar)
+    await publishAction({
+      type: 'join-crew',
+      participantId: pid,
+      name: name.value.trim(),
+      avatar,
+      keynoteId: keynoteId.value,
+      timestamp: Date.now(),
+    })
     joinedName.value = name.value.trim()
     status.value = 'joined'
-
-    // Save to localStorage with keynoteId
-    const participantId = getParticipantId()
-    if (participantId) {
-      saveMember(name.value.trim(), participantId, activeKeynoteId.value, avatar)
-    }
+    hasReannounced = true
+    saveCrew({ participantId: pid, name: name.value.trim(), avatar })
   } catch (err) {
     console.error('Failed to join crew:', err)
     status.value = 'error'
   }
 }
 
-// Direct vote (auto-submit on click)
-async function directVote(choice: 'A' | 'B') {
-  if (hasVoted.value || isSubmitting.value) return
-  selectedChoice.value = choice
-  await submitVote()
-}
+// ===========================================
+// Vote
+// ===========================================
 
-// Submit vote
-async function submitVote() {
-  console.log('[App] submitVote called:', {
-    selectedChoice: selectedChoice.value,
-    activeVoteIndex: activeVoteIndex.value,
-    activeKeynoteId: activeKeynoteId.value
-  })
+async function handleVote(choice: 'A' | 'B') {
+  const vote = sessionState.value?.vote
+  if (!vote || hasVotedThisRound.value || isSubmitting.value || !keynoteId.value) return
 
-  // Clear previous error
-  voteError.value = null
-
-  // Try to get keynoteId from localStorage if not available
-  let keynoteId = activeKeynoteId.value
-  if (!keynoteId) {
-    const saved = loadSavedMember()
-    keynoteId = saved?.keynoteId || null
-    console.log('[App] Using saved keynoteId:', keynoteId)
-  }
-
-  if (!selectedChoice.value || activeVoteIndex.value === null || !keynoteId) {
-    console.warn('[App] Cannot submit vote - missing data:', {
-      selectedChoice: selectedChoice.value,
-      activeVoteIndex: activeVoteIndex.value,
-      keynoteId
-    })
-    voteError.value = 'Missing data to submit vote'
-    return
-  }
+  const pid = getParticipantId()
+  if (!pid) return
 
   isSubmitting.value = true
   try {
-    await sendVote(activeVoteIndex.value, selectedChoice.value, keynoteId)
-    hasVoted.value = true
-    clearCountdown()
-    console.log('[App] Vote submitted:', selectedChoice.value)
+    await publishAction({
+      type: 'vote-cast',
+      participantId: pid,
+      voteIndex: vote.index,
+      choice,
+      keynoteId: keynoteId.value,
+      timestamp: Date.now(),
+    })
+    votedRounds.value = [...votedRounds.value, vote.index]
+    saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
-    console.error('Failed to submit vote:', err)
-    voteError.value = 'Failed to submit vote. Tap to retry.'
+    console.error('Failed to vote:', err)
   } finally {
     isSubmitting.value = false
   }
 }
 
-// Submit poll (auto-submit on click)
-async function submitPoll(choice: PollChoice) {
-  console.log('[App] submitPoll called:', {
-    choice,
-    activePollId: activePollId.value
-  })
+// ===========================================
+// Poll
+// ===========================================
 
-  // Clear previous error
-  voteError.value = null
+async function handlePoll(choice: PollChoice) {
+  const poll = sessionState.value?.poll
+  if (!poll || hasPolledThisRound.value || isSubmitting.value || !keynoteId.value) return
 
-  if (hasPollVoted.value || !activePollId.value) {
-    console.warn('[App] Cannot submit poll - already voted or no active poll')
-    return
-  }
-
-  // Try to get keynoteId from localStorage if not available
-  let keynoteId = activeKeynoteId.value
-  if (!keynoteId) {
-    const saved = loadSavedMember()
-    keynoteId = saved?.keynoteId || null
-  }
-
-  if (!keynoteId) {
-    console.warn('[App] Cannot submit poll - no keynoteId')
-    voteError.value = 'Connection lost. Please refresh.'
-    return
-  }
+  const pid = getParticipantId()
+  if (!pid) return
 
   isSubmitting.value = true
   try {
-    await sendPoll(activePollId.value, choice, keynoteId)
-    hasPollVoted.value = true
-    pollPhase.value = 'submitted'
-    clearCountdown()
-    console.log('[App] Poll submitted:', choice)
+    await publishAction({
+      type: 'poll-cast',
+      participantId: pid,
+      pollId: poll.id,
+      choice,
+      keynoteId: keynoteId.value,
+      timestamp: Date.now(),
+    })
+    polledIds.value = [...polledIds.value, poll.id]
+    saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
     console.error('Failed to submit poll:', err)
-    voteError.value = 'Failed to submit. Please try again.'
   } finally {
     isSubmitting.value = false
   }
 }
+
+// ===========================================
+// Visibility change (force reconnect on unlock)
+// ===========================================
+
+function handleVisibilityChange() {
+  if (!document.hidden) {
+    reconnect()
+  }
+}
+
+// ===========================================
+// Lifecycle
+// ===========================================
+
+onMounted(async () => {
+  const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
+  if (!apiKey) {
+    status.value = 'error'
+    console.error('VITE_ABLY_API_KEY not set')
+    return
+  }
+
+  const savedCrew = loadCrew()
+  const savedVotes = loadVotes()
+
+  try {
+    await connect(apiKey, savedCrew?.participantId)
+
+    // Subscribe to session state
+    unsubscribe = onSessionState(handleSessionState)
+
+    // Restore display data immediately (before session-state arrives)
+    if (savedCrew) {
+      joinedName.value = savedCrew.name
+      selectedAvatar.value = savedCrew.avatar
+    }
+
+    // Restore voted rounds (keynoteId validation happens in handleSessionState)
+    if (savedVotes) {
+      keynoteId.value = savedVotes.keynoteId
+      votedRounds.value = savedVotes.votedRounds
+      polledIds.value = savedVotes.polledIds
+    }
+
+    // Show "waiting" if no session-state arrives within 5s
+    waitingTimeout = setTimeout(() => {
+      if (status.value === 'connecting') {
+        status.value = 'waiting'
+      }
+    }, 5000)
+  } catch (err) {
+    console.error('Failed to connect:', err)
+    status.value = 'error'
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+})
+
+onBeforeUnmount(() => {
+  unsubscribe?.()
+  if (waitingTimeout) clearTimeout(waitingTimeout)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+})
 </script>
 
 <template>
@@ -1031,35 +337,26 @@ async function submitPoll(choice: PollChoice) {
     <div class="card">
       <h1>Lighthouse Pirates</h1>
 
-      <!-- #1 Connecting -->
-      <div
-        v-if="status === 'connecting'"
-        class="status"
-      >
+      <!-- Connecting -->
+      <div v-if="status === 'connecting'" class="status">
         <div class="spinner"></div>
         <p>Connecting...</p>
       </div>
 
-      <!-- #2 Waiting for presentation -->
-      <div
-        v-else-if="status === 'waiting'"
-        class="status"
-      >
+      <!-- Waiting for presentation -->
+      <div v-else-if="status === 'waiting'" class="status">
         <div class="spinner"></div>
         <p>Waiting for the captain...</p>
         <p class="hint">The presentation hasn't started yet</p>
       </div>
 
-      <!-- #3 Error -->
-      <div
-        v-else-if="status === 'error'"
-        class="status error"
-      >
+      <!-- Error -->
+      <div v-else-if="status === 'error'" class="status error">
         <p>Connection error</p>
         <p class="hint">Check your internet connection</p>
       </div>
 
-      <!-- #4 Form - Name Step -->
+      <!-- Form - Name Step -->
       <div
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
         class="form"
@@ -1074,155 +371,84 @@ async function submitPoll(choice: PollChoice) {
           :disabled="status === 'joining'"
           @keyup.enter="handleNext"
         />
-        <p
-          v-if="validationMessage"
-          class="validation"
-        >{{ validationMessage }}</p>
-
-        <button
-          @click="handleNext"
-          :disabled="!canGoNext"
-          class="next-btn"
-        >
+        <p v-if="validationMessage" class="validation">{{ validationMessage }}</p>
+        <button @click="handleNext" :disabled="!canGoNext" class="next-btn">
           Next
         </button>
       </div>
 
-      <!-- #5 Form - Avatar Step -->
+      <!-- Form - Avatar Step -->
       <div
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
         class="avatar-step"
       >
-        <button
-          class="back-btn"
-          @click="handleBack"
-          :disabled="status === 'joining'"
-        >
+        <button class="back-btn" @click="handleBack" :disabled="status === 'joining'">
           ← Back
         </button>
         <p class="name-preview">{{ name }}</p>
         <AvatarCreator @join="handleJoin" />
-        <div
-          v-if="status === 'joining'"
-          class="joining-overlay"
-        >
+        <div v-if="status === 'joining'" class="joining-overlay">
           <div class="spinner"></div>
           <p>Boarding...</p>
         </div>
       </div>
 
-      <!-- #6 Vote ended - show winner + percentages -->
+      <!-- Joined: Vote buttons -->
       <div
-        v-else-if="status === 'joined' && currentSlideType === 'vote' && voteEndedData"
-        class="vote-ended"
-      >
-        <h2>Vote closed!</h2>
-        <p class="winner-text">Option {{ voteEndedData.winner }} wins!</p>
-        <div class="results-bar">
-          <div class="results-a" :style="{ width: percentageA + '%' }">
-            <span v-if="percentageA >= 15">A - {{ percentageA }}%</span>
-          </div>
-          <div class="results-b" :style="{ width: percentageB + '%' }">
-            <span v-if="percentageB >= 15">B - {{ percentageB }}%</span>
-          </div>
-        </div>
-        <p v-if="hasVoted" class="hint">You voted {{ selectedChoice }}</p>
-        <p v-else class="hint">You missed this vote</p>
-      </div>
-
-      <!-- #7 Voted - waiting for results -->
-      <div
-        v-else-if="status === 'joined' && currentSlideType === 'vote' && hasVoted"
-        class="success"
-      >
-        <div class="checkmark">✓</div>
-        <h2>Vote recorded!</h2>
-        <p>You voted for option {{ selectedChoice }}</p>
-        <p class="hint">Wait for the results...</p>
-      </div>
-
-      <!-- #8 Missed vote -->
-      <div
-        v-else-if="status === 'joined' && currentSlideType === 'vote' && voteMissed"
-        class="missed"
-      >
-        <div class="missed-icon">X</div>
-        <h2>Too late!</h2>
-        <p>You missed the vote</p>
-        <p class="hint">Wait for the results...</p>
-      </div>
-
-      <!-- #9 Voting in progress -->
-      <div
-        v-else-if="status === 'joined' && currentSlideType === 'vote' && timeRemaining > 0 && activeVoteIndex !== null"
+        v-else-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound"
         class="voting"
       >
         <h2>Vote now!</h2>
-        <div class="countdown">{{ timeRemaining }}s</div>
         <p class="vote-hint">Choose your option</p>
         <div class="vote-buttons">
           <button
-            :class="['vote-btn', 'vote-a', { selected: selectedChoice === 'A' }]"
-            @click="directVote('A')"
+            class="vote-btn vote-a"
+            @click="handleVote('A')"
             :disabled="isSubmitting"
           >
             A
           </button>
           <button
-            :class="['vote-btn', 'vote-b', { selected: selectedChoice === 'B' }]"
-            @click="directVote('B')"
+            class="vote-btn vote-b"
+            @click="handleVote('B')"
             :disabled="isSubmitting"
           >
             B
           </button>
         </div>
-        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
         <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
       </div>
 
-      <!-- #10 Vote slide - pending (get ready!) -->
+      <!-- Joined: Vote submitted -->
       <div
-        v-else-if="status === 'joined' && currentSlideType === 'vote'"
-        class="vote-pending"
-      >
-        <h2>Get ready to vote!</h2>
-        <p class="hint">The vote will start soon...</p>
-      </div>
-
-      <!-- #11 Poll ended -->
-      <div
-        v-else-if="status === 'joined' && currentSlideType === 'poll' && pollPhase === 'ended'"
-        class="poll-ended"
-      >
-        <div class="checkmark">✓</div>
-        <h2>Poll closed!</h2>
-        <p v-if="hasPollVoted" class="hint">Your response has been recorded</p>
-        <p v-else class="hint">You missed this poll</p>
-      </div>
-
-      <!-- #12 Poll submitted -->
-      <div
-        v-else-if="status === 'joined' && currentSlideType === 'poll' && hasPollVoted"
+        v-else-if="status === 'joined' && phase === 'voting' && hasVotedThisRound"
         class="success"
       >
         <div class="checkmark">✓</div>
-        <h2>Thanks!</h2>
-        <p class="hint">Your response has been recorded</p>
+        <h2>Vote recorded!</h2>
+        <p class="hint">Results on the big screen...</p>
       </div>
 
-      <!-- #13 Poll in progress -->
+      <!-- Joined: Vote results -->
       <div
-        v-else-if="status === 'joined' && currentSlideType === 'poll' && activePollId && timeRemaining > 0"
+        v-else-if="status === 'joined' && phase === 'vote-results'"
+        class="vote-ended"
+      >
+        <h2>Vote closed!</h2>
+        <p class="hint">Check the results on screen!</p>
+      </div>
+
+      <!-- Joined: Poll buttons -->
+      <div
+        v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound"
         class="polling"
       >
         <h2>Quick question!</h2>
-        <div class="countdown">{{ timeRemaining }}s</div>
         <p class="poll-hint">What's your Lighthouse knowledge level?</p>
-        <p v-if="voteError" class="vote-error">{{ voteError }}</p>
         <div class="poll-buttons">
           <button
             class="poll-btn poll-cabin"
-            @click="submitPoll('cabin_boy')"
+            @click="handlePoll('cabin_boy')"
             :disabled="isSubmitting"
           >
             <span class="poll-emoji">🪣</span>
@@ -1230,7 +456,7 @@ async function submitPoll(choice: PollChoice) {
           </button>
           <button
             class="poll-btn poll-quarter"
-            @click="submitPoll('quartermaster')"
+            @click="handlePoll('quartermaster')"
             :disabled="isSubmitting"
           >
             <span class="poll-emoji">⚓</span>
@@ -1238,25 +464,37 @@ async function submitPoll(choice: PollChoice) {
           </button>
           <button
             class="poll-btn poll-captain"
-            @click="submitPoll('captain')"
+            @click="handlePoll('captain')"
             :disabled="isSubmitting"
           >
             <span class="poll-emoji">🏴‍☠️</span>
             <span class="poll-label">Captain</span>
           </button>
         </div>
+        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
       </div>
 
-      <!-- #14 Poll slide - pending (get ready!) -->
+      <!-- Joined: Poll submitted -->
       <div
-        v-else-if="status === 'joined' && currentSlideType === 'poll'"
-        class="poll-pending"
+        v-else-if="status === 'joined' && phase === 'polling' && hasPolledThisRound"
+        class="success"
       >
-        <h2>Get ready!</h2>
-        <p class="hint">A quick question is coming...</p>
+        <div class="checkmark">✓</div>
+        <h2>Thanks!</h2>
+        <p class="hint">Your response has been recorded</p>
       </div>
 
-      <!-- #15 Joined - default (between votes) -->
+      <!-- Joined: Poll results -->
+      <div
+        v-else-if="status === 'joined' && phase === 'poll-results'"
+        class="poll-ended"
+      >
+        <div class="checkmark">✓</div>
+        <h2>Poll closed!</h2>
+        <p class="hint">Check the results on screen!</p>
+      </div>
+
+      <!-- Joined: Default (waiting between votes) -->
       <div
         v-else-if="status === 'joined'"
         class="joined-waiting"
@@ -1274,7 +512,7 @@ async function submitPoll(choice: PollChoice) {
       </div>
     </div>
 
-    <!-- Debug info -->
+    <!-- Connection indicator -->
     <div class="debug">
       <span :class="isConnected ? 'connected' : 'disconnected'">
         {{ isConnected ? 'Connected' : 'Disconnected' }}
@@ -1365,10 +603,6 @@ h1 {
 .avatar-wrapper-large :deep(.avatar-layer) {
   width: 100%;
   height: 100%;
-}
-
-.avatar-wrapper {
-  margin-bottom: 16px;
 }
 
 .form {
@@ -1482,37 +716,6 @@ input::placeholder {
   text-align: left;
 }
 
-.vote-error {
-  font-size: 14px;
-  color: #ff6b6b;
-  background: rgba(255, 107, 107, 0.1);
-  padding: 8px 16px;
-  border-radius: 8px;
-  margin: 8px 0;
-}
-
-.join-btn {
-  margin-top: 8px;
-  padding: 14px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e3a5f;
-  background: #ffd700;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-.join-btn:hover:not(:disabled) {
-  transform: scale(1.02);
-}
-
-.join-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .success {
   padding: 20px 0;
 }
@@ -1531,29 +734,6 @@ input::placeholder {
 
 .success h2 {
   color: #ffd700;
-  margin-bottom: 8px;
-}
-
-.missed {
-  padding: 20px 0;
-}
-
-.missed-icon {
-  width: 60px;
-  height: 60px;
-  background: #ef4444;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-  font-weight: bold;
-  color: white;
-  margin: 0 auto 16px;
-}
-
-.missed h2 {
-  color: #ef4444;
   margin-bottom: 8px;
 }
 
@@ -1589,13 +769,6 @@ input::placeholder {
   margin-bottom: 8px;
 }
 
-.countdown {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ffd700;
-  margin-bottom: 8px;
-}
-
 .vote-hint {
   opacity: 0.8;
   margin-bottom: 20px;
@@ -1609,12 +782,12 @@ input::placeholder {
 }
 
 .vote-btn {
-  width: 80px;
-  height: 80px;
-  font-size: 32px;
+  width: 120px;
+  height: 120px;
+  font-size: 48px;
   font-weight: bold;
   border: 3px solid;
-  border-radius: 12px;
+  border-radius: 16px;
   background: transparent;
   cursor: pointer;
   transition: all 0.2s;
@@ -1625,10 +798,10 @@ input::placeholder {
   color: #3b82f6;
 }
 
-.vote-a:hover,
-.vote-a.selected {
+.vote-a:hover:not(:disabled) {
   background: #3b82f6;
   color: white;
+  transform: scale(1.05);
 }
 
 .vote-b {
@@ -1636,10 +809,15 @@ input::placeholder {
   color: #f59e0b;
 }
 
-.vote-b:hover,
-.vote-b.selected {
+.vote-b:hover:not(:disabled) {
   background: #f59e0b;
   color: white;
+  transform: scale(1.05);
+}
+
+.vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .submitting-hint {
@@ -1685,6 +863,11 @@ input::placeholder {
   color: white;
 }
 
+.poll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .poll-emoji {
   font-size: 32px;
 }
@@ -1698,7 +881,7 @@ input::placeholder {
   border-color: #3b82f6;
 }
 
-.poll-cabin:hover {
+.poll-cabin:hover:not(:disabled) {
   background: #3b82f6;
 }
 
@@ -1706,7 +889,7 @@ input::placeholder {
   border-color: #f59e0b;
 }
 
-.poll-quarter:hover {
+.poll-quarter:hover:not(:disabled) {
   background: #f59e0b;
 }
 
@@ -1714,75 +897,17 @@ input::placeholder {
   border-color: #a855f7;
 }
 
-.poll-captain:hover {
+.poll-captain:hover:not(:disabled) {
   background: #a855f7;
 }
 
-/* Vote ended styles */
-.vote-ended {
-  padding: 20px 0;
-}
-
-.vote-ended h2 {
-  color: #ffd700;
-  margin-bottom: 8px;
-}
-
-.winner-text {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-.results-bar {
-  display: flex;
-  width: 100%;
-  height: 40px;
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 16px;
-}
-
-.results-a {
-  background: #3b82f6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: white;
-  transition: width 0.5s ease;
-}
-
-.results-b {
-  background: #f59e0b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: white;
-  transition: width 0.5s ease;
-}
-
-/* Vote/Poll pending styles */
-.vote-pending,
-.poll-pending {
-  padding: 40px 0;
-}
-
-.vote-pending h2,
-.poll-pending h2 {
-  color: #ffd700;
-  margin-bottom: 8px;
-  font-size: 24px;
-}
-
-/* Poll ended styles */
+/* Vote/Poll ended styles */
+.vote-ended,
 .poll-ended {
   padding: 20px 0;
 }
 
+.vote-ended h2,
 .poll-ended h2 {
   color: #ffd700;
   margin-bottom: 8px;

@@ -3,127 +3,78 @@
 // ===========================================
 
 import type {
-  AvatarCreatedMessage,
-  VoteCastMessage,
-  PollCastMessage,
   SessionStateMessage,
-  VoteStartedMessage,
-  VoteEndedMessage,
-  PollStartedMessage,
-  PollEndedMessage,
+  JoinCrewAction,
+  VoteCastAction,
+  PollCastAction,
   PollChoice,
 } from './types'
 
-// Helper to check if value is a non-null object
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
 }
 
-// Helper to check string
 function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
 
-// Helper to check number
 function isNumber(value: unknown): value is number {
   return typeof value === 'number' && !isNaN(value)
 }
 
 // ===========================================
-// Incoming message validators (vote app -> presentation)
+// Session state validator (presentation → vote app)
 // ===========================================
 
-export function isAvatarCreatedMessage(data: unknown): data is AvatarCreatedMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'avatar-created' &&
-    isString(data.keynoteId) &&
-    isString(data.participantId) &&
-    isString(data.name) &&
-    (data.avatar === null || isString(data.avatar)) &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isVoteCastMessage(data: unknown): data is VoteCastMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'vote-cast' &&
-    isString(data.keynoteId) &&
-    isString(data.participantId) &&
-    isNumber(data.voteIndex) &&
-    (data.choice === 'A' || data.choice === 'B') &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isPollCastMessage(data: unknown): data is PollCastMessage {
-  if (!isObject(data)) return false
-  const validChoices: PollChoice[] = ['cabin_boy', 'quartermaster', 'captain']
-  return (
-    data.type === 'poll-cast' &&
-    isString(data.keynoteId) &&
-    isString(data.participantId) &&
-    isString(data.pollId) &&
-    validChoices.includes(data.choice as PollChoice) &&
-    isNumber(data.timestamp)
-  )
-}
-
-// ===========================================
-// Outgoing message validators (presentation -> vote app)
-// ===========================================
+const VALID_PHASES = ['lobby', 'idle', 'voting', 'vote-results', 'polling', 'poll-results']
 
 export function isSessionStateMessage(data: unknown): data is SessionStateMessage {
   if (!isObject(data)) return false
   return (
     data.type === 'session-state' &&
-    (data.keynoteId === null || isString(data.keynoteId)) &&
-    isString(data.sessionId) &&
-    isNumber(data.currentSlide) &&
-    Array.isArray(data.path) &&
+    isString(data.keynoteId) &&
+    VALID_PHASES.includes(data.phase as string) &&
     isNumber(data.timestamp)
   )
 }
 
-export function isVoteStartedMessage(data: unknown): data is VoteStartedMessage {
+// ===========================================
+// Action validators (vote app → presentation)
+// ===========================================
+
+export function isJoinCrewAction(data: unknown): data is JoinCrewAction {
   if (!isObject(data)) return false
   return (
-    data.type === 'vote-started' &&
+    data.type === 'join-crew' &&
+    isString(data.participantId) &&
+    isString(data.name) &&
+    isString(data.avatar) &&
+    isString(data.keynoteId) &&
+    isNumber(data.timestamp)
+  )
+}
+
+export function isVoteCastAction(data: unknown): data is VoteCastAction {
+  if (!isObject(data)) return false
+  return (
+    data.type === 'vote-cast' &&
+    isString(data.participantId) &&
     isNumber(data.voteIndex) &&
-    isNumber(data.duration) &&
+    (data.choice === 'A' || data.choice === 'B') &&
+    isString(data.keynoteId) &&
     isNumber(data.timestamp)
   )
 }
 
-export function isPollStartedMessage(data: unknown): data is PollStartedMessage {
+export function isPollCastAction(data: unknown): data is PollCastAction {
   if (!isObject(data)) return false
+  const validChoices: PollChoice[] = ['cabin_boy', 'quartermaster', 'captain']
   return (
-    data.type === 'poll-started' &&
+    data.type === 'poll-cast' &&
+    isString(data.participantId) &&
     isString(data.pollId) &&
-    isNumber(data.duration) &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isVoteEndedMessage(data: unknown): data is VoteEndedMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'vote-ended' &&
-    isNumber(data.voteIndex) &&
-    (data.winner === 'A' || data.winner === 'B') &&
-    isObject(data.results) &&
-    isNumber((data.results as Record<string, unknown>).A) &&
-    isNumber((data.results as Record<string, unknown>).B) &&
-    isNumber(data.timestamp)
-  )
-}
-
-export function isPollEndedMessage(data: unknown): data is PollEndedMessage {
-  if (!isObject(data)) return false
-  return (
-    data.type === 'poll-ended' &&
-    isString(data.pollId) &&
+    validChoices.includes(data.choice as PollChoice) &&
+    isString(data.keynoteId) &&
     isNumber(data.timestamp)
   )
 }

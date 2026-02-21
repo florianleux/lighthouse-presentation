@@ -1,297 +1,178 @@
 import Ably from 'ably'
 import { ref, shallowRef } from 'vue'
 import { ABLY_CHANNELS } from '../../../shared/constants'
-import type {
-  OutgoingMessage,
-  AvatarCreatedMessage,
-  VoteCastMessage,
-  PollCastMessage,
-} from '../../../shared/types'
-import {
-  isAvatarCreatedMessage,
-  isVoteCastMessage,
-  isPollCastMessage,
-  validateMessage,
-} from '../../../shared/validators'
+import type { SessionStateMessage, JoinCrewAction, VoteCastAction, PollCastAction } from '../../../shared/types'
+import { isJoinCrewAction, isVoteCastAction, isPollCastAction } from '../../../shared/validators'
 
-// Connection timeout in milliseconds
 const CONNECTION_TIMEOUT = 15000
-
-// Helper to convert unknown error to Error
-function toError(err: unknown): Error {
-  if (err instanceof Error) return err
-  return new Error(String(err))
-}
 
 type MessageCallback<T> = (message: T) => void
 
 interface AblyState {
   client: Ably.Realtime | null
   isConnected: boolean
-  channels: Map<string, Ably.RealtimeChannel>
 }
 
-// Singleton state to share the connection
-const state = shallowRef<AblyState>({
-  client: null,
-  isConnected: false,
-  channels: new Map(),
-})
+const state = shallowRef<AblyState>({ client: null, isConnected: false })
 
-// Callbacks by message type
-const callbacks = {
-  'avatar-created': [] as MessageCallback<AvatarCreatedMessage>[],
-  'vote-cast': [] as MessageCallback<VoteCastMessage>[],
-  'poll-cast': [] as MessageCallback<PollCastMessage>[],
+// Callbacks by action type
+const actionCallbacks = {
+  'join-crew': [] as MessageCallback<JoinCrewAction>[],
+  'vote-cast': [] as MessageCallback<VoteCastAction>[],
+  'poll-cast': [] as MessageCallback<PollCastAction>[],
 }
 
-// Presence callbacks
 const presenceCallbacks = {
-  'enter': [] as MessageCallback<string>[],
-  'leave': [] as MessageCallback<string>[],
+  enter: [] as MessageCallback<string>[],
+  leave: [] as MessageCallback<string>[],
 }
 
 export function useAbly() {
   const isConnected = ref(state.value.isConnected)
   const error = ref<Error | null>(null)
 
-  /**
-   * Connect to Ably server
-   */
   async function connect(apiKey: string): Promise<void> {
-    if (state.value.client) {
-      console.log('[Ably] Already connected')
-      return
-    }
+    if (state.value.client) return
 
-    try {
-      const client = new Ably.Realtime({
-        key: apiKey,
-        clientId: 'presentation-' + crypto.randomUUID(),
+    const client = new Ably.Realtime({
+      key: apiKey,
+      clientId: 'presentation-' + crypto.randomUUID(),
+    })
+
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Connection timeout')), CONNECTION_TIMEOUT)
+      client.connection.once('connected', () => { clearTimeout(timeout); resolve() })
+      client.connection.once('failed', (stateChange) => {
+        clearTimeout(timeout)
+        reject(new Error(stateChange?.reason?.message || 'Connection failed'))
       })
+    })
 
-      // Connection with timeout
-      const connectionPromise = new Promise<void>((resolve, reject) => {
-        client.connection.on('connected', () => {
-          console.log('[Ably] Connected successfully')
-          state.value = { ...state.value, client, isConnected: true }
-          isConnected.value = true
-          resolve()
+    state.value = { client, isConnected: true }
+    isConnected.value = true
+
+    // Track ongoing connection state
+    client.connection.on((stateChange) => {
+      const connected = stateChange.current === 'connected'
+      isConnected.value = connected
+      state.value = { ...state.value, isConnected: connected }
+    })
+
+    // Subscribe to ACTIONS channel (all incoming actions from vote apps)
+    const actionsChannel = client.channels.get(ABLY_CHANNELS.ACTIONS)
+    actionsChannel.subscribe((message) => {
+      const data = message.data
+      if (isJoinCrewAction(data)) {
+        actionCallbacks['join-crew'].forEach((cb) => {
+          try { cb(data) } catch (err) { console.error('[Ably] Error in join-crew callback:', err) }
         })
-
-        client.connection.on('failed', (err) => {
-          console.error('[Ably] Connection failed', err)
-          error.value = toError(err)
-          reject(toError(err))
+      } else if (isVoteCastAction(data)) {
+        actionCallbacks['vote-cast'].forEach((cb) => {
+          try { cb(data) } catch (err) { console.error('[Ably] Error in vote-cast callback:', err) }
         })
+      } else if (isPollCastAction(data)) {
+        actionCallbacks['poll-cast'].forEach((cb) => {
+          try { cb(data) } catch (err) { console.error('[Ably] Error in poll-cast callback:', err) }
+        })
+      }
+    })
+
+    // Presence on SESSION channel (vote apps enter presence here)
+    const sessionChannel = client.channels.get(ABLY_CHANNELS.SESSION)
+    sessionChannel.presence.subscribe('enter', (member) => {
+      presenceCallbacks.enter.forEach((cb) => {
+        try { cb(member.clientId) } catch (err) { console.error('[Ably] Error in presence-enter:', err) }
       })
-
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`Connection timeout after ${CONNECTION_TIMEOUT}ms`))
-        }, CONNECTION_TIMEOUT)
+    })
+    sessionChannel.presence.subscribe('leave', (member) => {
+      presenceCallbacks.leave.forEach((cb) => {
+        try { cb(member.clientId) } catch (err) { console.error('[Ably] Error in presence-leave:', err) }
       })
+    })
 
-      await Promise.race([connectionPromise, timeoutPromise])
-
-      // Setup listeners on incoming channels
-      setupIncomingChannels()
-    } catch (err) {
-      console.error('[Ably] Connection error', err)
-      error.value = toError(err)
-      throw toError(err)
-    }
+    console.log('[Ably] Connected and subscribed to channels')
   }
 
   /**
-   * Configure listeners on incoming channels
+   * Publish session state to the SESSION channel.
    */
-  function setupIncomingChannels() {
+  async function publish(data: SessionStateMessage): Promise<void> {
     const { client } = state.value
     if (!client) return
-
-    // Channel AVATARS
-    const avatarsChannel = client.channels.get(ABLY_CHANNELS.AVATARS)
-    avatarsChannel.subscribe((message) => {
-      const data = validateMessage(message.data, isAvatarCreatedMessage, 'avatar-created')
-      if (data) {
-        console.log('[Ably] Avatar created:', data)
-        callbacks['avatar-created'].forEach((cb) => {
-          try {
-            cb(data)
-          } catch (err) {
-            console.error('[Ably] Error in avatar-created callback:', err)
-          }
-        })
-      }
-    })
-    state.value.channels.set(ABLY_CHANNELS.AVATARS, avatarsChannel)
-
-    // Channel VOTES (handles both vote-cast and poll-cast)
-    const votesChannel = client.channels.get(ABLY_CHANNELS.VOTES)
-    votesChannel.subscribe((message) => {
-      const rawData = message.data
-      if (isVoteCastMessage(rawData)) {
-        console.log('[Ably] Vote cast:', rawData)
-        callbacks['vote-cast'].forEach((cb) => {
-          try {
-            cb(rawData)
-          } catch (err) {
-            console.error('[Ably] Error in vote-cast callback:', err)
-          }
-        })
-      } else if (isPollCastMessage(rawData)) {
-        console.log('[Ably] Poll cast:', rawData)
-        callbacks['poll-cast'].forEach((cb) => {
-          try {
-            cb(rawData)
-          } catch (err) {
-            console.error('[Ably] Error in poll-cast callback:', err)
-          }
-        })
-      } else {
-        console.warn('[Ably] Invalid vote/poll message:', rawData)
-      }
-    })
-    state.value.channels.set(ABLY_CHANNELS.VOTES, votesChannel)
-
-    // Presence channel - track active voters
-    const presenceChannel = client.channels.get(ABLY_CHANNELS.PRESENCE)
-    presenceChannel.presence.subscribe('enter', (member) => {
-      const participantId = member.clientId
-      console.log('[Ably] Presence enter:', participantId)
-      presenceCallbacks['enter'].forEach((cb) => {
-        try { cb(participantId) } catch (err) {
-          console.error('[Ably] Error in presence-enter callback:', err)
-        }
-      })
-    })
-    presenceChannel.presence.subscribe('leave', (member) => {
-      const participantId = member.clientId
-      console.log('[Ably] Presence leave:', participantId)
-      presenceCallbacks['leave'].forEach((cb) => {
-        try { cb(participantId) } catch (err) {
-          console.error('[Ably] Error in presence-leave callback:', err)
-        }
-      })
-    })
-    state.value.channels.set(ABLY_CHANNELS.PRESENCE, presenceChannel)
-
-    console.log('[Ably] Subscribed to incoming channels and presence')
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
+    await channel.publish('message', data)
   }
 
-  /**
-   * Publish a message to a channel
-   */
-  async function publish(channel: string, data: OutgoingMessage): Promise<void> {
-    const { client } = state.value
-    if (!client) {
-      console.warn('[Ably] Cannot publish - not connected')
-      return
-    }
-
-    let ch = state.value.channels.get(channel)
-    if (!ch) {
-      ch = client.channels.get(channel)
-      state.value.channels.set(channel, ch)
-    }
-
-    await ch.publish('message', data)
-    console.log(`[Ably] Published to ${channel}:`, data.type)
-  }
-
-  /**
-   * Subscribe to a message type
-   */
-  function onAvatarCreated(callback: MessageCallback<AvatarCreatedMessage>): () => void {
-    callbacks['avatar-created'].push(callback)
+  // Action subscriptions
+  function onJoinCrew(callback: MessageCallback<JoinCrewAction>): () => void {
+    actionCallbacks['join-crew'].push(callback)
     return () => {
-      const idx = callbacks['avatar-created'].indexOf(callback)
-      if (idx > -1) callbacks['avatar-created'].splice(idx, 1)
+      const idx = actionCallbacks['join-crew'].indexOf(callback)
+      if (idx > -1) actionCallbacks['join-crew'].splice(idx, 1)
     }
   }
 
-  function onVoteCast(callback: MessageCallback<VoteCastMessage>): () => void {
-    callbacks['vote-cast'].push(callback)
+  function onVoteCast(callback: MessageCallback<VoteCastAction>): () => void {
+    actionCallbacks['vote-cast'].push(callback)
     return () => {
-      const idx = callbacks['vote-cast'].indexOf(callback)
-      if (idx > -1) callbacks['vote-cast'].splice(idx, 1)
+      const idx = actionCallbacks['vote-cast'].indexOf(callback)
+      if (idx > -1) actionCallbacks['vote-cast'].splice(idx, 1)
     }
   }
 
-  function onPollCast(callback: MessageCallback<PollCastMessage>): () => void {
-    callbacks['poll-cast'].push(callback)
+  function onPollCast(callback: MessageCallback<PollCastAction>): () => void {
+    actionCallbacks['poll-cast'].push(callback)
     return () => {
-      const idx = callbacks['poll-cast'].indexOf(callback)
-      if (idx > -1) callbacks['poll-cast'].splice(idx, 1)
+      const idx = actionCallbacks['poll-cast'].indexOf(callback)
+      if (idx > -1) actionCallbacks['poll-cast'].splice(idx, 1)
     }
   }
 
+  // Presence subscriptions
   function onPresenceEnter(callback: MessageCallback<string>): () => void {
-    presenceCallbacks['enter'].push(callback)
+    presenceCallbacks.enter.push(callback)
     return () => {
-      const idx = presenceCallbacks['enter'].indexOf(callback)
-      if (idx > -1) presenceCallbacks['enter'].splice(idx, 1)
+      const idx = presenceCallbacks.enter.indexOf(callback)
+      if (idx > -1) presenceCallbacks.enter.splice(idx, 1)
     }
   }
 
   function onPresenceLeave(callback: MessageCallback<string>): () => void {
-    presenceCallbacks['leave'].push(callback)
+    presenceCallbacks.leave.push(callback)
     return () => {
-      const idx = presenceCallbacks['leave'].indexOf(callback)
-      if (idx > -1) presenceCallbacks['leave'].splice(idx, 1)
+      const idx = presenceCallbacks.leave.indexOf(callback)
+      if (idx > -1) presenceCallbacks.leave.splice(idx, 1)
     }
   }
 
-  /**
-   * Get current presence members (for initial sync)
-   */
   async function getPresenceMembers(): Promise<string[]> {
     const { client } = state.value
     if (!client) return []
-    const channel = client.channels.get(ABLY_CHANNELS.PRESENCE)
+    const channel = client.channels.get(ABLY_CHANNELS.SESSION)
     const members = await channel.presence.get()
-    return members.map(m => m.clientId)
+    return members.map((m) => m.clientId)
   }
 
-  /**
-   * Disconnect from Ably
-   */
   function disconnect() {
     const { client } = state.value
     if (client) {
       client.close()
-      state.value = {
-        client: null,
-        isConnected: false,
-        channels: new Map(),
-      }
+      state.value = { client: null, isConnected: false }
       isConnected.value = false
-      console.log('[Ably] Disconnected')
     }
   }
 
   return {
-    // State
     isConnected,
     error,
-
-    // Actions
     connect,
     publish,
     disconnect,
-
-    // Subscriptions
-    onAvatarCreated,
+    onJoinCrew,
     onVoteCast,
     onPollCast,
-
-    // Presence
     onPresenceEnter,
     onPresenceLeave,
     getPresenceMembers,
-
-    // Channels constants (for convenience)
-    CHANNELS: ABLY_CHANNELS,
   }
 }

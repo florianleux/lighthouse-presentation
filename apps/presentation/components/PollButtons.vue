@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { useNav } from '@slidev/client'
-import { sessionStore, getAbly, registerPollSlide, publishSessionState } from '../setup/main'
-import { ABLY_CHANNELS, POLL_CONFIG } from '../../../shared/constants'
-import type { PollStartedMessage, PollEndedMessage } from '../../../shared/types'
+import { sessionStore, currentPhase, phaseData, currentPollId, publishSessionState } from '../setup/main'
+import { POLL_CONFIG } from '../../../shared/constants'
 
 const props = defineProps<{
   pollId: string
 }>()
-
-const { currentSlideNo } = useNav()
 
 // Is this poll currently active?
 const isPollActive = computed(() =>
@@ -23,18 +19,16 @@ const results = computed(() => sessionStore.pollResults[props.pollId] || {
   captain: []
 })
 
-// Timer - use shared constants for consistency
+// Timer (internal to presentation only)
 const POLL_DURATION = POLL_CONFIG.DURATION_SECONDS
 const GRACE_PERIOD = POLL_CONFIG.GRACE_PERIOD_SECONDS
-const TIME_SYNC_INTERVAL = POLL_CONFIG.TIME_SYNC_INTERVAL_SECONDS
 const timeRemaining = ref(0)
 const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let graceTimeout: ReturnType<typeof setTimeout> | null = null
-let timeSyncInterval: ReturnType<typeof setInterval> | null = null
 
 function startTimer() {
-  clearTimer() // Clear any existing timer first
+  clearTimer()
   timeRemaining.value = POLL_DURATION
   isInGracePeriod.value = false
   timerInterval = setInterval(() => {
@@ -42,12 +36,6 @@ function startTimer() {
     if (timeRemaining.value <= 0) {
       clearInterval(timerInterval!)
       timerInterval = null
-      // Stop time sync during grace period
-      if (timeSyncInterval) {
-        clearInterval(timeSyncInterval)
-        timeSyncInterval = null
-      }
-      // Start grace period - keep accepting votes for a few more seconds
       isInGracePeriod.value = true
       console.log('[PollButtons] Timer ended, grace period started')
       graceTimeout = setTimeout(() => {
@@ -56,11 +44,6 @@ function startTimer() {
       }, GRACE_PERIOD * 1000)
     }
   }, 1000)
-
-  // Start periodic time sync to keep vote apps synchronized
-  timeSyncInterval = setInterval(() => {
-    publishTimeSync()
-  }, TIME_SYNC_INTERVAL * 1000)
 }
 
 function clearTimer() {
@@ -72,26 +55,7 @@ function clearTimer() {
     clearTimeout(graceTimeout)
     graceTimeout = null
   }
-  if (timeSyncInterval) {
-    clearInterval(timeSyncInterval)
-    timeSyncInterval = null
-  }
   isInGracePeriod.value = false
-}
-
-// Publish time sync message to keep vote apps synchronized
-async function publishTimeSync() {
-  const ably = getAbly()
-  if (ably && timeRemaining.value > 0) {
-    const message: PollStartedMessage = {
-      type: 'poll-started',
-      pollId: props.pollId,
-      duration: timeRemaining.value,
-      timestamp: Date.now()
-    }
-    await ably.publish(ABLY_CHANNELS.SESSION, message)
-    console.log('[PollButtons] Time sync published:', timeRemaining.value, 'seconds remaining')
-  }
 }
 
 // Keyboard shortcut: V to start poll
@@ -102,57 +66,51 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  registerPollSlide(currentSlideNo.value, props.pollId)
+  currentPollId.value = props.pollId
+  // Publish so vote apps know we're on a poll slide
+  publishSessionState()
   window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   clearTimer()
+  currentPollId.value = null
   window.removeEventListener('keydown', handleKeydown)
 })
 
-// Start poll session
-async function startPollSession() {
+function startPollSession() {
   sessionStore.activePollId = props.pollId
   sessionStore.pollPhase = 'polling'
-  sessionStore.pollStartTimestamp = Date.now()
   startTimer()
 
-  const ably = getAbly()
-  if (ably) {
-    const message: PollStartedMessage = {
-      type: 'poll-started',
-      pollId: props.pollId,
-      duration: POLL_DURATION,
-      timestamp: Date.now()
-    }
-    await ably.publish(ABLY_CHANNELS.SESSION, message)
-    console.log('[PollButtons] Poll session started for', props.pollId)
-  }
+  // Tell vote apps we're in polling phase
+  currentPhase.value = 'polling'
+  phaseData.value = { poll: { id: props.pollId } }
+  publishSessionState()
 
-  // Publish enriched session state so vote apps get pollContext
-  publishSessionState(currentSlideNo.value)
+  console.log('[PollButtons] Poll session started for', props.pollId)
 }
 
-// Stop poll session
-async function stopPollSession() {
+function stopPollSession() {
   clearTimer()
   sessionStore.pollPhase = 'ended'
 
-  // Publish PollEndedMessage so vote apps show "Poll closed!"
-  const ably = getAbly()
-  if (ably) {
-    const message: PollEndedMessage = {
-      type: 'poll-ended',
-      pollId: props.pollId,
-      timestamp: Date.now(),
-    }
-    await ably.publish(ABLY_CHANNELS.SESSION, message)
-    console.log('[PollButtons] Poll ended published for', props.pollId)
+  // Compute results
+  const r = results.value
+  const pollResults: Record<string, number> = {
+    cabin_boy: r.cabin_boy.length,
+    quartermaster: r.quartermaster.length,
+    captain: r.captain.length,
   }
 
-  // Publish enriched session state with pollContext.pollPhase = 'ended'
-  publishSessionState(currentSlideNo.value)
+  // Tell vote apps poll is over
+  currentPhase.value = 'poll-results'
+  phaseData.value = {
+    pollResult: { id: props.pollId, results: pollResults }
+  }
+  publishSessionState()
+
+  console.log('[PollButtons] Poll ended for', props.pollId)
 }
 </script>
 

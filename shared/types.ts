@@ -35,119 +35,63 @@ export interface CrewMember {
 }
 
 // ===========================================
-// INCOMING Messages (vote app → presentation)
+// Session state (presentation → vote apps)
 // ===========================================
 
-export interface AvatarCreatedMessage {
-  type: 'avatar-created'
-  keynoteId: string
-  participantId: string
-  name: string
-  avatar: Avatar | null
-  timestamp: number
-}
-
-export interface VoteCastMessage {
-  type: 'vote-cast'
-  keynoteId: string
-  participantId: string
-  voteIndex: number
-  choice: 'A' | 'B'
-  timestamp: number
-}
-
-// Poll types
-export type PollChoice = 'cabin_boy' | 'quartermaster' | 'captain'
-
-export interface PollCastMessage {
-  type: 'poll-cast'
-  keynoteId: string
-  participantId: string
-  pollId: string
-  choice: PollChoice
-  timestamp: number
-}
-
-// ===========================================
-// OUTGOING Messages (presentation → vote app)
-// ===========================================
-
-export interface VoteContext {
-  voteIndex: number
-  votePhase: 'pending' | 'voting' | 'ended'
-  winner?: 'A' | 'B'
-  resultsA?: number
-  resultsB?: number
-  duration?: number         // Vote duration in seconds (when voting)
-  startTimestamp?: number   // When the vote started (when voting)
-}
-
-export interface PollContext {
-  pollId: string
-  pollPhase: 'pending' | 'polling' | 'ended'
-  duration?: number         // Poll duration in seconds (when polling)
-  startTimestamp?: number   // When the poll started (when polling)
-}
+export type SessionPhase = 'lobby' | 'idle' | 'voting' | 'vote-results' | 'polling' | 'poll-results'
 
 export interface SessionStateMessage {
   type: 'session-state'
-  keynoteId: string | null
-  sessionId: string
-  currentSlide: number
-  path: (string | null)[]
+  keynoteId: string
+  phase: SessionPhase
+  // Present only when phase === 'voting'
+  vote?: { index: number }
+  // Present only when phase === 'vote-results'
+  voteResult?: { index: number; winner: 'A' | 'B'; countA: number; countB: number }
+  // Present only when phase === 'polling'
+  poll?: { id: string }
+  // Present only when phase === 'poll-results'
+  pollResult?: { id: string; results: Record<string, number> }
   timestamp: number
-  // Enriched fields for vote app screen state (optional for backward compat)
-  slideType?: 'vote' | 'poll' | 'other'
-  voteContext?: VoteContext | null
-  pollContext?: PollContext | null
 }
 
-export interface VoteStartedMessage {
-  type: 'vote-started'
+// ===========================================
+// Actions (vote app → presentation)
+// ===========================================
+
+export interface JoinCrewAction {
+  type: 'join-crew'
+  participantId: string
+  name: string
+  avatar: string // JSON serialized PirateAvatar
+  keynoteId: string
+  timestamp: number
+}
+
+export interface VoteCastAction {
+  type: 'vote-cast'
+  participantId: string
   voteIndex: number
-  duration: number // in seconds
+  choice: 'A' | 'B'
+  keynoteId: string
   timestamp: number
 }
 
-export interface VoteEndedMessage {
-  type: 'vote-ended'
-  voteIndex: number
-  winner: 'A' | 'B'
-  results: { A: number; B: number }
-  timestamp: number
-}
+export type PollChoice = 'cabin_boy' | 'quartermaster' | 'captain'
 
-export interface PollStartedMessage {
-  type: 'poll-started'
+export interface PollCastAction {
+  type: 'poll-cast'
+  participantId: string
   pollId: string
-  duration: number // in seconds
+  choice: PollChoice
+  keynoteId: string
   timestamp: number
 }
 
-export interface PollEndedMessage {
-  type: 'poll-ended'
-  pollId: string
-  timestamp: number
-}
+export type ActionMessage = JoinCrewAction | VoteCastAction | PollCastAction
 
 // ===========================================
-// Union types for strict typing
-// ===========================================
-
-export type IncomingMessage =
-  | AvatarCreatedMessage
-  | VoteCastMessage
-  | PollCastMessage
-
-export type OutgoingMessage =
-  | SessionStateMessage
-  | VoteStartedMessage
-  | VoteEndedMessage
-  | PollStartedMessage
-  | PollEndedMessage
-
-// ===========================================
-// Session state (stored locally)
+// Session state (stored locally by presentation)
 // ===========================================
 
 export interface VoteResults {
@@ -161,4 +105,3 @@ export interface PollResults {
   quartermaster: string[]
   captain: string[]
 }
-
