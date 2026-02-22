@@ -1,5 +1,5 @@
 // ===========================================
-// Shared types for Ably communication
+// Shared types for Lighthouse Pirates
 // ===========================================
 
 // ===========================================
@@ -56,39 +56,58 @@ export interface SessionStateMessage {
 }
 
 // ===========================================
-// Actions (vote app → presentation)
+// Poll choice type
 // ===========================================
 
-export interface JoinCrewAction {
-  type: 'join-crew'
-  participantId: string
+export type PollChoice = 'cabin_boy' | 'captain' | 'admiral'
+
+// ===========================================
+// Firestore document types
+// ===========================================
+
+export interface FirestoreConfig {
+  activePresentationId: string | null
+}
+
+export interface FirestorePresentation {
+  keynoteId: string
+  createdAt: number
+  active: boolean
+  phase: SessionPhase
+  vote?: { index: number }
+  voteResult?: { index: number; winner: 'A' | 'B'; countA: number; countB: number }
+  poll?: { id: string }
+  pollResult?: { id: string; results: Record<string, number> }
+}
+
+export interface FirestoreParticipant {
   name: string
-  avatar: string // JSON serialized PirateAvatar
-  keynoteId: string
-  timestamp: number
+  avatar: string
+  createdAt: number
 }
 
-export interface VoteCastAction {
-  type: 'vote-cast'
-  participantId: string
-  voteIndex: number
+export interface FirestoreVote {
+  status: 'open' | 'closed'
+  startTime: number
+  closedAt?: number
+  result?: { winner: 'A' | 'B'; counts: { A: number; B: number }; total: number }
+}
+
+export interface FirestoreBallot {
   choice: 'A' | 'B'
-  keynoteId: string
-  timestamp: number
+  votedAt: number
 }
 
-export type PollChoice = 'cabin_boy' | 'quartermaster' | 'captain'
+export interface FirestorePoll {
+  status: 'open' | 'closed'
+  startTime: number
+  closedAt?: number
+}
 
-export interface PollCastAction {
-  type: 'poll-cast'
-  participantId: string
-  pollId: string
+export interface FirestorePollResponse {
   choice: PollChoice
-  keynoteId: string
-  timestamp: number
+  respondedAt: number
 }
-
-export type ActionMessage = JoinCrewAction | VoteCastAction | PollCastAction
 
 // ===========================================
 // Session state (stored locally by presentation)
@@ -102,6 +121,6 @@ export interface VoteResults {
 
 export interface PollResults {
   cabin_boy: string[]
-  quartermaster: string[]
   captain: string[]
+  admiral: string[]
 }

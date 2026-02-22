@@ -7,7 +7,7 @@ import { sessionStore, publishSessionState } from './setup/main'
 
 const { currentSlideNo } = useNav()
 
-// Track slide changes
+// Track slide changes and publish state to Firestore
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
     sessionStore.updateLastSlide(slide)
@@ -16,56 +16,6 @@ watch(currentSlideNo, (slide) => {
 })
 
 const showAdminPanel = ref(false)
-
-// Session state broadcast (heartbeat every 3s for late joiners / reconnecting phones)
-let broadcastInterval: ReturnType<typeof setInterval> | null = null
-let countdownInterval: ReturnType<typeof setInterval> | null = null
-const joinSessionRemaining = ref(0)
-
-function startBroadcast() {
-  if (broadcastInterval) return
-  broadcastInterval = setInterval(() => {
-    if (sessionStore.keynoteId) {
-      publishSessionState()
-    }
-  }, 3000)
-}
-
-function stopBroadcast() {
-  if (broadcastInterval) {
-    clearInterval(broadcastInterval)
-    broadcastInterval = null
-  }
-}
-
-function stopCountdown() {
-  if (countdownInterval) {
-    clearInterval(countdownInterval)
-    countdownInterval = null
-  }
-  joinSessionRemaining.value = 0
-}
-
-function handleStartJoinSession(durationMinutes: number) {
-  stopBroadcast()
-  stopCountdown()
-
-  joinSessionRemaining.value = durationMinutes * 60
-  countdownInterval = setInterval(() => {
-    joinSessionRemaining.value--
-    if (joinSessionRemaining.value <= 0) {
-      stopBroadcast()
-      stopCountdown()
-    }
-  }, 1000)
-
-  startBroadcast()
-  publishSessionState()
-}
-
-function handleSendHeartbeat() {
-  publishSessionState()
-}
 
 function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'k' || e.key === 'K') {
@@ -83,8 +33,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
-  stopBroadcast()
-  stopCountdown()
 })
 </script>
 
@@ -92,9 +40,6 @@ onUnmounted(() => {
   <CrewPills :current-slide="currentSlideNo" />
   <AdminPanel
     :visible="showAdminPanel"
-    :join-session-remaining="joinSessionRemaining"
     @close="showAdminPanel = false"
-    @start-join-session="handleStartJoinSession"
-    @send-heartbeat="handleSendHeartbeat"
   />
 </template>

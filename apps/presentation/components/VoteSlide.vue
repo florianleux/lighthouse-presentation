@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, currentPhase, phaseData, currentVoteIndex, publishSessionState } from '../setup/main'
+import { sessionStore, voteStore, currentPhase, phaseData, currentVoteIndex, firestore, publishSessionState } from '../setup/main'
 import { getVoteProps } from '../../../shared/metrics-data'
 import { VOTE_CONFIG } from '../../../shared/constants'
 
@@ -18,8 +18,6 @@ const { next } = useNav()
 
 onMounted(() => {
   currentVoteIndex.value = voteIndex.value
-  // Publish so vote apps know we're on a vote slide
-  publishSessionState()
   window.addEventListener('keydown', handleKeydown)
 })
 
@@ -37,6 +35,7 @@ function applyVote(choice: 'A' | 'B') {
   voteStore.vote(voteIndex.value, choice)
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
+  firestore.stopListeningToBallots()
   currentPhase.value = 'idle'
   phaseData.value = {}
   publishSessionState()
@@ -118,10 +117,15 @@ function startVoteSession() {
   sessionStore.votePhase = 'voting'
   startTimer()
 
-  // Tell vote apps we're in voting phase
+  // Update session phase
   currentPhase.value = 'voting'
   phaseData.value = { vote: { index: voteIndex.value } }
-  publishSessionState()
+
+  // Firestore: open vote and listen for ballots
+  firestore.openVote(voteIndex.value, VOTE_DURATION)
+  firestore.listenToBallots(voteIndex.value, (participantId, choice) => {
+    sessionStore.recordVote(participantId, voteIndex.value, choice)
+  })
 
   console.log('[VoteSlide] Vote session started for vote', voteIndex.value)
 }
@@ -129,6 +133,7 @@ function startVoteSession() {
 function stopVoteSession() {
   clearTimer()
   sessionStore.votePhase = 'ended'
+  firestore.stopListeningToBallots()
 
   // Compute results
   const r = sessionStore.voteResults[voteIndex.value]
@@ -136,12 +141,18 @@ function stopVoteSession() {
   const countB = r?.B.length ?? 0
   const w: 'A' | 'B' = countB > countA ? 'B' : 'A'
 
-  // Tell vote apps vote is over
+  // Update session phase
   currentPhase.value = 'vote-results'
   phaseData.value = {
     voteResult: { index: voteIndex.value, winner: w, countA, countB }
   }
-  publishSessionState()
+
+  // Firestore: close vote with results
+  firestore.closeVote(voteIndex.value, {
+    winner: w,
+    counts: { A: countA, B: countB },
+    total: countA + countB,
+  })
 
   console.log('[VoteSlide] Vote ended for vote', voteIndex.value)
 }

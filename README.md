@@ -14,8 +14,8 @@ lighthouse-presentation/
 │   ├── presentation/         # Projected slides (HTML/CSS/JS)
 │   └── vote/                 # Mobile voting app (HTML/CSS/JS)
 ├── shared/
-│   ├── types.ts              # Ably message types
-│   ├── constants.ts          # Channels, session states
+│   ├── types.ts              # Shared message types
+│   ├── constants.ts          # Config, session states
 │   └── avatars/              # Pirate avatar generation
 └── pnpm-workspace.yaml
 ```
@@ -23,7 +23,7 @@ lighthouse-presentation/
 ## Tech Stack
 
 - **Frontend**: HTML/CSS/JavaScript + Tailwind CSS
-- **Real-time**: Ably WebSockets
+- **Real-time**: Firebase Firestore
 - **Deployment**: Netlify (2 sites)
 
 ## Development

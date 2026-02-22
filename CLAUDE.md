@@ -10,8 +10,9 @@ lighthouse-presentation/
 │   ├── presentation/         # Site projeté en salle
 │   └── vote/                 # App mobile participants
 ├── shared/
-│   ├── types.ts              # Types Ably, avatars
-│   ├── constants.ts          # Channels, états de session
+│   ├── types.ts              # Types partagés, Firestore, avatars
+│   ├── constants.ts          # Config Firestore, états de session
+│   ├── firebase.ts           # Initialisation Firebase
 │   └── avatars/              # Système d'avatars
 ├── pnpm-workspace.yaml
 └── package.json

@@ -2,13 +2,16 @@
 // Shared constants for Lighthouse Pirates
 // ===========================================
 
-// Ably Channels (2 channels only)
-export const ABLY_CHANNELS = {
-  // Session state heartbeat (presentation → vote apps)
-  SESSION: 'lighthouse:session',
-
-  // User actions: join, vote, poll (vote apps → presentation)
-  ACTIONS: 'lighthouse:actions',
+// Firestore collection paths
+export const FIRESTORE_COLLECTIONS = {
+  CONFIG: 'config',
+  CONFIG_CURRENT: 'config/current',
+  PRESENTATIONS: 'presentations',
+  PARTICIPANTS: 'participants',
+  VOTES: 'votes',
+  BALLOTS: 'ballots',
+  POLLS: 'polls',
+  RESPONSES: 'responses',
 } as const
 
 // Vote configuration
@@ -22,7 +25,7 @@ export const POLL_CONFIG = {
   DURATION_SECONDS: 20,
   GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: 'knowledge-level',
-  CHOICES: ['cabin_boy', 'quartermaster', 'captain'] as const,
+  CHOICES: ['cabin_boy', 'captain', 'admiral'] as const,
 } as const
 
 // Performance metrics - Re-exported from centralized metrics-data.ts

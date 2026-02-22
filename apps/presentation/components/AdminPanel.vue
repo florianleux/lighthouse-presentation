@@ -1,45 +1,42 @@
 <script setup lang="ts">
-import { computed, ref, nextTick } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore } from '../setup/main'
+import { sessionStore, voteStore, firestore } from '../setup/main'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()
 
 const props = defineProps<{
   visible: boolean
-  joinSessionRemaining: number
 }>()
 
 const emit = defineEmits<{
   close: []
-  startJoinSession: [duration: number]
-  sendHeartbeat: []
 }>()
 
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
 const activeCrewCount = computed(() => sessionStore.activeCrew.length)
-const pollResults = computed(() => sessionStore.pollResults['knowledge-level'] || {
-  cabin_boy: [],
-  quartermaster: [],
-  captain: []
+const pollResults = computed(() => {
+  const raw = sessionStore.pollResults['knowledge-level']
+  return {
+    cabin_boy: raw?.cabin_boy ?? [],
+    captain: raw?.captain ?? [],
+    admiral: raw?.admiral ?? [],
+  }
 })
 
 const totalPollVotes = computed(() =>
   pollResults.value.cabin_boy.length +
-  pollResults.value.quartermaster.length +
-  pollResults.value.captain.length
+  pollResults.value.captain.length +
+  pollResults.value.admiral.length
 )
 
 const isPollDone = computed(() => sessionStore.pollPhase === 'ended')
+const isFirestoreConnected = computed(() => firestore.isConnected.value)
 
 // Get vote names from metrics data (CLS, FCP, LCP, TBT, SI)
 const voteNames = METRICS_LIST.map(m => m.name)
-
-// Join session controls
-const selectedDuration = ref(5)
-const isJoinSessionActive = computed(() => props.joinSessionRemaining > 0)
 
 async function startNewSession() {
   if (confirm('Start a new session? This will reset the crew and all votes.')) {
@@ -49,8 +46,8 @@ async function startNewSession() {
     // Wait for panel to close before resetting
     await nextTick()
 
-    // Reset session
-    sessionStore.startNewSession()
+    // Reset session (await Firestore doc creation before navigating)
+    await sessionStore.startNewSession()
 
     // Navigate to slide 1 (this will trigger publishSessionState via the watch in global-top)
     go(1)
@@ -97,34 +94,18 @@ async function startNewSession() {
               </p>
             </div>
 
-            <!-- Join Session Section -->
+            <!-- Connection Status -->
             <div class="section">
-              <label>Join Session</label>
-              <div class="join-controls">
-                <input
-                  v-model.number="selectedDuration"
-                  type="number"
-                  min="1"
-                  max="60"
-                  :disabled="isJoinSessionActive"
-                  class="duration-input"
-                />
-                <span class="duration-unit">min</span>
-                <button
-                  class="panel-btn primary"
-                  :disabled="!keynoteId || isJoinSessionActive"
-                  @click="emit('startJoinSession', selectedDuration)"
-                >
-                  {{ isJoinSessionActive ? `${joinSessionRemaining}s` : 'Start' }}
-                </button>
+              <label>Connection</label>
+              <div class="connection-status">
+                <span
+                  class="connection-dot"
+                  :class="isFirestoreConnected ? 'connected' : 'disconnected'"
+                ></span>
+                <span class="connection-label">
+                  Firestore: {{ isFirestoreConnected ? 'Connected' : 'Offline' }}
+                </span>
               </div>
-              <button
-                class="panel-btn secondary full-width"
-                :disabled="!keynoteId"
-                @click="emit('sendHeartbeat')"
-              >
-                Sync Session State
-              </button>
             </div>
 
             <!-- Crew Section -->
@@ -332,32 +313,32 @@ async function startNewSession() {
   margin-left: 8px;
 }
 
-.join-controls {
+.connection-status {
   display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
   align-items: center;
-}
-
-.duration-input {
-  width: 60px;
+  gap: 8px;
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
-  color: white;
-  font-size: 14px;
-  text-align: center;
 }
 
-.duration-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
 
-.duration-unit {
+.connection-dot.connected {
+  background: #22c55e;
+}
+
+.connection-dot.disconnected {
+  background: #ef4444;
+}
+
+.connection-label {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .panel-btn {

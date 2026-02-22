@@ -1,13 +1,12 @@
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
-import { useAbly } from '../composables/useAbly'
 import { STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
+import { useFirestore } from '../composables/useFirestore'
 import type {
   CrewMember,
   VoteResults,
   PollResults,
   PollChoice,
-  SessionStateMessage,
   SessionPhase,
 } from '../../../shared/types'
 
@@ -24,7 +23,24 @@ export const debugMode = isDebugMode()
 // ===========================================
 
 export const currentPhase = ref<SessionPhase>('lobby')
-export const phaseData = ref<Partial<SessionStateMessage>>({})
+export const phaseData = ref<Record<string, unknown>>({})
+
+// Firestore instance (singleton)
+export const firestore = useFirestore()
+
+// Publish session state to Firestore (called by components on phase changes)
+export function publishSessionState() {
+  firestore.publishSessionState(currentPhase.value, phaseData.value)
+}
+
+// Setup Firestore listeners for a given presentation
+function setupFirestoreListeners() {
+  if (!firestore.isConnected.value || !sessionStore.keynoteId) return
+
+  firestore.listenToParticipants((member) => {
+    sessionStore.addCrewMember(member)
+  })
+}
 
 // Track which slide type is active (for CrewPills visibility)
 export const currentVoteIndex = ref<number | null>(null)
@@ -99,7 +115,7 @@ export const sessionStore = reactive({
   createdAt: initialSessionData?.createdAt ?? null as number | null,
   lastSlide: initialSessionData?.lastSlide ?? 1,
   sessionId: generateSessionId(),
-  isAblyConnected: false,
+  isRealtimeConnected: false,
 
   // Crew
   crew: (initialSessionData?.crew ?? []) as CrewMember[],
@@ -120,7 +136,7 @@ export const sessionStore = reactive({
 
   // Poll results
   pollResults: (initialSessionData?.pollResults ?? {
-    [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
+    [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], captain: [], admiral: [] },
   }) as Record<string, PollResults>,
 
   // Internal poll state (for PollButtons timer)
@@ -155,12 +171,12 @@ export const sessionStore = reactive({
   recordPollVote(participantId: string, pollId: string, choice: PollChoice) {
     let results = this.pollResults[pollId]
     if (!results) {
-      results = { cabin_boy: [], quartermaster: [], captain: [] }
+      results = { cabin_boy: [], captain: [], admiral: [] }
       this.pollResults[pollId] = results
     }
     if (results.cabin_boy.includes(participantId) ||
-        results.quartermaster.includes(participantId) ||
-        results.captain.includes(participantId)) return
+        results.captain.includes(participantId) ||
+        results.admiral.includes(participantId)) return
     results[choice].push(participantId)
     persistSession()
   },
@@ -199,7 +215,7 @@ export const sessionStore = reactive({
     this.activeVoteIndex = null
     this.votePhase = 'waiting'
     this.pollResults = {
-      [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], quartermaster: [], captain: [] },
+      [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], captain: [], admiral: [] },
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
@@ -211,7 +227,7 @@ export const sessionStore = reactive({
     currentPollId.value = null
   },
 
-  startNewSession() {
+  async startNewSession() {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
     }
@@ -221,15 +237,31 @@ export const sessionStore = reactive({
     this.lastSlide = 1
     this.resetSession()
     persistSession()
+
+    // Create Firestore presentation document
+    firestore.disconnect()
+    const connected = firestore.connect()
+    if (connected && this.keynoteId) {
+      await firestore.createPresentation(this.keynoteId, this.keynoteId)
+      setupFirestoreListeners()
+    }
+
     console.log('[Session] New session started:', this.keynoteId)
   },
 
-  initKeynote() {
+  async initKeynote() {
     if (this.keynoteId) return this.keynoteId
     this.keynoteId = generateKeynoteId()
     this.createdAt = Date.now()
     this.lastSlide = 1
     persistSession()
+
+    // Create Firestore presentation document
+    if (firestore.isConnected.value && this.keynoteId) {
+      await firestore.createPresentation(this.keynoteId, this.keynoteId)
+      setupFirestoreListeners()
+    }
+
     console.log('[Session] Keynote initialized:', this.keynoteId)
     return this.keynoteId
   },
@@ -249,91 +281,31 @@ function persistSession() {
 }
 
 // ===========================================
-// Ably setup
+// App setup
 // ===========================================
-
-let ablyInstance: ReturnType<typeof useAbly> | null = null
-
-export function getAbly() {
-  return ablyInstance
-}
 
 export default defineAppSetup(({ app }) => {
   if (debugMode) {
     console.log('[Debug] Debug mode enabled - manual vote mode active')
   }
 
+  // Connect to Firestore
+  const connected = firestore.connect()
+  sessionStore.isRealtimeConnected = connected
+
+  // Sync connection status
+  watch(firestore.isConnected, (val) => {
+    sessionStore.isRealtimeConnected = val
+  })
+
+  // Restore existing session or initialize a new one
+  if (connected && sessionStore.keynoteId) {
+    // Restored from localStorage — reconnect to the same Firestore presentation
+    firestore.setPresentationId(sessionStore.keynoteId)
+    setupFirestoreListeners()
+    console.log('[Session] Restored session:', sessionStore.keynoteId)
+  }
+
   app.provide('voteStore', voteStore)
   app.provide('sessionStore', sessionStore)
-
-  const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
-
-  if (apiKey) {
-    ablyInstance = useAbly()
-
-    ablyInstance.connect(apiKey)
-      .then(() => {
-        sessionStore.isAblyConnected = true
-        console.log('[Session] Ably connected')
-
-        // Listen for crew joins
-        ablyInstance!.onJoinCrew((msg) => {
-          if (msg.keynoteId !== sessionStore.keynoteId) return
-          sessionStore.addCrewMember({
-            participantId: msg.participantId,
-            name: msg.name,
-            avatar: msg.avatar,
-            joinedAt: msg.timestamp,
-          })
-        })
-
-        // Listen for votes
-        ablyInstance!.onVoteCast((msg) => {
-          if (msg.keynoteId !== sessionStore.keynoteId) return
-          sessionStore.recordVote(msg.participantId, msg.voteIndex, msg.choice)
-        })
-
-        // Listen for polls
-        ablyInstance!.onPollCast((msg) => {
-          if (msg.keynoteId !== sessionStore.keynoteId) return
-          sessionStore.recordPollVote(msg.participantId, msg.pollId, msg.choice)
-        })
-
-        // Track active crew via presence
-        ablyInstance!.onPresenceEnter((participantId) => {
-          sessionStore.updateActiveCrew(participantId)
-        })
-        ablyInstance!.onPresenceLeave((participantId) => {
-          sessionStore.removeActiveCrew(participantId)
-        })
-
-        // Sync current presence members
-        ablyInstance!.getPresenceMembers().then((members) => {
-          members.forEach((id) => sessionStore.updateActiveCrew(id))
-        })
-      })
-      .catch((err) => {
-        console.error('[Session] Failed to connect to Ably:', err)
-      })
-  } else {
-    console.warn('[Session] VITE_ABLY_API_KEY not set - running in offline mode')
-  }
 })
-
-// ===========================================
-// Publish session state (called by global-top + components)
-// ===========================================
-
-export function publishSessionState() {
-  if (!ablyInstance || !sessionStore.isAblyConnected || !sessionStore.keynoteId) return
-
-  const message: SessionStateMessage = {
-    type: 'session-state',
-    keynoteId: sessionStore.keynoteId,
-    phase: currentPhase.value,
-    ...phaseData.value,
-    timestamp: Date.now(),
-  }
-
-  ablyInstance.publish(message)
-}

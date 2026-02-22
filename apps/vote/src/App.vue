@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useAbly } from './composables/useAbly'
+import { ref, computed, onMounted } from 'vue'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
+import { useFirestore } from './composables/useFirestore'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
+
+const { isConnected: firestoreConnected, connect, onSessionState, registerParticipant, submitVote, submitPoll } = useFirestore()
 
 // ===========================================
 // Persistence helpers
@@ -44,15 +46,18 @@ function saveVotesData(votes: PersistedVotes) {
   try { localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(votes)) } catch {}
 }
 
-// ===========================================
-// Ably
-// ===========================================
-
-const { isConnected, connect, onSessionState, publishAction, getParticipantId, reconnect } = useAbly()
+function getOrCreateParticipantId(): string {
+  const savedCrew = loadCrew()
+  if (savedCrew?.participantId) return savedCrew.participantId
+  return 'pirate-' + crypto.randomUUID()
+}
 
 // ===========================================
 // State
 // ===========================================
+
+const isConnected = firestoreConnected
+const participantId = ref(getOrCreateParticipantId())
 
 const status = ref<'connecting' | 'waiting' | 'error' | 'idle' | 'joining' | 'joined'>('connecting')
 const currentStep = ref<'name' | 'avatar'>('name')
@@ -69,13 +74,6 @@ const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
 const isSubmitting = ref(false)
-
-// Re-announce flag (once per keynoteId)
-let hasReannounced = false
-
-// Timers
-let waitingTimeout: ReturnType<typeof setTimeout> | null = null
-let unsubscribe: (() => void) | null = null
 
 // ===========================================
 // Computed
@@ -109,25 +107,29 @@ const validationMessage = computed(() => {
 const canGoNext = computed(() => isValid.value && keynoteId.value !== null)
 
 // ===========================================
-// Session state handler
+// Session state handler (called by Firestore onSnapshot listener)
 // ===========================================
 
 function handleSessionState(msg: SessionStateMessage) {
   sessionState.value = msg
 
-  // Clear waiting timeout
-  if (waitingTimeout) {
-    clearTimeout(waitingTimeout)
-    waitingTimeout = null
-  }
+  const isNewKeynote = msg.keynoteId !== keynoteId.value
 
-  // Keynote change: reset voted rounds
-  if (msg.keynoteId !== keynoteId.value) {
+  // Keynote change: reset everything — user must rejoin
+  if (isNewKeynote) {
     keynoteId.value = msg.keynoteId
-    hasReannounced = false
     votedRounds.value = []
     polledIds.value = []
     saveVotesData({ keynoteId: msg.keynoteId, votedRounds: [], polledIds: [] })
+    // Clear crew — force re-creation
+    try { localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER) } catch {}
+    joinedName.value = ''
+    selectedAvatar.value = null
+    name.value = ''
+    currentStep.value = 'name'
+    participantId.value = getOrCreateParticipantId()
+    status.value = 'idle'
+    return
   }
 
   // First session state: transition from connecting/waiting
@@ -139,23 +141,6 @@ function handleSessionState(msg: SessionStateMessage) {
       status.value = 'joined'
     } else {
       status.value = 'idle'
-    }
-  }
-
-  // Re-announce to presentation (once per keynoteId)
-  if (status.value === 'joined' && !hasReannounced && keynoteId.value) {
-    hasReannounced = true
-    const savedCrew = loadCrew()
-    const pid = getParticipantId()
-    if (savedCrew && pid) {
-      publishAction({
-        type: 'join-crew',
-        participantId: pid,
-        name: savedCrew.name,
-        avatar: savedCrew.avatar,
-        keynoteId: keynoteId.value,
-        timestamp: Date.now(),
-      }).catch((err) => console.error('[App] Failed to re-announce:', err))
     }
   }
 }
@@ -174,7 +159,7 @@ function handleBack() {
 }
 
 // ===========================================
-// Join crew
+// Join crew (local only — Firestore write will be added in Phase 3)
 // ===========================================
 
 async function handleJoin(avatar: string) {
@@ -182,24 +167,16 @@ async function handleJoin(avatar: string) {
   status.value = 'joining'
   selectedAvatar.value = avatar
 
-  const pid = getParticipantId()
+  const pid = participantId.value
   if (!pid || !keynoteId.value) {
     status.value = 'error'
     return
   }
 
   try {
-    await publishAction({
-      type: 'join-crew',
-      participantId: pid,
-      name: name.value.trim(),
-      avatar,
-      keynoteId: keynoteId.value,
-      timestamp: Date.now(),
-    })
+    await registerParticipant(pid, name.value.trim(), avatar)
     joinedName.value = name.value.trim()
     status.value = 'joined'
-    hasReannounced = true
     saveCrew({ participantId: pid, name: name.value.trim(), avatar })
   } catch (err) {
     console.error('Failed to join crew:', err)
@@ -208,26 +185,16 @@ async function handleJoin(avatar: string) {
 }
 
 // ===========================================
-// Vote
+// Vote (local only — Firestore write will be added in Phase 3)
 // ===========================================
 
 async function handleVote(choice: 'A' | 'B') {
   const vote = sessionState.value?.vote
   if (!vote || hasVotedThisRound.value || isSubmitting.value || !keynoteId.value) return
 
-  const pid = getParticipantId()
-  if (!pid) return
-
   isSubmitting.value = true
   try {
-    await publishAction({
-      type: 'vote-cast',
-      participantId: pid,
-      voteIndex: vote.index,
-      choice,
-      keynoteId: keynoteId.value,
-      timestamp: Date.now(),
-    })
+    await submitVote(vote.index, participantId.value, choice)
     votedRounds.value = [...votedRounds.value, vote.index]
     saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
@@ -238,26 +205,16 @@ async function handleVote(choice: 'A' | 'B') {
 }
 
 // ===========================================
-// Poll
+// Poll (local only — Firestore write will be added in Phase 3)
 // ===========================================
 
 async function handlePoll(choice: PollChoice) {
   const poll = sessionState.value?.poll
   if (!poll || hasPolledThisRound.value || isSubmitting.value || !keynoteId.value) return
 
-  const pid = getParticipantId()
-  if (!pid) return
-
   isSubmitting.value = true
   try {
-    await publishAction({
-      type: 'poll-cast',
-      participantId: pid,
-      pollId: poll.id,
-      choice,
-      keynoteId: keynoteId.value,
-      timestamp: Date.now(),
-    })
+    await submitPoll(poll.id, participantId.value, choice)
     polledIds.value = [...polledIds.value, poll.id]
     saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
@@ -268,67 +225,33 @@ async function handlePoll(choice: PollChoice) {
 }
 
 // ===========================================
-// Visibility change (force reconnect on unlock)
-// ===========================================
-
-function handleVisibilityChange() {
-  if (!document.hidden) {
-    reconnect()
-  }
-}
-
-// ===========================================
 // Lifecycle
 // ===========================================
 
 onMounted(async () => {
-  const apiKey = import.meta.env.VITE_ABLY_API_KEY as string
-  if (!apiKey) {
-    status.value = 'error'
-    console.error('VITE_ABLY_API_KEY not set')
-    return
-  }
-
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
 
-  try {
-    await connect(apiKey, savedCrew?.participantId)
-
-    // Subscribe to session state
-    unsubscribe = onSessionState(handleSessionState)
-
-    // Restore display data immediately (before session-state arrives)
-    if (savedCrew) {
-      joinedName.value = savedCrew.name
-      selectedAvatar.value = savedCrew.avatar
-    }
-
-    // Restore voted rounds (keynoteId validation happens in handleSessionState)
-    if (savedVotes) {
-      keynoteId.value = savedVotes.keynoteId
-      votedRounds.value = savedVotes.votedRounds
-      polledIds.value = savedVotes.polledIds
-    }
-
-    // Show "waiting" if no session-state arrives within 5s
-    waitingTimeout = setTimeout(() => {
-      if (status.value === 'connecting') {
-        status.value = 'waiting'
-      }
-    }, 5000)
-  } catch (err) {
-    console.error('Failed to connect:', err)
-    status.value = 'error'
+  // Restore display data
+  if (savedCrew) {
+    joinedName.value = savedCrew.name
+    selectedAvatar.value = savedCrew.avatar
   }
 
-  document.addEventListener('visibilitychange', handleVisibilityChange)
-})
+  // Restore voted rounds
+  if (savedVotes) {
+    keynoteId.value = savedVotes.keynoteId
+    votedRounds.value = savedVotes.votedRounds
+    polledIds.value = savedVotes.polledIds
+  }
 
-onBeforeUnmount(() => {
-  unsubscribe?.()
-  if (waitingTimeout) clearTimeout(waitingTimeout)
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  // Connect to Firestore
+  const connected = connect()
+  if (connected) {
+    onSessionState(handleSessionState)
+  } else {
+    status.value = 'waiting'
+  }
 })
 </script>
 
@@ -455,20 +378,20 @@ onBeforeUnmount(() => {
             <span class="poll-label">Cabin Boy</span>
           </button>
           <button
-            class="poll-btn poll-quarter"
-            @click="handlePoll('quartermaster')"
-            :disabled="isSubmitting"
-          >
-            <span class="poll-emoji">⚓</span>
-            <span class="poll-label">Quartermaster</span>
-          </button>
-          <button
             class="poll-btn poll-captain"
             @click="handlePoll('captain')"
             :disabled="isSubmitting"
           >
-            <span class="poll-emoji">🏴‍☠️</span>
+            <span class="poll-emoji">⚓</span>
             <span class="poll-label">Captain</span>
+          </button>
+          <button
+            class="poll-btn poll-admiral"
+            @click="handlePoll('admiral')"
+            :disabled="isSubmitting"
+          >
+            <span class="poll-emoji">🏴‍☠️</span>
+            <span class="poll-label">Admiral</span>
           </button>
         </div>
         <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
@@ -885,19 +808,19 @@ input::placeholder {
   background: #3b82f6;
 }
 
-.poll-quarter {
+.poll-captain {
   border-color: #f59e0b;
 }
 
-.poll-quarter:hover:not(:disabled) {
+.poll-captain:hover:not(:disabled) {
   background: #f59e0b;
 }
 
-.poll-captain {
+.poll-admiral {
   border-color: #a855f7;
 }
 
-.poll-captain:hover:not(:disabled) {
+.poll-admiral:hover:not(:disabled) {
   background: #a855f7;
 }
 

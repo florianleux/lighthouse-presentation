@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { sessionStore, currentPhase, phaseData, currentPollId, publishSessionState } from '../setup/main'
+import { sessionStore, currentPhase, phaseData, currentPollId, firestore } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
 const props = defineProps<{
@@ -12,11 +12,14 @@ const isPollActive = computed(() =>
   sessionStore.pollPhase === 'polling' && sessionStore.activePollId === props.pollId
 )
 
-// Poll results for this poll
-const results = computed(() => sessionStore.pollResults[props.pollId] || {
-  cabin_boy: [],
-  quartermaster: [],
-  captain: []
+// Poll results for this poll (defensive: handle old localStorage data with renamed keys)
+const results = computed(() => {
+  const raw = sessionStore.pollResults[props.pollId]
+  return {
+    cabin_boy: raw?.cabin_boy ?? [],
+    captain: raw?.captain ?? [],
+    admiral: raw?.admiral ?? [],
+  }
 })
 
 // Timer (internal to presentation only)
@@ -67,8 +70,6 @@ function handleKeydown(e: KeyboardEvent) {
 
 onMounted(() => {
   currentPollId.value = props.pollId
-  // Publish so vote apps know we're on a poll slide
-  publishSessionState()
   window.addEventListener('keydown', handleKeydown)
 })
 
@@ -83,10 +84,15 @@ function startPollSession() {
   sessionStore.pollPhase = 'polling'
   startTimer()
 
-  // Tell vote apps we're in polling phase
+  // Update session phase
   currentPhase.value = 'polling'
   phaseData.value = { poll: { id: props.pollId } }
-  publishSessionState()
+
+  // Firestore: open poll and listen for responses
+  firestore.openPoll(props.pollId, POLL_DURATION)
+  firestore.listenToPollResponses(props.pollId, (participantId, choice) => {
+    sessionStore.recordPollVote(participantId, props.pollId, choice)
+  })
 
   console.log('[PollButtons] Poll session started for', props.pollId)
 }
@@ -94,21 +100,24 @@ function startPollSession() {
 function stopPollSession() {
   clearTimer()
   sessionStore.pollPhase = 'ended'
+  firestore.stopListeningToPollResponses()
 
   // Compute results
   const r = results.value
   const pollResults: Record<string, number> = {
     cabin_boy: r.cabin_boy.length,
-    quartermaster: r.quartermaster.length,
     captain: r.captain.length,
+    admiral: r.admiral.length,
   }
 
-  // Tell vote apps poll is over
+  // Update session phase
   currentPhase.value = 'poll-results'
   phaseData.value = {
     pollResult: { id: props.pollId, results: pollResults }
   }
-  publishSessionState()
+
+  // Firestore: close poll with results
+  firestore.closePoll(props.pollId, pollResults)
 
   console.log('[PollButtons] Poll ended for', props.pollId)
 }
@@ -120,10 +129,10 @@ function stopPollSession() {
       <div class="text-4xl font-bold font-title">{{ results.cabin_boy.length }}</div>
     </div>
     <div class="absolute top-[88%] left-[54%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title ">{{ results.quartermaster.length }}</div>
+      <div class="text-4xl font-bold font-title ">{{ results.captain.length }}</div>
     </div>
     <div class="absolute top-[87.6%] left-[86.4%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title">{{ results.captain.length }}</div>
+      <div class="text-4xl font-bold font-title">{{ results.admiral.length }}</div>
     </div>
 
     <button
