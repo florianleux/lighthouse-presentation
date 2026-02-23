@@ -54,22 +54,14 @@ const isVoteActive = computed(() =>
   sessionStore.votePhase === 'voting' && sessionStore.activeVoteIndex === voteIndex.value
 )
 
-const results = computed(() => sessionStore.voteResults[voteIndex.value])
-
 const isVoteEnded = computed(() =>
   sessionStore.votePhase === 'ended' && sessionStore.activeVoteIndex === voteIndex.value
 )
 
-const winner = computed<'A' | 'B'>(() => {
-  const aCount = results.value.A.length
-  const bCount = results.value.B.length
-  return bCount > aCount ? 'B' : 'A'
-})
-
 // Timer (internal to presentation only - no sync to vote apps)
 const VOTE_DURATION = VOTE_CONFIG.DURATION_SECONDS
 const GRACE_PERIOD = VOTE_CONFIG.GRACE_PERIOD_SECONDS
-const timeRemaining = ref(30)
+const timeRemaining = ref(VOTE_DURATION)
 const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let graceTimeout: ReturnType<typeof setTimeout> | null = null
@@ -141,6 +133,10 @@ function stopVoteSession() {
   const countB = r?.B.length ?? 0
   const w: 'A' | 'B' = countB > countA ? 'B' : 'A'
 
+  // Record winner immediately so WinnerDisplay works regardless of navigation method
+  if (r) r.winner = w
+  voteStore.vote(voteIndex.value, w)
+
   // Update session phase
   currentPhase.value = 'vote-results'
   phaseData.value = {
@@ -153,12 +149,16 @@ function stopVoteSession() {
     counts: { A: countA, B: countB },
     total: countA + countB,
   })
-
-  console.log('[VoteSlide] Vote ended for vote', voteIndex.value)
 }
 
 function continueWithWinner() {
-  applyVote(winner.value)
+  // Winner already recorded in stopVoteSession, just navigate
+  sessionStore.votePhase = 'waiting'
+  sessionStore.activeVoteIndex = null
+  currentPhase.value = 'idle'
+  phaseData.value = {}
+  publishSessionState()
+  next()
 }
 </script>
 

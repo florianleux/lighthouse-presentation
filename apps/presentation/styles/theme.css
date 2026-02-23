@@ -16,7 +16,16 @@
 
 
 
-/* Fond général */
+/* Fond général — prevent white flash during long transitions */
+html,
+body,
+#app,
+#slide-container,
+.slidev-slides,
+.slidev-slide-container {
+  background: #d1bfa6 !important;
+}
+
 .slidev-layout {
   background: transparent;
   font-family: var(--font-body);
@@ -33,6 +42,9 @@
   background-size: cover;
   background-position: center;
   padding: 2rem;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Slide background with quadrant system (200% 200%) */
@@ -41,6 +53,9 @@
   inset: 0;
   background-size: 200% 200%;
   padding: 2rem;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Fonts utilities */

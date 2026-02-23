@@ -75,13 +75,19 @@ const hasVotes = computed(() => totalVotes.value > 0)
     </div>
 
 
-    <div class=" absolute bottom-[11%] left-[6%] text-option-a text-center">
+    <div class=" absolute bottom-[10%] -translate-x-1/2 left-[11%] text-option-a text-center">
       <div class="font-title text-6xl">{{ hasVotes ? percentageA + '%' : '-' }}</div>
-      <div v-if="hasVotes" class="-mt-2 text-xl">{{ countA }} votes</div>
+      <div
+        v-if="hasVotes"
+        class="-mt-2 text-xl"
+      >{{ countA }} votes</div>
     </div>
-    <div class="absolute bottom-[11%] right-[6%] text-option-b text-center">
+    <div class="absolute bottom-[10%] right-[11%] translate-x-1/2 text-option-b text-center">
       <div class="font-title text-6xl">{{ hasVotes ? percentageB + '%' : '-' }}</div>
-      <div v-if="hasVotes" class="-mt-2 text-xl">{{ countB }} votes</div>
+      <div
+        v-if="hasVotes"
+        class="-mt-2 text-xl"
+      >{{ countB }} votes</div>
     </div>
   </div>
 

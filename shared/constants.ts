@@ -16,13 +16,13 @@ export const FIRESTORE_COLLECTIONS = {
 
 // Vote configuration
 export const VOTE_CONFIG = {
-  DURATION_SECONDS: 30,
+  DURATION_SECONDS: 45,
   GRACE_PERIOD_SECONDS: 3,
 } as const
 
 // Poll configuration
 export const POLL_CONFIG = {
-  DURATION_SECONDS: 20,
+  DURATION_SECONDS: 45,
   GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: 'knowledge-level',
   CHOICES: ['cabin_boy', 'captain', 'admiral'] as const,
