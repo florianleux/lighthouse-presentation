@@ -15,6 +15,8 @@ import {
   collection,
   setDoc,
   updateDoc,
+  deleteDoc,
+  getDocs,
   onSnapshot,
   type Unsubscribe,
   type Firestore,
@@ -55,6 +57,51 @@ function disconnect() {
 }
 
 // ---- Session ----
+
+async function deleteAllPresentations(excludeId?: string): Promise<void> {
+  if (!db) return
+
+  try {
+    const presCollRef = collection(db, FIRESTORE_COLLECTIONS.PRESENTATIONS)
+    const allPres = await getDocs(presCollRef)
+    const toDelete = allPres.docs.filter(d => d.id !== excludeId)
+
+    for (const presDoc of toDelete) {
+      const presBase = [FIRESTORE_COLLECTIONS.PRESENTATIONS, presDoc.id] as const
+
+      // Delete participants
+      const participantsSnap = await getDocs(collection(db!, ...presBase, FIRESTORE_COLLECTIONS.PARTICIPANTS))
+      await Promise.all(participantsSnap.docs.map(d => deleteDoc(d.ref)))
+
+      // Delete ballots for each vote, then the vote doc
+      for (let i = 0; i < 5; i++) {
+        const voteId = `vote_${i}`
+        const ballotsSnap = await getDocs(
+          collection(db!, ...presBase, FIRESTORE_COLLECTIONS.VOTES, voteId, FIRESTORE_COLLECTIONS.BALLOTS)
+        )
+        await Promise.all(ballotsSnap.docs.map(d => deleteDoc(d.ref)))
+        await deleteDoc(doc(db!, ...presBase, FIRESTORE_COLLECTIONS.VOTES, voteId)).catch(() => {})
+      }
+
+      // Delete poll responses, then the poll doc
+      const pollsSnap = await getDocs(collection(db!, ...presBase, FIRESTORE_COLLECTIONS.POLLS))
+      for (const pollDoc of pollsSnap.docs) {
+        const responsesSnap = await getDocs(
+          collection(db!, ...presBase, FIRESTORE_COLLECTIONS.POLLS, pollDoc.id, FIRESTORE_COLLECTIONS.RESPONSES)
+        )
+        await Promise.all(responsesSnap.docs.map(d => deleteDoc(d.ref)))
+        await deleteDoc(pollDoc.ref)
+      }
+
+      // Delete the presentation doc itself
+      await deleteDoc(presDoc.ref)
+    }
+
+    console.log(`[Firestore] Deleted ${toDelete.length} old presentation(s)`)
+  } catch (err) {
+    console.error('[Firestore] Failed to delete old presentations:', err)
+  }
+}
 
 async function createPresentation(keynoteId: string, sessionId: string): Promise<string | null> {
   if (!db) return null
@@ -489,6 +536,7 @@ export function useFirestore() {
     isConnected,
     connect,
     disconnect,
+    deleteAllPresentations,
     createPresentation,
     setPresentationId,
     getPresentationId,

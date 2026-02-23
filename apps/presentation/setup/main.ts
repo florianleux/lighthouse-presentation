@@ -238,6 +238,8 @@ export const sessionStore = reactive({
     const connected = firestore.connect()
     if (connected && this.keynoteId) {
       await firestore.createPresentation(this.keynoteId, this.keynoteId)
+      // Clean up all old presentations in background (keep only the new one)
+      firestore.deleteAllPresentations(this.keynoteId)
       setupFirestoreListeners()
     }
 

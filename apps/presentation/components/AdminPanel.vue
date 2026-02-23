@@ -125,10 +125,13 @@ async function startNewSession() {
           </div>
 
           <div class="panel-content">
-            <!-- New Session Section -->
+            <!-- Session Info -->
             <div class="section">
+              <label>Session</label>
+              <div class="session-id">{{ keynoteId }}</div>
               <button
                 class="panel-btn danger full-width"
+                style="margin-top: 8px"
                 @click="startNewSession"
               >
                 New Session (Reset All)
@@ -427,6 +430,13 @@ async function startNewSession() {
 .connection-label {
   color: #94a3b8;
   font-size: 13px;
+}
+
+.session-id {
+  font-family: monospace;
+  font-size: 11px;
+  color: #64748b;
+  word-break: break-all;
 }
 
 .panel-btn {

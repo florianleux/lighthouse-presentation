@@ -12,22 +12,22 @@ service cloud.firestore {
     match /presentations/{presentationId} {
       allow read, write: if true;
 
-      // Participants: readable by all, create-only (vote app registers)
+      // Participants: readable by all, create-only (vote app registers), deletable for cleanup
       match /participants/{participantId} {
         allow read: if true;
-        allow create: if true;
-        allow update, delete: if false;
+        allow create, delete: if true;
+        allow update: if false;
       }
 
       // Votes: readable/writable by presentation
       match /votes/{voteId} {
         allow read, write: if true;
 
-        // Ballots: readable by all, create-only (vote app submits)
+        // Ballots: readable by all, create-only (vote app submits), deletable for cleanup
         match /ballots/{participantId} {
           allow read: if true;
-          allow create: if true;
-          allow update, delete: if false;
+          allow create, delete: if true;
+          allow update: if false;
         }
       }
 
@@ -35,11 +35,11 @@ service cloud.firestore {
       match /polls/{pollId} {
         allow read, write: if true;
 
-        // Responses: readable by all, create-only (vote app submits)
+        // Responses: readable by all, create-only (vote app submits), deletable for cleanup
         match /responses/{participantId} {
           allow read: if true;
-          allow create: if true;
-          allow update, delete: if false;
+          allow create, delete: if true;
+          allow update: if false;
         }
       }
     }

@@ -52,8 +52,8 @@ const isVoteActive = computed(() =>
   sessionStore.votePhase === 'voting' && sessionStore.activeVoteIndex === voteIndex.value
 )
 
-const isVoteEnded = computed(() =>
-  sessionStore.votePhase === 'ended' && sessionStore.activeVoteIndex === voteIndex.value
+const isVoteDone = computed(() =>
+  sessionStore.voteResults[voteIndex.value]?.winner !== null
 )
 
 // Timer (internal to presentation only - no sync to vote apps)
@@ -97,7 +97,7 @@ function clearTimer() {
 
 // Keyboard shortcut: V to start vote
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteEnded.value && !sessionStore.manualMode) {
+  if (e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !sessionStore.manualMode) {
     startVoteSession()
   }
 }
@@ -147,16 +147,13 @@ function stopVoteSession() {
     counts: { A: countA, B: countB },
     total: countA + countB,
   })
-}
 
-function continueWithWinner() {
-  // Winner already recorded in stopVoteSession, just navigate
+  // Reset vote state so navigation can proceed normally
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
   currentPhase.value = 'idle'
   phaseData.value = {}
   publishSessionState()
-  next()
 }
 </script>
 
@@ -168,7 +165,7 @@ function continueWithWinner() {
     <VoteCrewScatter
       :vote-index="voteIndex"
       :avatar-size="35"
-      :neutral-zone="{ top: 20, left: 33, right: 35, bottom: 35 }"
+      :neutral-zone="{ top: 20, left: 31, right: 33, bottom: 32 }"
       :zone-a="{ top: 25, left: 3, right: 77, bottom: 30 }"
       :zone-b="{ top: 26, left: 75, right: 6, bottom: 35 }"
     />
@@ -199,11 +196,11 @@ function continueWithWinner() {
 
       <!-- Audience vote control -->
       <button
-        v-if="!sessionStore.manualMode"
+        v-if="!sessionStore.manualMode && !isVoteDone"
         class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
-        @click="isVoteEnded ? continueWithWinner() : isVoteActive ? stopVoteSession() : startVoteSession()"
+        @click="isVoteActive ? stopVoteSession() : startVoteSession()"
       >
-        {{ isVoteEnded ? 'Continue' : isVoteActive ? 'Stop' : 'Start' }}
+        {{ isVoteActive ? 'Stop' : 'Start' }}
       </button>
 
 
@@ -213,7 +210,7 @@ function continueWithWinner() {
 
       <!-- Vote proportion bar -->
       <VoteProportionBar
-        v-if="isVoteActive || isVoteEnded"
+        v-if="isVoteActive || isVoteDone"
         :vote-index="voteIndex"
         :label-a="titleA"
         :label-b="titleB"
