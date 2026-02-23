@@ -2,6 +2,12 @@
 import { computed } from 'vue'
 import { sessionStore } from '../setup/main'
 
+const props = withDefaults(defineProps<{
+  avatarSize?: number
+}>(), {
+  avatarSize: 40,
+})
+
 const crew = computed(() => sessionStore.crew)
 
 // Deterministic hash: maps a string + seed to a number in [0, 1)
@@ -52,7 +58,7 @@ function getPosition(participantId: string, index: number, total: number) {
           class="animate-bounce animate-duration-600"
           :style="{ animationDelay: `${(i * 530) % 1500}ms` }"
           :avatar="member.avatar || ''"
-          :size="40"
+          :size="props.avatarSize"
         />
       </div>
     </TransitionGroup>

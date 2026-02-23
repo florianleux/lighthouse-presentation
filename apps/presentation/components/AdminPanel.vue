@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, firestore } from '../setup/main'
+import { sessionStore, voteStore, firestore, debugMode } from '../setup/main'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()
@@ -51,6 +51,51 @@ const isFirestoreConnected = computed(() => firestore.isConnected.value)
 
 // Get vote names from metrics data (CLS, FCP, LCP, TBT, SI)
 const voteNames = METRICS_LIST.map(m => m.name)
+
+// Simulate fake votes/poll
+const isSimulating = ref(false)
+
+const isVoteActive = computed(() =>
+  sessionStore.votePhase === 'voting' && sessionStore.activeVoteIndex !== null
+)
+
+const isPollActive = computed(() =>
+  sessionStore.pollPhase === 'polling' && sessionStore.activePollId !== null
+)
+
+const canSimulate = computed(() => isVoteActive.value || isPollActive.value)
+
+async function simulateFakeResponses() {
+  if (isSimulating.value || !canSimulate.value) return
+  isSimulating.value = true
+
+  // Get crew participant IDs that haven't voted/polled yet
+  const crewIds = sessionStore.crew.map(m => m.participantId)
+  const maxDurationMs = Math.min(crewIds.length * 200, 20000)
+
+  try {
+    if (isVoteActive.value && sessionStore.activeVoteIndex !== null) {
+      const results = sessionStore.voteResults[sessionStore.activeVoteIndex]
+      const alreadyVoted = new Set([...(results?.A ?? []), ...(results?.B ?? [])])
+      const remaining = crewIds.filter(id => !alreadyVoted.has(id))
+      await firestore.simulateFakeVotes(sessionStore.activeVoteIndex, remaining, maxDurationMs)
+    } else if (isPollActive.value && sessionStore.activePollId !== null) {
+      const pollId = sessionStore.activePollId
+      const results = sessionStore.pollResults[pollId]
+      const alreadyPolled = new Set([
+        ...(results?.cabin_boy ?? []),
+        ...(results?.captain ?? []),
+        ...(results?.admiral ?? []),
+      ])
+      const remaining = crewIds.filter(id => !alreadyPolled.has(id))
+      await firestore.simulateFakePollResponses(pollId, remaining, maxDurationMs)
+    }
+  } catch (err) {
+    console.error('[AdminPanel] Failed to simulate responses:', err)
+  } finally {
+    isSimulating.value = false
+  }
+}
 
 async function startNewSession() {
   if (confirm('Start a new session? This will reset the crew and all votes.')) {
@@ -135,7 +180,7 @@ async function startNewSession() {
                   <span class="stat-label">Active</span>
                 </div>
               </div>
-              <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+              <div v-if="debugMode" style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
                 <input
                   v-model.number="fakeCrewCount"
                   type="number"
@@ -152,6 +197,18 @@ async function startNewSession() {
                   {{ isGenerating ? 'Generating...' : 'Generate fake crew' }}
                 </button>
               </div>
+            </div>
+
+            <!-- Simulate Votes/Poll (debug only) -->
+            <div v-if="debugMode" class="section">
+              <label>Simulate</label>
+              <button
+                class="panel-btn secondary full-width"
+                :disabled="isSimulating || !canSimulate || !isFirestoreConnected"
+                @click="simulateFakeResponses"
+              >
+                {{ isSimulating ? 'Simulating...' : isVoteActive ? 'Simulate crew votes' : isPollActive ? 'Simulate crew poll' : 'No active vote/poll' }}
+              </button>
             </div>
 
             <!-- Votes Section -->

@@ -165,7 +165,14 @@ function continueWithWinner() {
     class="slide-bg relative"
     style="background-image: url('/backgrounds/metric-intro-br.webp');"
   >
-    <CrewScatter />
+    <VoteCrewScatter
+      :vote-index="voteIndex"
+      :avatar-size="35"
+      :neutral-zone="{ top: 20, left: 33, right: 35, bottom: 35 }"
+      :zone-a="{ top: 25, left: 3, right: 77, bottom: 30 }"
+      :zone-b="{ top: 26, left: 75, right: 6, bottom: 35 }"
+    />
+
 
     <div v-if="voteProps">
       <!-- Option blocks -->

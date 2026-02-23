@@ -412,6 +412,76 @@ async function generateFakeParticipants(count: number, spreadMs: number = 0) {
   console.log(`[Firestore] Generated ${count} fake participants over ${spreadMs}ms`)
 }
 
+async function simulateFakeVotes(
+  voteIndex: number,
+  participants: string[],
+  maxDurationMs: number = 20000
+) {
+  if (!db || !presentationId || participants.length === 0) return
+
+  const delay = maxDurationMs / participants.length
+
+  for (let i = 0; i < participants.length; i++) {
+    const choice: 'A' | 'B' = Math.random() > 0.5 ? 'A' : 'B'
+    const ballotRef = doc(
+      db,
+      FIRESTORE_COLLECTIONS.PRESENTATIONS,
+      presentationId,
+      FIRESTORE_COLLECTIONS.VOTES,
+      `vote_${voteIndex}`,
+      FIRESTORE_COLLECTIONS.BALLOTS,
+      participants[i]
+    )
+    setDoc(ballotRef, {
+      choice,
+      votedAt: Date.now(),
+    } satisfies FirestoreBallot)
+
+    if (i < participants.length - 1) {
+      // Random delay between 0 and 2x average to feel natural
+      const jitter = delay * (0.2 + Math.random() * 1.6)
+      await new Promise(resolve => setTimeout(resolve, jitter))
+    }
+  }
+
+  console.log(`[Firestore] Simulated ${participants.length} fake votes for vote_${voteIndex}`)
+}
+
+async function simulateFakePollResponses(
+  pollId: string,
+  participants: string[],
+  maxDurationMs: number = 20000
+) {
+  if (!db || !presentationId || participants.length === 0) return
+
+  const choices: PollChoice[] = ['cabin_boy', 'captain', 'admiral']
+  const delay = maxDurationMs / participants.length
+
+  for (let i = 0; i < participants.length; i++) {
+    const choice = choices[Math.floor(Math.random() * choices.length)]
+    const responseRef = doc(
+      db,
+      FIRESTORE_COLLECTIONS.PRESENTATIONS,
+      presentationId,
+      FIRESTORE_COLLECTIONS.POLLS,
+      pollId,
+      FIRESTORE_COLLECTIONS.RESPONSES,
+      participants[i]
+    )
+    setDoc(responseRef, {
+      choice,
+      respondedAt: Date.now(),
+    } satisfies FirestorePollResponse)
+
+    if (i < participants.length - 1) {
+      const jitter = delay * (0.2 + Math.random() * 1.6)
+      await new Promise(resolve => setTimeout(resolve, jitter))
+    }
+  }
+
+  console.log(`[Firestore] Simulated ${participants.length} fake poll responses for ${pollId}`)
+}
+
 // ---- Export ----
 
 export function useFirestore() {
@@ -433,5 +503,7 @@ export function useFirestore() {
     listenToPollResponses,
     stopListeningToPollResponses,
     generateFakeParticipants,
+    simulateFakeVotes,
+    simulateFakePollResponses,
   }
 }
