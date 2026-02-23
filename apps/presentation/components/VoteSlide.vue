@@ -165,6 +165,8 @@ function continueWithWinner() {
     class="slide-bg relative"
     style="background-image: url('/backgrounds/metric-intro-br.webp');"
   >
+    <CrewScatter />
+
     <div v-if="voteProps">
       <!-- Option blocks -->
 

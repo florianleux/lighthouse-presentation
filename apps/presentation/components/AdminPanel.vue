@@ -17,12 +17,13 @@ const emit = defineEmits<{
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
 const isGenerating = ref(false)
+const fakeCrewCount = ref(25)
 
 async function generateFakeParticipants() {
   if (isGenerating.value) return
   isGenerating.value = true
   try {
-    await firestore.generateFakeParticipants(150)
+    await firestore.generateFakeParticipants(fakeCrewCount.value, 5000)
   } catch (err) {
     console.error('[AdminPanel] Failed to generate fake participants:', err)
   } finally {
@@ -134,14 +135,23 @@ async function startNewSession() {
                   <span class="stat-label">Active</span>
                 </div>
               </div>
-              <button
-                class="panel-btn secondary full-width"
-                style="margin-top: 8px"
-                :disabled="isGenerating || !isFirestoreConnected"
-                @click="generateFakeParticipants"
-              >
-                {{ isGenerating ? 'Generating...' : 'Generate 150 fake crew' }}
-              </button>
+              <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+                <input
+                  v-model.number="fakeCrewCount"
+                  type="number"
+                  min="1"
+                  max="500"
+                  class="crew-count-input"
+                />
+                <button
+                  class="panel-btn secondary"
+                  style="flex: 1"
+                  :disabled="isGenerating || !isFirestoreConnected"
+                  @click="generateFakeParticipants"
+                >
+                  {{ isGenerating ? 'Generating...' : 'Generate fake crew' }}
+                </button>
+              </div>
             </div>
 
             <!-- Votes Section -->
@@ -411,6 +421,17 @@ async function startNewSession() {
 
 .full-width {
   width: 100%;
+}
+
+.crew-count-input {
+  width: 70px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 13px;
+  text-align: center;
 }
 
 /* Toggle switch styles */

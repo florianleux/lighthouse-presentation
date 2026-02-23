@@ -383,11 +383,10 @@ function randomAvatar(): string {
   return JSON.stringify(avatar)
 }
 
-async function generateFakeParticipants(count: number) {
+async function generateFakeParticipants(count: number, spreadMs: number = 0) {
   if (!db || !presentationId) return
 
-  const batch = await import('firebase/firestore').then(m => m.writeBatch)
-  const b = batch(db)
+  const delay = spreadMs > 0 ? spreadMs / count : 0
 
   for (let i = 0; i < count; i++) {
     const id = `fake-${crypto.randomUUID()}`
@@ -399,15 +398,18 @@ async function generateFakeParticipants(count: number) {
       FIRESTORE_COLLECTIONS.PARTICIPANTS,
       id
     )
-    b.set(participantRef, {
+    setDoc(participantRef, {
       name,
       avatar: randomAvatar(),
       createdAt: Date.now() + i,
     } satisfies FirestoreParticipant)
+
+    if (delay > 0 && i < count - 1) {
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
   }
 
-  await b.commit()
-  console.log(`[Firestore] Generated ${count} fake participants`)
+  console.log(`[Firestore] Generated ${count} fake participants over ${spreadMs}ms`)
 }
 
 // ---- Export ----

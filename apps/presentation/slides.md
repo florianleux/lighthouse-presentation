@@ -21,6 +21,7 @@ css: unocss
 <style src="./styles/modals.css"></style>
 
 <div class="slide-bg" style="background-image: url('/backgrounds/intro/1.png')">
+  <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
 
 ---
