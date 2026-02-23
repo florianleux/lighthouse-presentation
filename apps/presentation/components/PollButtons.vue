@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { sessionStore, currentPhase, phaseData, firestore } from '../setup/main'
+import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
 const props = defineProps<{
@@ -91,6 +91,14 @@ function startPollSession() {
   firestore.listenToPollResponses(props.pollId, (participantId, choice) => {
     sessionStore.recordPollVote(participantId, props.pollId, choice)
   })
+
+  // Auto-simulate fake crew poll responses (fire-and-forget)
+  const fakeCrewIds = getFakeCrewIds()
+  if (fakeCrewIds.length > 0) {
+    const maxDurationMs = Math.min(fakeCrewIds.length * 200, 20000)
+    firestore.simulateFakePollResponses(props.pollId, fakeCrewIds, maxDurationMs)
+    console.log(`[PollButtons] Auto-simulating ${fakeCrewIds.length} fake poll responses`)
+  }
 
   console.log('[PollButtons] Poll session started for', props.pollId)
 }

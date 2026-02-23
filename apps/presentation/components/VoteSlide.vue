@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState } from '../setup/main'
+import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
 import { useResolvedMetric } from '../composables/useResolvedMetric'
 
@@ -117,6 +117,14 @@ function startVoteSession() {
   firestore.listenToBallots(voteIndex.value, (participantId, choice) => {
     sessionStore.recordVote(participantId, voteIndex.value, choice)
   })
+
+  // Auto-simulate fake crew votes (fire-and-forget)
+  const fakeCrewIds = getFakeCrewIds()
+  if (fakeCrewIds.length > 0) {
+    const maxDurationMs = Math.min(fakeCrewIds.length * 200, 20000)
+    firestore.simulateFakeVotes(voteIndex.value, fakeCrewIds, maxDurationMs)
+    console.log(`[VoteSlide] Auto-simulating ${fakeCrewIds.length} fake votes`)
+  }
 
   console.log('[VoteSlide] Vote session started for vote', voteIndex.value)
 }

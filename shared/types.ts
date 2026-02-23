@@ -32,6 +32,7 @@ export interface CrewMember {
   name: string
   avatar: Avatar | null
   joinedAt: number
+  isFake?: boolean
 }
 
 // ===========================================
@@ -84,6 +85,7 @@ export interface FirestoreParticipant {
   name: string
   avatar: string
   createdAt: number
+  isFake?: boolean
 }
 
 export interface FirestoreVote {

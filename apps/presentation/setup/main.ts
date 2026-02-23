@@ -277,6 +277,12 @@ function persistSession() {
   })
 }
 
+export function getFakeCrewIds(): string[] {
+  return sessionStore.crew
+    .filter(m => m.isFake)
+    .map(m => m.participantId)
+}
+
 // ===========================================
 // App setup
 // ===========================================

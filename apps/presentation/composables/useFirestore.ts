@@ -203,6 +203,7 @@ function listenToParticipants(callback: (member: CrewMember) => void) {
           name: data.name,
           avatar: data.avatar,
           joinedAt: data.createdAt,
+          isFake: data.isFake ?? false,
         })
       }
     })
@@ -449,6 +450,7 @@ async function generateFakeParticipants(count: number, spreadMs: number = 0) {
       name,
       avatar: randomAvatar(),
       createdAt: Date.now() + i,
+      isFake: true,
     } satisfies FirestoreParticipant)
 
     if (delay > 0 && i < count - 1) {
