@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { voteStore } from '../setup/main'
-import { getVoteData } from '../../../shared/metrics-data'
+import { useResolvedMetric } from '../composables/useResolvedMetric'
 import LighthouseBuilding from './LighthouseBuilding.vue'
 
 const props = defineProps<{
   voteIndex: number
 }>()
 
+const { getResolvedVoteData } = useResolvedMetric()
+
 const choice = computed(() => voteStore.getChoice(props.voteIndex))
 const winner = computed(() => {
   const c = choice.value
   if (!c) return null
-  const voteData = getVoteData(props.voteIndex)
+  const voteData = getResolvedVoteData(props.voteIndex)
   if (!voteData) return null
   return voteData[c as 'A' | 'B']
 })

@@ -2,6 +2,7 @@
 import { computed, defineAsyncComponent, type Component } from 'vue'
 import { voteStore } from '../setup/main'
 import type { MetricName } from '../../../shared/metrics-data'
+import { useResolvedMetric } from '../composables/useResolvedMetric'
 
 const props = defineProps<{
   metric: MetricName
@@ -16,15 +17,18 @@ const metricIndexMap: Record<MetricName, number> = {
   si: 4,
 }
 
+const { resolveSlideSource } = useResolvedMetric()
+
 const winner = computed(() => voteStore.getChoice(metricIndexMap[props.metric]))
 
 const DetailComponent = computed<Component | null>(() => {
   if (!winner.value) return null
   const option = winner.value.toLowerCase() as 'a' | 'b'
+  const source = resolveSlideSource(props.metric, option)
 
   return defineAsyncComponent({
     loader: () =>
-      import(`./metrics/${props.metric}/options/${option}/detail-slides/DetailSlide${props.slideIndex}.vue`),
+      import(`./metrics/${source.metricName}/options/${source.option}/detail-slides/DetailSlide${props.slideIndex}.vue`),
     onError: () => null,
   })
 })

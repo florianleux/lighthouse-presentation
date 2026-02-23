@@ -223,6 +223,56 @@ export const METRICS: MetricsData = {
   },
 }
 
+// ===========================================
+// Derived Options (cross-metric option reuse)
+// ===========================================
+
+/**
+ * Maps a metric option to the loser of a previous vote.
+ * Key format: "metricName:option" (e.g., "lcp:b")
+ * Value: sourceMetricIndex of the vote whose loser provides the content
+ */
+export const DERIVED_OPTIONS: Record<string, { sourceMetricIndex: number }> = {
+  'lcp:b': { sourceMetricIndex: 1 }, // LCP option B = FCP loser
+}
+
+/**
+ * Resolves a potentially derived option to its actual source.
+ * If the option is derived (e.g., LCP:B → FCP loser), returns the source metric/option.
+ * Otherwise returns the original metric/option unchanged.
+ *
+ * @param getWinner - callback to retrieve vote winner ('A'|'B'|null) by metric index
+ */
+export function resolveDerivedOption(
+  metricIndex: number,
+  option: 'a' | 'b',
+  getWinner: (metricIndex: number) => string | null,
+): { metricIndex: number; metricName: MetricName; option: 'a' | 'b' } {
+  const metric = getMetricByIndex(metricIndex)
+  if (!metric) return { metricIndex, metricName: 'cls', option }
+
+  const metricName = metric.name.toLowerCase() as MetricName
+  const key = `${metricName}:${option}`
+  const derived = DERIVED_OPTIONS[key]
+
+  if (!derived) return { metricIndex, metricName, option }
+
+  const sourceWinner = getWinner(derived.sourceMetricIndex)
+  if (!sourceWinner) return { metricIndex, metricName, option }
+
+  const loserOption = sourceWinner === 'A' ? 'b' : 'a'
+  const sourceMetric = getMetricByIndex(derived.sourceMetricIndex)
+  if (!sourceMetric) return { metricIndex, metricName, option }
+
+  const sourceMetricName = sourceMetric.name.toLowerCase() as MetricName
+
+  return {
+    metricIndex: derived.sourceMetricIndex,
+    metricName: sourceMetricName,
+    option: loserOption,
+  }
+}
+
 // Export as array for iteration (maintains order by index)
 export const METRICS_LIST: readonly MetricConfig[] = [
   METRICS.cls,

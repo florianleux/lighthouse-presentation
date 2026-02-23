@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { getChoiceProps } from '../../../shared/metrics-data'
 import { computed } from 'vue'
+import { useResolvedMetric } from '../composables/useResolvedMetric'
 
 const props = defineProps<{
   metricIndex: number
 }>()
 
-const choiceProps = computed(() => getChoiceProps(props.metricIndex))
+const { getResolvedChoiceProps } = useResolvedMetric()
+const choiceProps = computed(() => getResolvedChoiceProps(props.metricIndex))
 </script>
 
 <template>

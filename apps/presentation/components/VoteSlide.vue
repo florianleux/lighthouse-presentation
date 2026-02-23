@@ -2,14 +2,15 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState } from '../setup/main'
-import { getVoteProps } from '../../../shared/metrics-data'
 import { VOTE_CONFIG } from '../../../shared/constants'
+import { useResolvedMetric } from '../composables/useResolvedMetric'
 
 const props = defineProps<{
   metricIndex: number
 }>()
 
-const voteProps = computed(() => getVoteProps(props.metricIndex))
+const { getResolvedVoteProps } = useResolvedMetric()
+const voteProps = computed(() => getResolvedVoteProps(props.metricIndex))
 const voteIndex = computed(() => voteProps.value.voteIndex)
 const titleA = computed(() => voteProps.value.titleA)
 const titleB = computed(() => voteProps.value.titleB)
