@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
-import { sessionStore, currentPhase, phaseData, currentPollId, firestore } from '../setup/main'
+import { sessionStore, currentPhase, phaseData, firestore } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
 const props = defineProps<{
@@ -69,13 +69,11 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  currentPollId.value = props.pollId
   window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   clearTimer()
-  currentPollId.value = null
   window.removeEventListener('keydown', handleKeydown)
 })
 

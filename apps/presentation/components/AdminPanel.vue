@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, firestore } from '../setup/main'
 import { METRICS_LIST } from '../../../shared/metrics-data'
@@ -16,6 +16,19 @@ const emit = defineEmits<{
 
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
+const isGenerating = ref(false)
+
+async function generateFakeParticipants() {
+  if (isGenerating.value) return
+  isGenerating.value = true
+  try {
+    await firestore.generateFakeParticipants(150)
+  } catch (err) {
+    console.error('[AdminPanel] Failed to generate fake participants:', err)
+  } finally {
+    isGenerating.value = false
+  }
+}
 const activeCrewCount = computed(() => sessionStore.activeCrew.length)
 const pollResults = computed(() => {
   const raw = sessionStore.pollResults['knowledge-level']
@@ -121,6 +134,14 @@ async function startNewSession() {
                   <span class="stat-label">Active</span>
                 </div>
               </div>
+              <button
+                class="panel-btn secondary full-width"
+                style="margin-top: 8px"
+                :disabled="isGenerating || !isFirestoreConnected"
+                @click="generateFakeParticipants"
+              >
+                {{ isGenerating ? 'Generating...' : 'Generate 150 fake crew' }}
+              </button>
             </div>
 
             <!-- Votes Section -->

@@ -42,9 +42,6 @@ function setupFirestoreListeners() {
   })
 }
 
-// Track which slide type is active (for CrewPills visibility)
-export const currentVoteIndex = ref<number | null>(null)
-export const currentPollId = ref<string | null>(null)
 
 // ===========================================
 // Session data persistence
@@ -223,8 +220,6 @@ export const sessionStore = reactive({
     voteStore.reset()
     currentPhase.value = 'lobby'
     phaseData.value = {}
-    currentVoteIndex.value = null
-    currentPollId.value = null
   },
 
   async startNewSession() {

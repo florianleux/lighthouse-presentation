@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, currentPhase, phaseData, currentVoteIndex, firestore, publishSessionState } from '../setup/main'
+import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState } from '../setup/main'
 import { getVoteProps } from '../../../shared/metrics-data'
 import { VOTE_CONFIG } from '../../../shared/constants'
 
@@ -17,13 +17,11 @@ const titleB = computed(() => voteProps.value.titleB)
 const { next } = useNav()
 
 onMounted(() => {
-  currentVoteIndex.value = voteIndex.value
   window.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   clearTimer()
-  currentVoteIndex.value = null
   window.removeEventListener('keydown', handleKeydown)
 })
 

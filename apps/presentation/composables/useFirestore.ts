@@ -339,6 +339,77 @@ function stopListeningToPollResponses() {
   }
 }
 
+// ---- Fake participants (debug) ----
+
+const PIRATE_NAMES = [
+  'Blackbeard', 'Red Anne', 'Captain Hook', 'Calico Jack', 'Long John',
+  'Davy Jones', 'Silver Beard', 'One-Eye Pete', 'Mad Mary', 'Iron Will',
+  'Sea Dog', 'Storm Rider', 'Barnacle Bill', 'Salty Sam', 'Coral Kate',
+  'Dread Pirate', 'Gold Tooth', 'Skull Face', 'Rum Runner', 'Wave Walker',
+  'Anchor Al', 'Brig Boss', 'Crow Nell', 'Dark Tide', 'Ember Eve',
+  'Fog Horn', 'Gale Force', 'Harbor Hank', 'Isle Ivy', 'Jolly Roger',
+  'Keel Ken', 'Loot Lucy', 'Mast Mike', 'North Star', 'Oyster Oz',
+  'Plank Pat', 'Quay Quinn', 'Reef Rob', 'Shark Sal', 'Timber Tom',
+]
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+function randomAvatar(): string {
+  const gender: 'male' | 'female' = Math.random() > 0.5 ? 'male' : 'female'
+  const maxAccessories = gender === 'male' ? 4 : 3
+  const accessoryCount = randomInt(0, 2)
+  const allAccessories = Array.from({ length: maxAccessories }, (_, i) => i + 1)
+  const regular: number[] = []
+  for (let i = 0; i < accessoryCount; i++) {
+    const idx = randomInt(0, allAccessories.length - 1)
+    regular.push(allAccessories.splice(idx, 1)[0])
+  }
+
+  const avatar = {
+    gender,
+    skinTone: ['dark', 'mid', 'light'][randomInt(0, 2)],
+    mouth: randomInt(1, 3),
+    eyes: { option: randomInt(1, 3), color: randomInt(1, 4) },
+    nose: randomInt(1, 4),
+    accessories: {
+      regular,
+      eyePatch: Math.random() > 0.8 ? (Math.random() > 0.5 ? 'left' : 'right') : null,
+    },
+    hair: Math.random() > 0.3 ? { option: randomInt(1, 3), color: randomInt(1, 5) } : null,
+    hat: Math.random() > 0.4 ? { option: randomInt(1, 2), color: randomInt(1, 4) } : null,
+  }
+  return JSON.stringify(avatar)
+}
+
+async function generateFakeParticipants(count: number) {
+  if (!db || !presentationId) return
+
+  const batch = await import('firebase/firestore').then(m => m.writeBatch)
+  const b = batch(db)
+
+  for (let i = 0; i < count; i++) {
+    const id = `fake-${crypto.randomUUID()}`
+    const name = PIRATE_NAMES[i % PIRATE_NAMES.length] + (i >= PIRATE_NAMES.length ? ` ${Math.floor(i / PIRATE_NAMES.length) + 1}` : '')
+    const participantRef = doc(
+      db,
+      FIRESTORE_COLLECTIONS.PRESENTATIONS,
+      presentationId,
+      FIRESTORE_COLLECTIONS.PARTICIPANTS,
+      id
+    )
+    b.set(participantRef, {
+      name,
+      avatar: randomAvatar(),
+      createdAt: Date.now() + i,
+    } satisfies FirestoreParticipant)
+  }
+
+  await b.commit()
+  console.log(`[Firestore] Generated ${count} fake participants`)
+}
+
 // ---- Export ----
 
 export function useFirestore() {
@@ -359,5 +430,6 @@ export function useFirestore() {
     closePoll,
     listenToPollResponses,
     stopListeningToPollResponses,
+    generateFakeParticipants,
   }
 }
