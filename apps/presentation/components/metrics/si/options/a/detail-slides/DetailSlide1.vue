@@ -23,7 +23,7 @@ const goodCss = `
       metric="si"
       option="a"
     >
-      <div class="text-center my-5 text-2xl">Deliver styles instantly for visible content</div>
+      <div class="text-center my-5 text-xl">Deliver styles instantly for visible content</div>
 
       <div class="text-4xl text-center font-bold my-7">Inline critical CSS!</div>
 

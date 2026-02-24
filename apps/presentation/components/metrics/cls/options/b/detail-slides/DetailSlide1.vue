@@ -14,7 +14,7 @@ const codeExample = `<div
       metric="cls"
       option="b"
     >
-      <div class="items-center flex-grow justify-center flex mt-5 text-2xl gap-12">
+      <div class="items-center flex-grow justify-center flex mt-5 text-xl gap-12">
         <div>
           Not designed by us
         </div>

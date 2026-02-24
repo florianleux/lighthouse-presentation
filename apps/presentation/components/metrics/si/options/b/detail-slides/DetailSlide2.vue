@@ -25,7 +25,7 @@ const goodFont = `
       metric="si"
       option="b"
     >
-      <div class="text-center text-2xl">Load only the characters you actually use</div>
+      <div class="text-center text-xl">Load only the characters you actually use</div>
 
       <div class="text-4xl text-center font-bold my-6">Subset custom fonts!</div>
 

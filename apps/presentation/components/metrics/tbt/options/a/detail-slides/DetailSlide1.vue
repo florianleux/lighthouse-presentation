@@ -35,7 +35,7 @@ async function initBlackMarket() {
       metric="tbt"
       option="a"
     >
-      <div class="text-center mb-5 text-2xl">Monolithic init blocks the main thread</div>
+      <div class="text-center mb-5 text-xl">Monolithic init blocks the main thread</div>
 
       <div class="text-4xl text-center font-bold my-7">Yield between tasks!</div>
 

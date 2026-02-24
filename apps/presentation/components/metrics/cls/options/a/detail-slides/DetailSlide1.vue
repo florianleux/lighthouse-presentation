@@ -26,7 +26,7 @@ const cssCodeExample = `
       metric="cls"
       option="a"
     >
-      <div class="items-center flex-grow justify-center flex  text-2xl gap-20">
+      <div class="items-center flex-grow justify-center flex  text-xl gap-20">
         <div>
           Images don't have reserved space until loaded
         </div>

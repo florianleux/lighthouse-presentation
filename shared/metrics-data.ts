@@ -161,7 +161,7 @@ export const METRICS: MetricsData = {
       b: {
         title: 'Focus on LCP',
         subtitle: 'Save effort, target smart',
-        keywords: ['Identify', 'Facilitate'],
+        keywords: ['Identify', 'Optimize'],
       },
     },
   },

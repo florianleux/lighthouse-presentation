@@ -11,7 +11,7 @@
       metric="lcp"
       option="b"
     >
-      <div class="text-2xl font-bold text-center mb-10">LCP changes with screen size (and user behavior)</div>
+      <div class="text-xl font-bold text-center mb-10">LCP changes with screen size (and user behavior)</div>
       <div class="text-4xl text-center font-bold">Google judges mobile, users experience both</div>
       <div class="mt-15 grid grid-cols-2 items-center justify-center gap-15">
         <div class="flex flex-col items-center text-center gap-10">

@@ -11,7 +11,7 @@
       metric="si"
       option="a"
     >
-      <div class="text-center text-2xl">One optimized image dominates the viewport</div>
+      <div class="text-center text-xl">One optimized image dominates the viewport</div>
 
       <div class="text-4xl text-center font-bold my-6">Optimize hero as single LCP!</div>
 

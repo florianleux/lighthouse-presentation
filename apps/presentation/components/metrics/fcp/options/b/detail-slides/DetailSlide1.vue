@@ -13,12 +13,12 @@ const jsCodeExample = `document.write()`
       metric="fcp"
       option="b"
     >
-      <div class="absolute text-2xl top-[25%] left-[18%]">
+      <div class="absolute text-xl top-[25%] left-[18%]">
         <span class="i-ph-check-bold inline-block w-6 h-6 -mb-1" />
         HTML
       </div>
 
-      <div class="absolute text-2xl top-[25%] left-[82%]">
+      <div class="absolute text-xl top-[25%] left-[82%]">
         <span class="i-svg-spinners-bars-fade inline-block w- h-6 align-middle mb-1" /> CSS
       </div>
 
@@ -67,7 +67,7 @@ const jsCodeExample = `document.write()`
 
       </div>
 
-      <div class="absolute text-2xl top-[50%] left-[7%]">
+      <div class="absolute text-xl top-[50%] left-[7%]">
         <span class="i-svg-spinners-bars-fade inline-block w- h-6 align-middle " /> JS
       </div>
 
@@ -79,7 +79,7 @@ const jsCodeExample = `document.write()`
       <!-- Parsing HTML -->
       <div
         v-click="2"
-        class="absolute italic text-2xl top-[36%] left-[30%]"
+        class="absolute italic text-xl top-[36%] left-[30%]"
       >
         Parsing
       </div>
@@ -100,14 +100,14 @@ const jsCodeExample = `document.write()`
           class="absolute top-[28%] left-[57%] w-69 h-0.5 bg-black origin-left"
           style="transform: rotate(90deg);"
         ></div>
-        <div class="absolute italic text-2xl top-[49%] left-[59%]">
+        <div class="absolute italic text-xl top-[49%] left-[59%]">
           Rendering
         </div>
       </div>
 
       <div v-click="5">
         <!-- Parsing CSS -->
-        <div class="absolute italic text-2xl top-[36%] left-[73%]">
+        <div class="absolute italic text-xl top-[36%] left-[73%]">
           Parsing
         </div>
         <div class="absolute border border-2 border-black p-2 font-bold text-3xl top-[50%] left-[75%]">
@@ -130,7 +130,7 @@ const jsCodeExample = `document.write()`
           class="absolute top-[55.5%] left-[57%] w-34 h-0.5 bg-black origin-left"
           style="transform: rotate(90deg);"
         ></div>
-        <div class="absolute italic text-2xl top-[65%] left-[59%]">
+        <div class="absolute italic text-xl top-[65%] left-[59%]">
           Rendering
         </div>
 

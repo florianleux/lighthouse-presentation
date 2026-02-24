@@ -30,7 +30,7 @@ const goodDom = `
       metric="tbt"
       option="b"
     >
-      <div class="text-center text-2xl">Fewer nodes = faster calculations</div>
+      <div class="text-center text-xl">Fewer nodes = faster calculations</div>
 
       <div class="text-4xl text-center font-bold my-6">Flatten the tree!</div>
 

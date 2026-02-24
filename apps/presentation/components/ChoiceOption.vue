@@ -33,7 +33,7 @@ defineProps<{
       <div
         v-for="(keyword, index) in keywords"
         :key="index"
-        class="text-2xl text-center p-3"
+        class="text-2xl text-center px-1"
         :class="[
           index === keywords.length - 1 && keywords.length % 2 === 1 ? 'col-span-2' : ''
         ]"

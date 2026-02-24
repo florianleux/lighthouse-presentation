@@ -39,7 +39,7 @@ const htmlImage = `<img
       metric="lcp"
       option="b"
     >
-      <div class="text-2xl font-bold text-center mb-3">Early discovery means early download</div>
+      <div class="text-xl font-bold text-center mb-3">Early discovery means early download</div>
 
       <div class="text-4xl text-center font-bold mb-7">Preload scanner must see the LCP</div>
 

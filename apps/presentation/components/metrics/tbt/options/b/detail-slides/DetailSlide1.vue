@@ -25,7 +25,7 @@ const goodSelector = `
       metric="tbt"
       option="b"
     >
-      <div class="text-center my-5 text-2xl">Complex selectors slow style matching</div>
+      <div class="text-center my-5 text-xl">Complex selectors slow style matching</div>
 
       <div class="text-4xl text-center font-bold my-7">Simplify!</div>
 

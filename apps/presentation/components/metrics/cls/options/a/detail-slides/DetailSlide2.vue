@@ -33,7 +33,7 @@ const preloadCodeExample = `<link
       metric="cls"
       option="a"
     >
-      <div class="items-center flex-grow justify-center flex mt-10 text-2xl gap-20">
+      <div class="items-center flex-grow justify-center flex mt-10 text-xl gap-20">
         <div>
           Flash of unstyled text (FOUT)
         </div>

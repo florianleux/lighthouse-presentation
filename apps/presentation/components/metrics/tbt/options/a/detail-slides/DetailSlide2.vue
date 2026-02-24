@@ -25,7 +25,7 @@ productCards.forEach(card => {
       metric="tbt"
       option="a"
     >
-      <div class="text-center text-2xl">Reading geometry after writing forces recalculation</div>
+      <div class="text-center text-xl">Reading geometry after writing forces recalculation</div>
 
       <div class="text-4xl text-center font-bold my-10">Batch reads, then writes!</div>
 

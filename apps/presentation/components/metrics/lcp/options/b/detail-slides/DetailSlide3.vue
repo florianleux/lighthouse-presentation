@@ -2,7 +2,7 @@
 const highPriority = `
 <img
   src="promo-banner.jpg"
-  fetchpriority="high" 
+  fetchpriority="high"
   alt="Promo Banner"
 />`
 
@@ -12,6 +12,16 @@ const lazyLoading = `
   loading="lazy"
   alt="Red Parrot"
 >`
+
+const nextGenFormats = `
+<picture>
+  <source type="image/avif"
+    srcset="banner.avif" />
+  <source type="image/webp"
+    srcset="banner.webp" />
+  <img src="banner.jpg"
+    alt="Promo Banner" />
+</picture>`
 </script>
 
 <template>
@@ -25,33 +35,35 @@ const lazyLoading = `
       option="b"
     >
 
-      <div class="text-4xl text-center font-bold mb-7">Load LCP first, everything else later</div>
+      <div class="text-4xl text-center font-bold mb-7">Load LCP first, lightest possible</div>
 
-      <div class="text-left grid grid-cols-2  text-center items-top gap-y-10 ">
-        <div class="flex flex-col items-top gap-6">
-          <div class="text-3xl text-center font-bold">Put it on top</div>
+      <div class="text-left grid grid-cols-2 text-center items-top gap-x-6">
+        <div class="flex flex-col items-top gap-2">
+          <div class="text-3xl text-center font-bold">Prioritize it!</div>
 
           <CodeSnippet
-            class="text-left px-15 mt-3"
+            class="text-left px-20"
             language="html"
             :code="highPriority"
-            size="medium"
+            size="tiny"
+          />
+
+          <CodeSnippet
+            class="text-left px-20"
+            language="html"
+            :code="lazyLoading"
+            size="tiny"
           />
 
         </div>
-        <div class="flex flex-col items-top gap-6">
-          <div class="text-3xl text-center font-bold">
-            Put the other down
-            <div class="text-lg -mt-2 text-[#FF2626]">
-              (be careful!)
-            </div>
-          </div>
+        <div class="flex flex-col items-top gap-2">
+          <div class="text-3xl text-center font-bold">Shrink it!</div>
 
           <CodeSnippet
-            class="text-left px-10 -mt-2"
+            class="text-left mt-5 px-10"
             language="html"
-            :code="lazyLoading"
-            size="medium"
+            :code="nextGenFormats"
+            size="small"
           />
 
         </div>

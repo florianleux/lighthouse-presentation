@@ -20,9 +20,9 @@ const noLodashCode = `
       metric="fcp"
       option="b"
     >
-      <div class=" grid grid-cols-3  text-center items-top gap-15">
-        <div class="flex flex-col items-top gap-10">
-          <div class="text-2xl font-bold">Not always relevant anymore</div>
+      <div class=" grid grid-cols-3  text-center items-top gap-20">
+        <div class="flex flex-col items-top gap-5">
+          <div class="text-xl font-bold">Not always relevant anymore</div>
           <div class="text-4xl font-bold">Use native methods!</div>
 
           <div class="text-left">
@@ -40,8 +40,8 @@ const noLodashCode = `
           </div>
 
         </div>
-        <div class="flex flex-col col-span-2 items-center gap-10">
-          <div class="text-2xl font-bold">Probably doesn't need to be blocking</div>
+        <div class="flex flex-col col-span-2 items-center gap-5">
+          <div class="text-xl font-bold">Probably doesn't need to be blocking</div>
           <div class="text-4xl font-bold">Defer or async it!</div>
           <div class="text-left w-full">
             <!-- JavaScript (defer) -->
