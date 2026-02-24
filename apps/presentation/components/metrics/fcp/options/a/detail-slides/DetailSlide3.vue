@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 100% 100%;">
+  <div class="slide-bg" style="background-image: url('/backgrounds/parchment-bottom-right.png');">
     <DetailSlide
       metric="fcp"
       option="a"

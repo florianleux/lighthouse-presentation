@@ -237,10 +237,16 @@ transition: slide-up
 <DetailSlideLoader metric="lcp" :slide-index="1" />
 
 ---
-transition: fade
+transition: slide-left
 ---
 
 <DetailSlideLoader metric="lcp" :slide-index="2" />
+
+---
+transition: fade
+---
+
+<DetailSlideLoader metric="lcp" :slide-index="3" />
 
 ---
 transition: fade

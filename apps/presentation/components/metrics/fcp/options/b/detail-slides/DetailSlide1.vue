@@ -5,8 +5,8 @@ const jsCodeExample = `document.write()`
 <template>
 
   <div
-    class="slide-bg-quadrant"
-    style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 0%;"
+    class="slide-bg"
+    style="background-image: url('/backgrounds/parchment-top-left.png');"
   >
     <DetailSlide
       class="pl-10 pt-5 relative"

@@ -63,17 +63,6 @@ body,
   -webkit-backface-visibility: hidden;
 }
 
-/* Slide background with quadrant system (200% 200%) */
-.slide-bg-quadrant {
-  position: absolute;
-  inset: 0;
-  background-size: 200% 200%;
-  padding: 2rem;
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
 /* Fonts utilities */
 .font-title {
   font-family: var(--font-title);

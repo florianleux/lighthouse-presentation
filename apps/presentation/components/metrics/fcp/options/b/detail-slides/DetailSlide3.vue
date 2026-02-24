@@ -12,8 +12,8 @@ const noLodashCode = `
 
 <template>
   <div
-    class="slide-bg-quadrant"
-    style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 100%;"
+    class="slide-bg"
+    style="background-image: url('/backgrounds/parchment-bottom-left.png');"
   >
     <DetailSlide
       class="pl-10"
@@ -22,7 +22,7 @@ const noLodashCode = `
     >
       <div class=" grid grid-cols-3  text-center items-top gap-15">
         <div class="flex flex-col items-top gap-10">
-          <div class="font-bold">Not always relevant anymore</div>
+          <div class="text-2xl font-bold">Not always relevant anymore</div>
           <div class="text-4xl font-bold">Use native methods!</div>
 
           <div class="text-left">
@@ -41,21 +41,21 @@ const noLodashCode = `
 
         </div>
         <div class="flex flex-col col-span-2 items-center gap-10">
-          <div class=" font-bold">Probably doesn't need to be blocking</div>
+          <div class="text-2xl font-bold">Probably doesn't need to be blocking</div>
           <div class="text-4xl font-bold">Defer or async it!</div>
           <div class="text-left w-full">
             <!-- JavaScript (defer) -->
             <div class="mb-2">
               <div class="text-lg font-bold mb-2">defer</div>
               <div class="grid grid-cols-4 gap-0.5">
-                <!-- Row 1: HTML parsing continu -->
+                <!-- Row 1: HTML parsing continues -->
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
                 <div />
-                <!-- Row 2: Script loading + execution après -->
+                <!-- Row 2: Script loading + execution after -->
                 <div class="col" />
-                <div class="col bg-orange-400 text-white text-xs px-2 py-2 rounded">Script Loading</div>
+                <div class="col bg-orange-400 text-white text-xs px-2 py-2 rounded">Script loading</div>
                 <div></div>
                 <div class="bg-orange-600  text-white text-xs px-2 py-2 rounded">Script execution</div>
               </div>
@@ -64,14 +64,14 @@ const noLodashCode = `
             <div>
               <div class="text-lg font-bold mb-2">async</div>
               <div class="grid grid-cols-4 gap-0.5">
-                <!-- Row 1: HTML parsing interrompu -->
+                <!-- Row 1: HTML parsing interrupted -->
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
                 <div></div>
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
-                <!-- Row 2: Script loading + execution immédiate -->
+                <!-- Row 2: Script loading + immediate execution -->
                 <div></div>
-                <div class="bg-orange-400 text-white text-xs px-2 py-2 rounded">Script Loading</div>
+                <div class="bg-orange-400 text-white text-xs px-2 py-2 rounded">Script loading</div>
                 <div class="bg-orange-600 text-white text-xs px-2 py-2 rounded">Script execution</div>
                 <div></div>
               </div>

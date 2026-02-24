@@ -42,7 +42,7 @@ const facadeVideoCodeExample = `
 
 
         </div>
-        <div class="flex flex-col items-cente justify-top gap-6 pr-10">
+        <div class="flex flex-col items-center justify-top gap-6 pr-10">
           <div class="text-center">
             Static content loads faster
           </div>

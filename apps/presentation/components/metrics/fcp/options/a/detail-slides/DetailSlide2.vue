@@ -1,6 +1,6 @@
 
 <template>
-  <div class="slide-bg-quadrant" style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 100%;">
+  <div class="slide-bg" style="background-image: url('/backgrounds/parchment-bottom-left.png');">
     <DetailSlide
       metric="fcp"
       option="a"

@@ -23,8 +23,8 @@ const minifyCodeAfter = `
 
 <template>
   <div
-    class="slide-bg-quadrant"
-    style="background-image: url('/backgrounds/parchment.png'); background-position: 0% 100%;"
+    class="slide-bg"
+    style="background-image: url('/backgrounds/parchment-bottom-left.png');"
   >
     <DetailSlide
       class="pl-10"
@@ -33,7 +33,7 @@ const minifyCodeAfter = `
     >
       <div class=" grid grid-cols-3  text-center items-top gap-15">
         <div class="flex flex-col items-top gap-10">
-          <div class="font-bold">Too long</div>
+          <div class="text-2xl font-bold">Too long</div>
           <div class="text-4xl font-bold">Purge it!</div>
 
           <div class="text-left">
@@ -52,7 +52,7 @@ const minifyCodeAfter = `
 
         </div>
         <div class="flex flex-col items-center gap-10">
-          <div class=" font-bold">Too heavy</div>
+          <div class="text-2xl font-bold">Too heavy</div>
           <div class="text-4xl font-bold">Minify it!</div>
           <div class="text-left">
             <CodeSnippet
@@ -70,7 +70,7 @@ const minifyCodeAfter = `
         </div>
 
         <div class="flex flex-col items-center gap-10">
-          <div class=" font-bold">Too late</div>
+          <div class="text-2xl font-bold">Too late</div>
           <div class="text-4xl -mt-2 font-bold">Preload it! <div class="text-lg -mt-3 text-[#FF2626]">(with caution!)
             </div>
           </div>
@@ -79,19 +79,7 @@ const minifyCodeAfter = `
       </div>
 
 
-      <!-- <div class="grid grid-cols-3 gap-10">
 
-        <CodeSnippet
-          language="css"
-          :code="matchingMetricsCodeExample"
-          size="tiny"
-        />
-        <CodeSnippet
-          language="html"
-          :code="preloadCodeExample"
-          size="tiny"
-        />
-      </div> -->
 
     </DetailSlide>
   </div>
