@@ -42,7 +42,7 @@ export interface BusinessInfo {
   comment: string
 }
 
-/**q
+/**
  * Threshold values for metric scoring
  * Can be numbers (e.g., 0.1) or strings (e.g., '1.8 sec')
  */
@@ -159,9 +159,9 @@ export const METRICS: MetricsData = {
         keywords: ['[Keyword 1]', '[Keyword 2]'],
       },
       b: {
-        title: '[PLACEHOLDER Option B]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: 'Focus on LCP',
+        subtitle: 'Save effort, target smart',
+        keywords: ['Identify', 'Facilitate'],
       },
     },
   },
@@ -182,14 +182,14 @@ export const METRICS: MetricsData = {
     businessInfo: [],
     options: {
       a: {
-        title: '[PLACEHOLDER Option A]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: 'Code Execution',
+        subtitle: 'Break up the work',
+        keywords: ['Split tasks', 'Avoid forced layouts'],
       },
       b: {
-        title: '[PLACEHOLDER Option B]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: 'Page Structure',
+        subtitle: 'Simplify calculations',
+        keywords: ['CSS selectors', 'DOM complexity'],
       },
     },
   },
@@ -210,14 +210,14 @@ export const METRICS: MetricsData = {
     businessInfo: [],
     options: {
       a: {
-        title: '[PLACEHOLDER Option A]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: 'Above the fold',
+        subtitle: 'Trick the metrics',
+        keywords: ['Critical CSS', 'Hero takeover'],
       },
       b: {
-        title: '[PLACEHOLDER Option B]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: 'Compression',
+        subtitle: 'Trim to the bone',
+        keywords: ['Font subsetting', 'Text compression'],
       },
     },
   },
@@ -233,12 +233,12 @@ export const METRICS: MetricsData = {
  * Value: sourceMetricIndex of the vote whose loser provides the content
  */
 export const DERIVED_OPTIONS: Record<string, { sourceMetricIndex: number }> = {
-  'lcp:b': { sourceMetricIndex: 1 }, // LCP option B = FCP loser
+  'lcp:a': { sourceMetricIndex: 1 }, // LCP option A = FCP loser
 }
 
 /**
  * Resolves a potentially derived option to its actual source.
- * If the option is derived (e.g., LCP:B → FCP loser), returns the source metric/option.
+ * If the option is derived (e.g., LCP:A → FCP loser), returns the source metric/option.
  * Otherwise returns the original metric/option unchanged.
  *
  * @param getWinner - callback to retrieve vote winner ('A'|'B'|null) by metric index
