@@ -66,7 +66,7 @@ function handleVote(choice: 'A' | 'B') {
 </script>
 
 <template>
-  <div class="relative w-screen h-screen overflow-hidden">
+  <div class="relative w-screen h-dvh overflow-hidden">
     <img
       src="/vote/Bg.png"
       alt=""
