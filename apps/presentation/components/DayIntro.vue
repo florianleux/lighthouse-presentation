@@ -27,10 +27,7 @@ const metricData = computed(() => METRICS[props.metric])
     </div>
 
     <!-- Lighthouse building showing progress -->
-    <div
-      class="absolute left-[84.5%] bottom-[18%] top-[10%] -translate-x-1/2"
-      style="width: 25%;"
-    >
+    <div class="absolute left-[84.5%] bottom-[18%] top-[4%] -translate-x-1/2 h-[78%] w-[50%]">
       <LighthouseBuilding />
     </div>
   </div>
