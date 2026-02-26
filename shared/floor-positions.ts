@@ -13,6 +13,7 @@ interface FloorPositions {
   choice: FloorPosition
   vote: FloorPosition
   building: FloorPosition
+  mobile: FloorPosition
 }
 
 export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
@@ -29,6 +30,10 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       a: { bottom: '0%', left: '50%', height: '19.6%', width: 'auto' },
       b: { bottom: '0%', left: '50%', height: '19.6%', width: 'auto' },
     },
+    mobile: {
+      a: { top: '23%', left: '52%', width: '60%' },
+      b: { top: '22%', left: '50%', width: '60%' },
+    },
   },
   fcp: {
     choice: {
@@ -43,10 +48,14 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       a: { bottom: '19.55%', left: '50%', height: '10.5%', width: 'auto' },
       b: { bottom: '19.55%', left: '50%', height: '10.5%', width: 'auto' },
     },
+    mobile: {
+      a: { top: '25%', left: '52%', width: '60%' },
+      b: { top: '25%', left: '50%', width: '67%' },
+    },
   },
   lcp: {
     choice: {
-      a: { top: '61%', left: '15%', transform: 'rotate(-13deg)', width: '20%' },
+      a: { top: '55%', left: '15%', transform: 'rotate(-13deg)', width: '20%' },
       b: { top: '52%', right: '12%', transform: 'rotate(14deg)', width: '22%' },
     },
     vote: {
@@ -56,6 +65,10 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
     building: {
       a: { bottom: '29.9%', left: '50%', height: '22%', width: 'auto' },
       b: { bottom: '29%', left: '50%', height: '23%', width: 'auto' },
+    },
+    mobile: {
+      a: { top: '22%', left: '52%', width: '50%' },
+      b: { top: '23%', left: '50%', width: '50%' },
     },
   },
   tbt: {
@@ -71,6 +84,10 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       a: { bottom: '51.8%', left: '50%', height: '31%', width: 'auto' },
       b: { bottom: '51.8%', left: '50%', height: '31%', width: 'auto' },
     },
+    mobile: {
+      a: { top: '19%', left: '50%', width: '35%' },
+      b: { top: '19%', left: '50%', width: '35%' },
+    },
   },
   si: {
     choice: {
@@ -84,6 +101,10 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
     building: {
       a: { bottom: '82.7%', left: '50%', height: '18%', width: 'auto' },
       b: { bottom: '82.6%', left: '50%', height: '18%', width: 'auto' },
+    },
+    mobile: {
+      a: { top: '19%', left: '50%', width: '50%' },
+      b: { top: '19%', left: '50%', width: '50%' },
     },
   },
 }

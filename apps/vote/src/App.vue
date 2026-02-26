@@ -2,9 +2,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
+import { getMetricByIndex } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
+import VoteScreen from './components/VoteScreen.vue'
 
 const { isConnected: firestoreConnected, connect, onSessionState, registerParticipant, submitVote, submitPoll } = useFirestore()
 
@@ -32,7 +34,7 @@ function loadCrew(): PersistedCrew | null {
 }
 
 function saveCrew(crew: PersistedCrew) {
-  try { localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify(crew)) } catch {}
+  try { localStorage.setItem(STORAGE_KEYS.CREW_MEMBER, JSON.stringify(crew)) } catch { }
 }
 
 function loadVotes(): PersistedVotes | null {
@@ -43,7 +45,7 @@ function loadVotes(): PersistedVotes | null {
 }
 
 function saveVotesData(votes: PersistedVotes) {
-  try { localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(votes)) } catch {}
+  try { localStorage.setItem(STORAGE_KEYS.VOTE_STATE, JSON.stringify(votes)) } catch { }
 }
 
 function getOrCreateParticipantId(): string {
@@ -72,6 +74,8 @@ const sessionState = ref<SessionStateMessage | null>(null)
 // Vote/poll tracking (persisted)
 const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
+// Track vote winners for derived option resolution (e.g. LCP option A = FCP loser)
+const voteWinners = ref<Record<number, 'A' | 'B'>>({})
 
 const isSubmitting = ref(false)
 
@@ -89,6 +93,12 @@ const hasVotedThisRound = computed(() => {
 const hasPolledThisRound = computed(() => {
   const poll = sessionState.value?.poll
   return poll ? polledIds.value.includes(poll.id) : false
+})
+
+const currentMetric = computed(() => {
+  const vote = sessionState.value?.vote
+  if (!vote) return null
+  return getMetricByIndex(vote.index) ?? null
 })
 
 const isValid = computed(() => {
@@ -122,7 +132,7 @@ function handleSessionState(msg: SessionStateMessage) {
     polledIds.value = []
     saveVotesData({ keynoteId: msg.keynoteId, votedRounds: [], polledIds: [] })
     // Clear crew — force re-creation
-    try { localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER) } catch {}
+    try { localStorage.removeItem(STORAGE_KEYS.CREW_MEMBER) } catch { }
     joinedName.value = ''
     selectedAvatar.value = null
     name.value = ''
@@ -130,6 +140,11 @@ function handleSessionState(msg: SessionStateMessage) {
     participantId.value = getOrCreateParticipantId()
     status.value = 'idle'
     return
+  }
+
+  // Track vote winners for derived options
+  if (msg.voteResult) {
+    voteWinners.value[msg.voteResult.index] = msg.voteResult.winner
   }
 
   // First session state: transition from connecting/waiting
@@ -256,25 +271,47 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="container">
-    <div class="card">
+  <div class=" p-0">
+    <!-- Immersive vote screen (replaces card when actively voting) -->
+    <VoteScreen
+      v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
+      :metric="currentMetric"
+      :vote-winners="voteWinners"
+      :is-submitting="isSubmitting"
+      @vote="handleVote"
+    />
+
+    <!-- Standard card layout (all other states) -->
+    <div
+      v-else
+      class="card"
+    >
       <h1>Lighthouse Pirates</h1>
 
       <!-- Connecting -->
-      <div v-if="status === 'connecting'" class="status">
+      <div
+        v-if="status === 'connecting'"
+        class="status"
+      >
         <div class="spinner"></div>
         <p>Connecting...</p>
       </div>
 
       <!-- Waiting for presentation -->
-      <div v-else-if="status === 'waiting'" class="status">
+      <div
+        v-else-if="status === 'waiting'"
+        class="status"
+      >
         <div class="spinner"></div>
         <p>Waiting for the captain...</p>
         <p class="hint">The presentation hasn't started yet</p>
       </div>
 
       <!-- Error -->
-      <div v-else-if="status === 'error'" class="status error">
+      <div
+        v-else-if="status === 'error'"
+        class="status error"
+      >
         <p>Connection error</p>
         <p class="hint">Check your internet connection</p>
       </div>
@@ -294,8 +331,15 @@ onMounted(async () => {
           :disabled="status === 'joining'"
           @keyup.enter="handleNext"
         />
-        <p v-if="validationMessage" class="validation">{{ validationMessage }}</p>
-        <button @click="handleNext" :disabled="!canGoNext" class="next-btn">
+        <p
+          v-if="validationMessage"
+          class="validation"
+        >{{ validationMessage }}</p>
+        <button
+          @click="handleNext"
+          :disabled="!canGoNext"
+          class="next-btn"
+        >
           Next
         </button>
       </div>
@@ -305,41 +349,22 @@ onMounted(async () => {
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
         class="avatar-step"
       >
-        <button class="back-btn" @click="handleBack" :disabled="status === 'joining'">
+        <button
+          class="back-btn"
+          @click="handleBack"
+          :disabled="status === 'joining'"
+        >
           ← Back
         </button>
         <p class="name-preview">{{ name }}</p>
         <AvatarCreator @join="handleJoin" />
-        <div v-if="status === 'joining'" class="joining-overlay">
+        <div
+          v-if="status === 'joining'"
+          class="joining-overlay"
+        >
           <div class="spinner"></div>
           <p>Boarding...</p>
         </div>
-      </div>
-
-      <!-- Joined: Vote buttons -->
-      <div
-        v-else-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound"
-        class="voting"
-      >
-        <h2>Vote now!</h2>
-        <p class="vote-hint">Choose your option</p>
-        <div class="vote-buttons">
-          <button
-            class="vote-btn vote-a"
-            @click="handleVote('A')"
-            :disabled="isSubmitting"
-          >
-            A
-          </button>
-          <button
-            class="vote-btn vote-b"
-            @click="handleVote('B')"
-            :disabled="isSubmitting"
-          >
-            B
-          </button>
-        </div>
-        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
       </div>
 
       <!-- Joined: Vote submitted -->
@@ -394,7 +419,10 @@ onMounted(async () => {
             <span class="poll-label">Admiral</span>
           </button>
         </div>
-        <p v-if="isSubmitting" class="submitting-hint">Sending...</p>
+        <p
+          v-if="isSubmitting"
+          class="submitting-hint"
+        >Sending...</p>
       </div>
 
       <!-- Joined: Poll submitted -->
@@ -435,12 +463,6 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Connection indicator -->
-    <div class="debug">
-      <span :class="isConnected ? 'connected' : 'disconnected'">
-        {{ isConnected ? 'Connected' : 'Disconnected' }}
-      </span>
-    </div>
   </div>
 </template>
 
@@ -680,67 +702,6 @@ input::placeholder {
 
 .disconnected {
   color: #ff6b6b;
-}
-
-/* Voting styles */
-.voting {
-  padding: 20px 0;
-}
-
-.voting h2 {
-  color: #ffd700;
-  margin-bottom: 8px;
-}
-
-.vote-hint {
-  opacity: 0.8;
-  margin-bottom: 20px;
-}
-
-.vote-buttons {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.vote-btn {
-  width: 120px;
-  height: 120px;
-  font-size: 48px;
-  font-weight: bold;
-  border: 3px solid;
-  border-radius: 16px;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.vote-a {
-  border-color: #3b82f6;
-  color: #3b82f6;
-}
-
-.vote-a:hover:not(:disabled) {
-  background: #3b82f6;
-  color: white;
-  transform: scale(1.05);
-}
-
-.vote-b {
-  border-color: #f59e0b;
-  color: #f59e0b;
-}
-
-.vote-b:hover:not(:disabled) {
-  background: #f59e0b;
-  color: white;
-  transform: scale(1.05);
-}
-
-.vote-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .submitting-hint {

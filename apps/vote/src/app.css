@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@utility font-title {
+  font-family: 'Germania One', serif;
+}
+
+@utility font-body {
+  font-family: 'Crimson Text', serif;
+}
