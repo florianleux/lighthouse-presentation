@@ -77,10 +77,6 @@ const minifyCodeAfter = `
           <div class="text-lg bg-green-500 p-10"> PLACEHOLDER SCHEMA</div>
         </div>
       </div>
-
-
-
-
     </DetailSlide>
   </div>
 </template>

@@ -4,6 +4,8 @@ import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
 import { useResolvedMetric } from '../composables/useResolvedMetric'
+import { getMetricByIndex } from '../../../shared/metrics-data'
+import { FLOOR_POSITIONS } from '../../../shared/floor-positions'
 
 const props = defineProps<{
   metricIndex: number
@@ -14,6 +16,12 @@ const voteProps = computed(() => getResolvedVoteProps(props.metricIndex))
 const voteIndex = computed(() => voteProps.value.voteIndex)
 const titleA = computed(() => voteProps.value.titleA)
 const titleB = computed(() => voteProps.value.titleB)
+
+const metricName = computed(() => getMetricByIndex(props.metricIndex)?.name.toLowerCase() ?? '')
+const floorA = computed(() => `/floors/floor-${metricName.value}-a.png`)
+const floorB = computed(() => `/floors/floor-${metricName.value}-b.png`)
+const posA = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.a ?? {})
+const posB = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.b ?? {})
 
 const { next } = useNav()
 
@@ -226,5 +234,18 @@ function stopVoteSession() {
       />
 
     </div>
+
+    <img
+      :src="floorA"
+      class="absolute"
+      :style="posA"
+      alt=""
+    />
+    <img
+      :src="floorB"
+      class="absolute"
+      :style="posB"
+      alt=""
+    />
   </div>
 </template>
