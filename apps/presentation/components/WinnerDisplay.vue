@@ -34,7 +34,7 @@ const winner = computed(() => {
         <div class="font-bold font-title text-5xl">{{ winner.title }}</div>
       </div>
 
-      <div class="absolute right-45 bottom-20 top-20">
+      <div class="absolute w-[25.5%] h-[73%] left-[79.6%] top-[10.4%] -translate-x-1/2">
         <LighthouseBuilding />
       </div>
     </div>

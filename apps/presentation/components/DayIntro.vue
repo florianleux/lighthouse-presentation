@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { METRICS, type MetricName } from '../../../shared/metrics-data'
+import LighthouseBuilding from './LighthouseBuilding.vue'
 
 const props = defineProps<{
   day: number
@@ -23,7 +24,14 @@ const metricData = computed(() => METRICS[props.metric])
       <div class="text-3xl text-white -mt-4">
         {{ metricData.fullName }}
       </div>
+    </div>
 
+    <!-- Lighthouse building showing progress -->
+    <div
+      class="absolute left-[84.5%] bottom-[18%] top-[10%] -translate-x-1/2"
+      style="width: 25%;"
+    >
+      <LighthouseBuilding />
     </div>
   </div>
 </template>
