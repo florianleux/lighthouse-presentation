@@ -333,34 +333,30 @@ transition: fade
 <DetailSlideLoader metric="si" :slide-index="2" />
 
 ---
+transition: slide-down
+---
+<!-- TODO: Change BG -->
+<Outro />
 
-# Recap
+---
+transition: slide-down
+---
+<!-- TODO: Change BG -->
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.png')">
 
-## Lighthouse complete!
+
+<div class="grid mt-15 pl-15 text-shadow-md grid-cols-2 gap-10 pt-4 text-white">
+<div>
+PLACEHOLDER OUTRO
+</div>
+
+</div>
+
+</div>
 
 ---
 
-# Conclusion
-
-## What we learned
-
-- Performance optimizations have measurable impact
-- 5 Performance metrics: CLS (25%), FCP (10%), LCP (25%), TBT (30%), SI (10%)
-- Optimization choices are often trade-offs
-- The key is to prioritize based on context
-
-<div class="pt-8 text-center">
-  (TBD)
-</div>
+<!-- TODO: Change BG -->
+<ThankYou />
 
 ---
-
-# Questions?
-
-<div class="text-6xl pt-8">
-  🏴‍☠️
-</div>
-
-<div class="pt-8 opacity-50">
-  Let's build a lighthouse! - An interactive presentation
-</div>
