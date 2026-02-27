@@ -53,6 +53,8 @@ export interface SessionStateMessage {
   poll?: { id: string }
   // Present only when phase === 'poll-results'
   pollResult?: { id: string; results: Record<string, number> }
+  // Accumulated vote winners across all rounds (persists across all phases)
+  voteWinners?: Record<number, 'A' | 'B'>
   timestamp: number
 }
 
@@ -79,6 +81,7 @@ export interface FirestorePresentation {
   voteResult?: { index: number; winner: 'A' | 'B'; countA: number; countB: number }
   poll?: { id: string }
   pollResult?: { id: string; results: Record<string, number> }
+  voteWinners?: Record<number, 'A' | 'B'>
 }
 
 export interface FirestoreParticipant {

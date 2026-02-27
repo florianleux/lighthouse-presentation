@@ -265,6 +265,9 @@ async function closeVote(
       closedAt: Date.now(),
       result,
     })
+    // Persist winner for derived option resolution (e.g. LCP option A = FCP loser)
+    const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
+    await updateDoc(presRef, { [`voteWinners.${voteIndex}`]: result.winner })
     await publishSessionState('vote-results', {
       voteResult: { index: voteIndex, winner: result.winner, countA: result.counts.A, countB: result.counts.B }
     })
