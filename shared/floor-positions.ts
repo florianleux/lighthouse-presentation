@@ -31,8 +31,8 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '0%', left: '50%', height: '19.6%', width: 'auto' },
     },
     mobile: {
-      a: { top: '23%', left: '52%', width: '60%' },
-      b: { top: '22%', left: '50%', width: '60%' },
+      a: { top: '23%', left: '52%', width: '65%' },
+      b: { top: '22%', left: '50%', width: '65%' },
     },
   },
   fcp: {
@@ -49,14 +49,14 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '19.55%', left: '50%', height: '10.5%', width: 'auto' },
     },
     mobile: {
-      a: { top: '25%', left: '52%', width: '60%' },
-      b: { top: '25%', left: '50%', width: '67%' },
+      a: { top: '29%', left: '52%', width: '65%' },
+      b: { top: '29%', left: '50%', width: '69%' },
     },
   },
   lcp: {
     choice: {
-      a: { top: '55%', left: '15%', transform: 'rotate(-13deg)', width: '20%' },
-      b: { top: '52%', right: '12%', transform: 'rotate(14deg)', width: '22%' },
+      a: { top: '62%', left: '16%', transform: 'rotate(-13deg)', width: '17%' },
+      b: { top: '55%', right: '14%', transform: 'rotate(14deg)', width: '20%' },
     },
     vote: {
       a: { top: '6%', left: '1.5%', transform: 'rotate(-23deg)', width: '9%' },
@@ -67,8 +67,8 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '29%', left: '50%', height: '23%', width: 'auto' },
     },
     mobile: {
-      a: { top: '19%', left: '52%', width: '47%' },
-      b: { top: '23%', left: '50%', width: '50%' },
+      a: { top: '20%', left: '52%', width: '55%' },
+      b: { top: '22%', left: '50%', width: '60%' },
     },
   },
   tbt: {
@@ -103,8 +103,8 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '82.6%', left: '50%', height: '18%', width: 'auto' },
     },
     mobile: {
-      a: { top: '19%', left: '50%', width: '50%' },
-      b: { top: '19%', left: '50%', width: '50%' },
+      a: { top: '19%', left: '50%', width: '60%' },
+      b: { top: '19%', left: '50%', width: '60%' },
     },
   },
 }
