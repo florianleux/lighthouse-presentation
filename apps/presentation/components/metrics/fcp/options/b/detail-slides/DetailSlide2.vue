@@ -24,7 +24,7 @@ const minifyCodeAfter = `
 <template>
   <div
     class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-bottom-left.png');"
+    style="background-image: url('/backgrounds/cls-detail-2.webp');"
   >
     <DetailSlide
       class="pl-10"

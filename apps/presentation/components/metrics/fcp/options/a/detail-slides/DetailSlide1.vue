@@ -4,7 +4,7 @@
 <template>
   <div
     class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-top-left.png');"
+    style="background-image: url('/backgrounds/cls-detail-1.webp');"
   >
     <DetailSlide
       class="pl-10 pt-5"

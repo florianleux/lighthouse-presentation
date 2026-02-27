@@ -13,7 +13,7 @@ const noLodashCode = `
 <template>
   <div
     class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-bottom-left.png');"
+    style="background-image: url('/backgrounds/cls-detail-4.webp');"
   >
     <DetailSlide
       class="pl-10"

@@ -2,7 +2,10 @@
 </script>
 
 <template>
-  <div class="slide-bg" style="background-image: url('/backgrounds/parchment-bottom-right.png');">
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/cls-detail-4.webp');"
+  >
     <DetailSlide
       metric="fcp"
       option="a"
@@ -22,4 +25,3 @@
     </DetailSlide>
   </div>
 </template>
-

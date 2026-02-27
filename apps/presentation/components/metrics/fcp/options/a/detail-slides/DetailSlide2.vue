@@ -1,6 +1,6 @@
 
 <template>
-  <div class="slide-bg" style="background-image: url('/backgrounds/parchment-bottom-left.png');">
+  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-2.webp');">
     <DetailSlide
       metric="fcp"
       option="a"
