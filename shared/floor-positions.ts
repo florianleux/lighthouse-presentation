@@ -67,7 +67,7 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '29%', left: '50%', height: '23%', width: 'auto' },
     },
     mobile: {
-      a: { top: '22%', left: '52%', width: '50%' },
+      a: { top: '19%', left: '52%', width: '47%' },
       b: { top: '23%', left: '50%', width: '50%' },
     },
   },
@@ -85,8 +85,8 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
       b: { bottom: '51.8%', left: '50%', height: '31%', width: 'auto' },
     },
     mobile: {
-      a: { top: '19%', left: '50%', width: '35%' },
-      b: { top: '19%', left: '50%', width: '35%' },
+      a: { top: '19%', left: '50%', width: '38%' },
+      b: { top: '19%', left: '50%', width: '40%' },
     },
   },
   si: {

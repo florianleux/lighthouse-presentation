@@ -39,7 +39,7 @@ const options = computed(() => {
   return [
     {
       key: 'A' as const,
-      position: 'top-[10%]',
+      position: 'top-[5%]',
       bg: '/vote/A.png',
       floor: `/floors/floor-${metricName.value}-a.png`,
       floorStyle: FLOOR_POSITIONS[metricName.value]?.mobile.a ?? {},
@@ -48,7 +48,7 @@ const options = computed(() => {
     },
     {
       key: 'B' as const,
-      position: 'bottom-[10%]',
+      position: 'bottom-[5%]',
       bg: '/vote/B.png',
       floor: `/floors/floor-${metricName.value}-b.png`,
       floorStyle: FLOOR_POSITIONS[metricName.value]?.mobile.b ?? {},
