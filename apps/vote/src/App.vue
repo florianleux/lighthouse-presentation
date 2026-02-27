@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
-import { getMetricByIndex } from '../../../shared/metrics-data'
+import { getMetricByIndex, METRICS_LIST } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
 import AvatarCreator from './components/AvatarCreator.vue'
 import AvatarPreview from './components/AvatarPreview.vue'
@@ -253,10 +253,25 @@ function requestFullscreen() {
 document.addEventListener('click', requestFullscreen, { once: true })
 
 // ===========================================
+// Preload images
+// ===========================================
+
+function preloadImages() {
+  const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
+  const urls = [
+    '/vote/Bg.png', '/vote/A.png', '/vote/B.png', '/vote/light.png',
+    ...metrics.flatMap(m => [`/floors/floor-${m}-a.png`, `/floors/floor-${m}-b.png`]),
+  ]
+  urls.forEach(src => { new Image().src = src })
+}
+
+// ===========================================
 // Lifecycle
 // ===========================================
 
 onMounted(async () => {
+  preloadImages()
+
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
 
