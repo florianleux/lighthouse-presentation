@@ -15,12 +15,14 @@ export const FIRESTORE_COLLECTIONS = {
 } as const
 
 // Vote configuration
+// TODO: Remettre DURATION_SECONDS à 30 avant la présentation !
 export const VOTE_CONFIG = {
   DURATION_SECONDS: Infinity,
   GRACE_PERIOD_SECONDS: 3,
 } as const
 
 // Poll configuration
+// TODO: Remettre DURATION_SECONDS à 30 avant la présentation !
 export const POLL_CONFIG = {
   DURATION_SECONDS: Infinity,
   GRACE_PERIOD_SECONDS: 3,
