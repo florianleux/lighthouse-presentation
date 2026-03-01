@@ -54,7 +54,7 @@ body,
 /* Slide background wrapper */
 .slide-bg {
   position: absolute;
-  inset: 0;
+  inset: -1px;
   background-size: cover;
   background-position: center;
   padding: 2rem;

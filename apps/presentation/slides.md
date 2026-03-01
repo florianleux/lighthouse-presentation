@@ -335,14 +335,12 @@ transition: fade
 ---
 transition: slide-down
 ---
-<!-- TODO: Change BG -->
 <Outro />
 
 ---
 transition: slide-down
 ---
-<!-- TODO: Change BG -->
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/end-middle.png')">
 
 
 <div class="grid mt-15 pl-15 text-shadow-md grid-cols-2 gap-10 pt-4 text-white">
@@ -356,7 +354,6 @@ PLACEHOLDER OUTRO
 
 ---
 
-<!-- TODO: Change BG -->
 <ThankYou />
 
 ---

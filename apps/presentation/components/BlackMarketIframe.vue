@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   url?: string
@@ -8,31 +8,48 @@ const props = withDefaults(defineProps<{
 }>(), {
   url: 'https://blackmarket.florianleux.fr',
   scale: 0.6,
-  delay: 3000, // Delay in ms before loading iframe (default: 3s for transition)
+  delay: 3000,
 })
 
 const shouldLoad = ref(false)
+const container = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
-// Delay initial load to let slide transition finish
 onMounted(() => {
-  setTimeout(() => {
-    shouldLoad.value = true
-  }, props.delay)
+  if (!container.value) return
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting && !shouldLoad.value) {
+        setTimeout(() => {
+          shouldLoad.value = true
+        }, props.delay)
+        observer?.disconnect()
+      }
+    },
+    { threshold: 0.5 },
+  )
+  observer.observe(container.value)
+})
+
+onUnmounted(() => {
+  observer?.disconnect()
 })
 
 const scalePercent = 100 / props.scale
 </script>
 
 <template>
-  <iframe
-    v-if="shouldLoad"
-    :src="url"
-    class="w-full h-full border-0"
-    :style="{
-      transform: `scale(${scale})`,
-      transformOrigin: 'top left',
-      width: `${scalePercent}%`,
-      height: `${scalePercent}%`,
-    }"
-  />
+  <div ref="container" class="w-full h-full">
+    <iframe
+      v-if="shouldLoad"
+      :src="url"
+      class="w-full h-full border-0"
+      :style="{
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left',
+        width: `${scalePercent}%`,
+        height: `${scalePercent}%`,
+      }"
+    />
+  </div>
 </template>
