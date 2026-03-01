@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const props = withDefaults(defineProps<{
   url?: string
@@ -11,33 +11,13 @@ const props = withDefaults(defineProps<{
   delay: 3000, // Delay in ms before loading iframe (default: 3s for transition)
 })
 
-// Use a key to force iframe refresh when entering the slide
-const iframeKey = ref(Date.now())
 const shouldLoad = ref(false)
 
-// Delay initial load
+// Delay initial load to let slide transition finish
 onMounted(() => {
   setTimeout(() => {
     shouldLoad.value = true
   }, props.delay)
-
-  // Try to watch slide changes if Slidev context is available
-  import('@slidev/client').then(({ useNav }) => {
-    try {
-      const { currentSlideNo } = useNav()
-      watch(currentSlideNo, () => {
-        shouldLoad.value = false
-        setTimeout(() => {
-          iframeKey.value = Date.now()
-          shouldLoad.value = true
-        }, props.delay)
-      })
-    } catch {
-      // useNav() failed - router not available
-    }
-  }).catch(() => {
-    // Import failed
-  })
 })
 
 const scalePercent = 100 / props.scale
@@ -46,7 +26,6 @@ const scalePercent = 100 / props.scale
 <template>
   <iframe
     v-if="shouldLoad"
-    :key="iframeKey"
     :src="url"
     class="w-full h-full border-0"
     :style="{
