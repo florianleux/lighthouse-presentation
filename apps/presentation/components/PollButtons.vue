@@ -141,6 +141,19 @@ function stopPollSession() {
       <div class="text-4xl font-bold font-title">{{ results.admiral.length }}</div>
     </div>
 
+    <div
+      v-if="isPollActive && timeRemaining > 0"
+      class="absolute top-[82%] left-[7.5%] -translate-x-1/2 text-3xl font-bold font-title text-white"
+    >
+      {{ timeRemaining }}
+    </div>
+    <div
+      v-else-if="isInGracePeriod"
+      class="absolute top-[83%] left-1/2 -translate-x-1/2 text-2xl font-bold text-red-500 font-title"
+    >
+      Closing...
+    </div>
+
     <button
       v-if="sessionStore.pollPhase !== 'ended'"
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"

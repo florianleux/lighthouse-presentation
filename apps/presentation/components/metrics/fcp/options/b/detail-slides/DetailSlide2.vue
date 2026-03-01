@@ -18,6 +18,11 @@ const minifyCodeBefore = `
 const minifyCodeAfter = `
 .button{background-color:blue;padding:10px}
 `
+const preloadCode = `
+<link rel="preload"
+      href="/css/critical.css"
+      as="style" />
+`
 
 </script>
 
@@ -31,8 +36,8 @@ const minifyCodeAfter = `
       metric="fcp"
       option="b"
     >
-      <div class=" grid grid-cols-3  text-center items-top gap-15">
-        <div class="flex flex-col items-top gap-10">
+      <div class=" grid grid-cols-3 mt-6  text-center items-top gap-10">
+        <div class="flex flex-col items-top gap-8">
           <div class="text-xl font-bold">Too long</div>
           <div class="text-4xl font-bold">Purge it!</div>
 
@@ -51,7 +56,7 @@ const minifyCodeAfter = `
           </div>
 
         </div>
-        <div class="flex flex-col items-center gap-10">
+        <div class="flex flex-col items-center gap-8">
           <div class="text-xl font-bold">Too heavy</div>
           <div class="text-4xl font-bold">Minify it!</div>
           <div class="text-left">
@@ -69,12 +74,19 @@ const minifyCodeAfter = `
           </div>
         </div>
 
-        <div class="flex flex-col items-center gap-10">
+        <div class="flex flex-col items-center gap-8">
           <div class="text-xl font-bold">Too late</div>
-          <div class="text-4xl -mt-2 font-bold">Preload it! <div class="text-lg -mt-3 text-[#FF2626]">(with caution!)
+          <div class="text-4xl -mt-2 font-bold">Preload it! <div class="text-lg -mt-3 text-[#FF2626]">(only the critical
+              CSS!)
             </div>
           </div>
-          <div class="text-lg bg-green-500 p-10"> PLACEHOLDER SCHEMA</div>
+          <div class="text-left">
+            <CodeSnippet
+              language="html"
+              :code="preloadCode"
+              size="tiny"
+            />
+          </div>
         </div>
       </div>
     </DetailSlide>

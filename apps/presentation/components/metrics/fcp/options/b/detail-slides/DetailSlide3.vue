@@ -20,7 +20,7 @@ const noLodashCode = `
       metric="fcp"
       option="b"
     >
-      <div class=" grid grid-cols-3  text-center items-top gap-20">
+      <div class=" mr-13 ml-11 grid grid-cols-3  text-center items-top gap-7">
         <div class="flex flex-col items-top gap-5">
           <div class="text-xl font-bold">Not always relevant anymore</div>
           <div class="text-4xl font-bold">Use native methods!</div>

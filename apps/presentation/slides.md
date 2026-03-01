@@ -55,32 +55,27 @@ transition: slide-up
 
 <div class="text-4xl text-shadow-md text-white font-title">Why does performance matters ?</div>
 
-<div class="grid mt-15 pl-15 text-shadow-md grid-cols-2 gap-10 pt-4 text-white">
+<div class="grid mt-8 pl-15 text-shadow-md grid-cols-2 pt-4 text-white">
 <div>
-  <div>
-    <div class="text-5xl font-bold">53%</div>
-    <div>of users leave if page loads > 3s</div>
-  </div>
-  <div>
-    <div class="text-5xl mt-10 font-bold">70%</div>
-    <div class="font-bold">of consumers say speed affects their purchase decisions</div>
-  </div>
+    <div class="text-8xl font-bold">53%</div>
+    <div class="text-8xl mt-10 font-bold">70%</div>
 </div>
-<div class="mt-20">
-  <div>
-    <div class="text-5xl font-bold">32%</div>
-    <div>increase in bounce rate when load time goes from 1s to 3s</div>
-  </div>
-  <div>
-    <div class="text-5xl mt-10 font-bold">3x</div>
-    <div>higher conversion rate for sites loading in 1s vs 5s</div>
-  </div>
+<div class="mt-10">
+    <div class="text-8xl font-bold">32%</div>
+    <div class="text-8xl mt-10 font-bold">3x</div>
 </div>
 
 
 </div>
 
 </div>
+
+<!--
+53% of users leave if page loads > 3s
+70% of consumers say speed affects their purchase decisions
+32% increase in bounce rate when load time goes from 1s to 3s
+3x higher conversion rate for sites loading in 1s vs 5s
+-->
 
 ---
 transition: slide-up
@@ -355,5 +350,3 @@ PLACEHOLDER OUTRO
 ---
 
 <ThankYou />
-
----

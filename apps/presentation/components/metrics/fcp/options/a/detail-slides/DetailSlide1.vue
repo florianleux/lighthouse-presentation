@@ -37,7 +37,18 @@
             style="left: 66%; top: 50%; transform: translate(-50%, -50%)"
           >1800ms</span>
         </div>
-        <div class="mt-10 text-lg bg-green-500 p-10"> PLACEHOLDER SCHEMA</div>
+        <!-- TTFB breakdown timeline -->
+        <div class="mt-10 w-full">
+          <div class="grid grid-cols-7 gap-0.5">
+            <div class="bg-yellow-300 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">Redirect</div>
+            <div class="bg-yellow-400 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">HTTP Cache</div>
+            <div class="bg-amber-400 text-amber-900 text-xs px-2 py-2 rounded text-center font-semibold">DNS</div>
+            <div class="bg-amber-500 text-white text-xs px-2 py-2 rounded text-center font-semibold">TCP + TLS</div>
+            <div class="bg-orange-400 text-white text-xs px-2 py-2 rounded text-center font-semibold">Request</div>
+            <div class="bg-orange-500 text-white text-xs px-2 py-2 rounded text-center font-semibold">Server Processing</div>
+            <div class="bg-orange-600 text-white text-xs px-2 py-2 rounded text-center font-semibold">Response</div>
+          </div>
+        </div>
 
       </div>
 
