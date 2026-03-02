@@ -105,6 +105,7 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
     if (data.poll) msg.poll = data.poll
     if (data.pollResult) msg.pollResult = data.pollResult
     if (data.voteWinners) msg.voteWinners = data.voteWinners
+    if (data.resolvedDerived) msg.resolvedDerived = data.resolvedDerived
 
     callback(msg)
   }, (err) => {

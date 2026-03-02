@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { initFirebase } from '../../../shared/firebase'
 import { FIRESTORE_COLLECTIONS } from '../../../shared/constants'
+import { getAffectedDerivedKeys } from '../../../shared/metrics-data'
 import type {
   FirestorePresentation,
   FirestoreParticipant,
@@ -17,6 +18,7 @@ import {
   updateDoc,
   deleteDoc,
   getDocs,
+  getDoc,
   onSnapshot,
   type Unsubscribe,
   type Firestore,
@@ -265,9 +267,21 @@ async function closeVote(
       closedAt: Date.now(),
       result,
     })
-    // Persist winner for derived option resolution (e.g. LCP option A = FCP loser)
+    // Persist winner + resolved derived options
     const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
-    await updateDoc(presRef, { [`voteWinners.${voteIndex}`]: result.winner })
+    const winnerUpdate: Record<string, unknown> = {
+      [`voteWinners.${voteIndex}`]: result.winner,
+    }
+    // Resolve derived options affected by this vote (e.g., FCP result → LCP option A)
+    const affectedKeys = getAffectedDerivedKeys(voteIndex)
+    for (const key of affectedKeys) {
+      const loserOption = result.winner === 'A' ? 'b' : 'a'
+      winnerUpdate[`resolvedDerived.${key}`] = {
+        sourceMetricIndex: voteIndex,
+        sourceOption: loserOption,
+      }
+    }
+    await updateDoc(presRef, winnerUpdate)
     await publishSessionState('vote-results', {
       voteResult: { index: voteIndex, winner: result.winner, countA: result.counts.A, countB: result.counts.B }
     })
@@ -387,6 +401,49 @@ function stopListeningToPollResponses() {
   if (pollResponsesUnsubscribe) {
     pollResponsesUnsubscribe()
     pollResponsesUnsubscribe = null
+  }
+}
+
+// ---- Session restore ----
+
+async function restoreSessionState(): Promise<{ voteWinners?: Record<number, 'A' | 'B'> } | null> {
+  if (!db || !presentationId) return null
+
+  try {
+    const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
+    const presSnap = await getDoc(presRef)
+    if (!presSnap.exists()) return null
+
+    const data = presSnap.data() as FirestorePresentation
+    return {
+      voteWinners: data.voteWinners as Record<number, 'A' | 'B'> | undefined,
+    }
+  } catch (err) {
+    console.error('[Firestore] Failed to restore session state:', err)
+    return null
+  }
+}
+
+async function persistVoteWinner(voteIndex: number, winner: 'A' | 'B') {
+  if (!db || !presentationId) return
+
+  try {
+    const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
+    const update: Record<string, unknown> = {
+      [`voteWinners.${voteIndex}`]: winner,
+    }
+    // Resolve derived options affected by this vote
+    const affectedKeys = getAffectedDerivedKeys(voteIndex)
+    for (const key of affectedKeys) {
+      const loserOption = winner === 'A' ? 'b' : 'a'
+      update[`resolvedDerived.${key}`] = {
+        sourceMetricIndex: voteIndex,
+        sourceOption: loserOption,
+      }
+    }
+    await updateDoc(presRef, update)
+  } catch (err) {
+    console.error('[Firestore] Failed to persist vote winner:', err)
   }
 }
 
@@ -546,6 +603,8 @@ export function useFirestore() {
     setPresentationId,
     getPresentationId,
     publishSessionState,
+    restoreSessionState,
+    persistVoteWinner,
     listenToParticipants,
     openVote,
     closeVote,

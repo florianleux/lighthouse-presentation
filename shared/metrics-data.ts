@@ -273,6 +273,16 @@ export function resolveDerivedOption(
   }
 }
 
+/**
+ * Returns all derived option keys affected by a given source metric index.
+ * e.g., getAffectedDerivedKeys(1) → ['lcp:a'] (FCP result affects LCP option A)
+ */
+export function getAffectedDerivedKeys(sourceMetricIndex: number): string[] {
+  return Object.entries(DERIVED_OPTIONS)
+    .filter(([, config]) => config.sourceMetricIndex === sourceMetricIndex)
+    .map(([key]) => key)
+}
+
 // Export as array for iteration (maintains order by index)
 export const METRICS_LIST: readonly MetricConfig[] = [
   METRICS.cls,

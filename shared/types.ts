@@ -55,6 +55,8 @@ export interface SessionStateMessage {
   pollResult?: { id: string; results: Record<string, number> }
   // Accumulated vote winners across all rounds (persists across all phases)
   voteWinners?: Record<number, 'A' | 'B'>
+  // Pre-resolved derived options (e.g., 'lcp:a' → FCP loser)
+  resolvedDerived?: Record<string, ResolvedDerivedOption>
   timestamp: number
 }
 
@@ -72,6 +74,11 @@ export interface FirestoreConfig {
   activePresentationId: string | null
 }
 
+export interface ResolvedDerivedOption {
+  sourceMetricIndex: number
+  sourceOption: 'a' | 'b'
+}
+
 export interface FirestorePresentation {
   keynoteId: string
   createdAt: number
@@ -82,6 +89,7 @@ export interface FirestorePresentation {
   poll?: { id: string }
   pollResult?: { id: string; results: Record<string, number> }
   voteWinners?: Record<number, 'A' | 'B'>
+  resolvedDerived?: Record<string, ResolvedDerivedOption>
 }
 
 export interface FirestoreParticipant {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
@@ -36,13 +36,17 @@ onUnmounted(() => {
 
 // --- Vote logic (shared by manual + audience) ---
 
-function applyVote(choice: 'A' | 'B') {
+async function applyVote(choice: 'A' | 'B') {
   const r = sessionStore.voteResults[voteIndex.value]
   if (r) r.winner = choice
   voteStore.vote(voteIndex.value, choice)
   sessionStore.votePhase = 'waiting'
   sessionStore.activeVoteIndex = null
   firestore.stopListeningToBallots()
+
+  // Persist winner to Firebase for derived option resolution (even in manual mode)
+  await firestore.persistVoteWinner(voteIndex.value, choice)
+
   currentPhase.value = 'idle'
   phaseData.value = {}
   publishSessionState()
@@ -67,27 +71,19 @@ const isVoteDone = computed(() =>
 
 // Timer (internal to presentation only - no sync to vote apps)
 const VOTE_DURATION = VOTE_CONFIG.DURATION_SECONDS
-const GRACE_PERIOD = VOTE_CONFIG.GRACE_PERIOD_SECONDS
 const timeRemaining = ref(VOTE_DURATION)
-const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null
-let graceTimeout: ReturnType<typeof setTimeout> | null = null
 
 function startTimer() {
   clearTimer()
   timeRemaining.value = VOTE_DURATION
-  isInGracePeriod.value = false
   timerInterval = setInterval(() => {
     timeRemaining.value--
     if (timeRemaining.value <= 0) {
       clearInterval(timerInterval!)
       timerInterval = null
-      isInGracePeriod.value = true
-      console.log('[VoteSlide] Timer ended, grace period started')
-      graceTimeout = setTimeout(() => {
-        isInGracePeriod.value = false
-        stopVoteSession()
-      }, GRACE_PERIOD * 1000)
+      console.log('[VoteSlide] Timer ended, auto-stopping vote')
+      stopVoteSession()
     }
   }, 1000)
 }
@@ -97,12 +93,20 @@ function clearTimer() {
     clearInterval(timerInterval)
     timerInterval = null
   }
-  if (graceTimeout) {
-    clearTimeout(graceTimeout)
-    graceTimeout = null
-  }
-  isInGracePeriod.value = false
 }
+
+// Auto-stop when all crew members have voted
+const totalVotes = computed(() => {
+  const r = sessionStore.voteResults[voteIndex.value]
+  return (r?.A.length ?? 0) + (r?.B.length ?? 0)
+})
+
+watch(totalVotes, (total) => {
+  if (isVoteActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
+    console.log('[VoteSlide] All crew voted, auto-stopping vote')
+    stopVoteSession()
+  }
+})
 
 // Keyboard shortcut: V to start vote
 function handleKeydown(e: KeyboardEvent) {
@@ -137,7 +141,10 @@ function startVoteSession() {
   console.log('[VoteSlide] Vote session started for vote', voteIndex.value)
 }
 
-function stopVoteSession() {
+async function stopVoteSession() {
+  // Guard: prevent double-stop (timer + all-voted watcher can race)
+  if (sessionStore.votePhase !== 'voting') return
+
   clearTimer()
   sessionStore.votePhase = 'ended'
   firestore.stopListeningToBallots()
@@ -152,14 +159,9 @@ function stopVoteSession() {
   if (r) r.winner = w
   voteStore.vote(voteIndex.value, w)
 
-  // Update session phase
-  currentPhase.value = 'vote-results'
-  phaseData.value = {
-    voteResult: { index: voteIndex.value, winner: w, countA, countB }
-  }
-
-  // Firestore: close vote with results
-  firestore.closeVote(voteIndex.value, {
+  // Firestore: close vote with results (writes voteWinners + publishes 'vote-results')
+  // Await to ensure voteWinners is persisted before resetting phase
+  await firestore.closeVote(voteIndex.value, {
     winner: w,
     counts: { A: countA, B: countB },
     total: countA + countB,

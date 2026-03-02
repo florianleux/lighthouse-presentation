@@ -306,6 +306,25 @@ export default defineAppSetup(({ app }) => {
     // Restored from localStorage — reconnect to the same Firestore presentation
     firestore.setPresentationId(sessionStore.keynoteId)
     setupFirestoreListeners()
+
+    // Session exists — set phase to 'idle' (not 'lobby') to avoid overwriting Firebase state
+    currentPhase.value = 'idle'
+
+    // Async: sync voteWinners from Firebase (source of truth for derived options)
+    firestore.restoreSessionState().then((state) => {
+      if (state?.voteWinners) {
+        for (const [index, winner] of Object.entries(state.voteWinners)) {
+          const idx = Number(index)
+          voteStore.path[idx] = winner
+          if (sessionStore.voteResults[idx] && !sessionStore.voteResults[idx].winner) {
+            sessionStore.voteResults[idx].winner = winner
+          }
+        }
+        persistSession()
+        console.log('[Session] Synced voteWinners from Firebase:', state.voteWinners)
+      }
+    })
+
     console.log('[Session] Restored session:', sessionStore.keynoteId)
   }
 
