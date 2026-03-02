@@ -259,8 +259,8 @@ document.addEventListener('click', requestFullscreen, { once: true })
 function preloadImages() {
   const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
   const urls = [
-    '/vote/Bg.png', '/vote/A.png', '/vote/B.png', '/vote/light.png',
-    ...metrics.flatMap(m => [`/floors/floor-${m}-a.png`, `/floors/floor-${m}-b.png`]),
+    '/vote/Bg.webp', '/vote/A.webp', '/vote/B.webp', '/vote/light.webp', '/vote/blueprint.webp', '/vote/shadow.webp',
+    ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
   ]
   urls.forEach(src => { new Image().src = src })
 }
@@ -309,6 +309,42 @@ onMounted(async () => {
       @vote="handleVote"
     />
 
+    <!-- NameForm: full-screen with decorative layers -->
+    <div
+      v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
+      class="relative w-screen h-dvh overflow-hidden"
+    >
+      <img
+        src="/vote/Bg.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-0"
+      />
+      <img
+        src="/vote/blueprint.webp"
+        alt=""
+        class="absolute left-1/2 top-[32%] -translate-x-1/2 -translate-y-1/2 max-h-[70dvh] max-w-[90vw] z-1 pointer-events-none"
+      />
+      <img
+        src="/vote/shadow.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-48 mix-blend-multiply"
+      />
+      <div class="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
+        <NameForm
+          v-model="name"
+          :validation-message="validationMessage"
+          :can-submit="canGoNext"
+          :disabled="status === 'joining'"
+          @submit="handleNext"
+        />
+      </div>
+      <img
+        src="/vote/light.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+      />
+    </div>
+
     <!-- Standard card layout (all other states) -->
     <div
       v-else
@@ -327,16 +363,6 @@ onMounted(async () => {
       <StatusScreen
         v-else-if="status === 'error'"
         variant="error"
-      />
-
-      <!-- Onboarding: Name -->
-      <NameForm
-        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
-        v-model="name"
-        :validation-message="validationMessage"
-        :can-submit="canGoNext"
-        :disabled="status === 'joining'"
-        @submit="handleNext"
       />
 
       <!-- Onboarding: Avatar -->
@@ -396,4 +422,3 @@ onMounted(async () => {
 
   </div>
 </template>
-

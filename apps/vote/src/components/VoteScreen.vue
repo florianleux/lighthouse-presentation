@@ -40,8 +40,8 @@ const options = computed(() => {
     {
       key: 'A' as const,
       position: 'top-[5%]',
-      bg: '/vote/A.png',
-      floor: `/floors/floor-${metricName.value}-a.png`,
+      bg: '/vote/A.webp',
+      floor: `/floors/floor-${metricName.value}-a.webp`,
       floorStyle: FLOOR_POSITIONS[metricName.value]?.mobile.a ?? {},
       title: a.title,
       subtitle: a.subtitle,
@@ -49,8 +49,8 @@ const options = computed(() => {
     {
       key: 'B' as const,
       position: 'bottom-[5%]',
-      bg: '/vote/B.png',
-      floor: `/floors/floor-${metricName.value}-b.png`,
+      bg: '/vote/B.webp',
+      floor: `/floors/floor-${metricName.value}-b.webp`,
       floorStyle: FLOOR_POSITIONS[metricName.value]?.mobile.b ?? {},
       title: b.title,
       subtitle: b.subtitle,
@@ -68,7 +68,7 @@ function handleVote(choice: 'A' | 'B') {
 <template>
   <div class="relative w-screen h-dvh overflow-hidden">
     <img
-      src="/vote/Bg.png"
+      src="/vote/Bg.webp"
       alt=""
       class="absolute inset-0 w-full h-full object-cover z-0"
     />
@@ -91,19 +91,10 @@ function handleVote(choice: 'A' | 'B') {
     >Sending...</p>
 
     <img
-      src="/vote/light.png"
+      src="/vote/light.webp"
       alt=""
       class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
     />
   </div>
 </template>
 
-<style scoped>
-.opacity-41 {
-  opacity: 0.41;
-}
-
-.mix-blend-plus-lighter {
-  mix-blend-mode: plus-lighter;
-}
-</style>

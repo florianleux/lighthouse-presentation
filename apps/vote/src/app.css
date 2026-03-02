@@ -7,3 +7,19 @@
 @utility font-body {
   font-family: 'Crimson Text', serif;
 }
+
+@utility opacity-41 {
+  opacity: 0.41;
+}
+
+@utility opacity-48 {
+  opacity: 0.48;
+}
+
+@utility mix-blend-plus-lighter {
+  mix-blend-mode: plus-lighter;
+}
+
+@utility mix-blend-multiply {
+  mix-blend-mode: multiply;
+}
