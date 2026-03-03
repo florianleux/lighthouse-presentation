@@ -70,6 +70,7 @@ function handleVote(choice: 'A' | 'B') {
     <img
       src="/vote/Bg.webp"
       alt=""
+      fetchpriority="high"
       class="absolute inset-0 w-full h-full object-cover z-0"
     />
 

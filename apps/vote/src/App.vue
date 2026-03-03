@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import { getMetricByIndex, METRICS_LIST } from '../../../shared/metrics-data'
@@ -80,6 +80,7 @@ const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
 const isSubmitting = ref(false)
+const imagesReady = ref(false)
 
 // ===========================================
 // Computed
@@ -143,12 +144,13 @@ function handleSessionState(msg: SessionStateMessage) {
     name.value = ''
     currentStep.value = 'name'
     participantId.value = getOrCreateParticipantId()
-    status.value = 'idle'
+    status.value = imagesReady.value ? 'idle' : 'connecting'
     return
   }
 
-  // First session state: transition from connecting/waiting
+  // First session state: transition from connecting/waiting (only when images are loaded)
   if (status.value === 'connecting' || status.value === 'waiting') {
+    if (!imagesReady.value) return
     const savedCrew = loadCrew()
     if (savedCrew) {
       joinedName.value = savedCrew.name
@@ -159,6 +161,13 @@ function handleSessionState(msg: SessionStateMessage) {
     }
   }
 }
+
+// When images finish loading, complete any deferred transition
+watch(imagesReady, (ready) => {
+  if (ready && sessionState.value && (status.value === 'connecting' || status.value === 'waiting')) {
+    handleSessionState(sessionState.value)
+  }
+})
 
 // ===========================================
 // Navigation
@@ -256,13 +265,19 @@ document.addEventListener('click', requestFullscreen, { once: true })
 // Preload images
 // ===========================================
 
-function preloadImages() {
+function preloadImages(): Promise<void> {
   const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
   const urls = [
     '/vote/Bg.webp', '/vote/A.webp', '/vote/B.webp', '/vote/light.webp', '/vote/blueprint.webp', '/vote/shadow.webp',
     ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
   ]
-  urls.forEach(src => { new Image().src = src })
+  const promises = urls.map(src => new Promise<void>((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve()
+    img.onerror = () => resolve()
+    img.src = src
+  }))
+  return Promise.all(promises).then(() => {})
 }
 
 // ===========================================
@@ -270,7 +285,7 @@ function preloadImages() {
 // ===========================================
 
 onMounted(async () => {
-  preloadImages()
+  preloadImages().then(() => { imagesReady.value = true })
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
@@ -317,6 +332,7 @@ onMounted(async () => {
       <img
         src="/vote/Bg.webp"
         alt=""
+        fetchpriority="high"
         class="absolute inset-0 w-full h-full object-cover z-0"
       />
       <img
@@ -329,7 +345,7 @@ onMounted(async () => {
         alt=""
         class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-48 mix-blend-multiply"
       />
-      <div class="absolute bottom-[14%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
+      <div class="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
         <NameForm
           v-model="name"
           :validation-message="validationMessage"
