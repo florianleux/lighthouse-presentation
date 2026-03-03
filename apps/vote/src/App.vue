@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { STORAGE_KEYS } from '../../../shared/constants'
+import { STORAGE_KEYS, AVATAR_CONFIG } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import { getMetricByIndex, METRICS_LIST } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
@@ -267,10 +267,28 @@ document.addEventListener('click', requestFullscreen, { once: true })
 
 function preloadImages(): Promise<void> {
   const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
-  const urls = [
+  const urls: string[] = [
     '/vote/Bg.webp', '/vote/A.webp', '/vote/B.webp', '/vote/light.webp', '/vote/blueprint.webp', '/vote/shadow.webp',
     ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
   ]
+
+  // Avatar assets (~200 small webp layers)
+  const { GENDERS, SKIN_TONES, MOUTH_COUNT, NOSE_COUNT, EYE_OPTIONS, EYE_COLORS, ACCESSORY_COUNT, ACCESSORY_COUNT_FEMALE, HAIR_OPTIONS, HAIR_COLORS, HAT_OPTIONS, HAT_COLORS } = AVATAR_CONFIG
+  for (const gender of GENDERS) {
+    const maxAcc = gender === 'male' ? ACCESSORY_COUNT : ACCESSORY_COUNT_FEMALE
+    for (const tone of SKIN_TONES) {
+      const base = `/avatars/${gender}/${tone}_tone`
+      urls.push(`${base}/face.webp`)
+      for (let i = 1; i <= MOUTH_COUNT; i++) urls.push(`${base}/mouth/mouth_${i}.webp`)
+      for (let o = 1; o <= EYE_OPTIONS; o++) for (let c = 1; c <= EYE_COLORS; c++) urls.push(`${base}/eyes/option_${o}/color_${c}.webp`)
+      for (let i = 1; i <= NOSE_COUNT; i++) urls.push(`${base}/nose/nose_${i}.webp`)
+      for (let i = 1; i <= maxAcc; i++) urls.push(`${base}/accessories/accessory_${i}.webp`)
+      urls.push(`${base}/accessories/eye_patch_left.webp`, `${base}/accessories/eye_patch_right.webp`)
+    }
+    for (let o = 1; o <= HAIR_OPTIONS; o++) for (let c = 1; c <= HAIR_COLORS; c++) urls.push(`/avatars/${gender}/hair/option_${o}/color_${c}.webp`)
+    for (let o = 1; o <= HAT_OPTIONS; o++) for (let c = 1; c <= HAT_COLORS; c++) urls.push(`/avatars/${gender}/hats/option_${o}/color_${c}.webp`)
+  }
+
   const promises = urls.map(src => new Promise<void>((resolve) => {
     const img = new Image()
     img.onload = () => resolve()
