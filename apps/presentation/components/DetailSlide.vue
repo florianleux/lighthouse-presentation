@@ -17,11 +17,8 @@ const optionData = computed(() => metricData.value.options[props.option])
       <div class="text-4xl font-title">
         {{ optionData.title }}
       </div>
-      <div
-        v-if="optionData.keywords.length > 0"
-        class="text-left text-lg"
-      >
-        {{ optionData.keywords.join(' and ') }}
+      <div class="text-left text-lg">
+        {{ optionData.subtitle }}
       </div>
     </div>
 
