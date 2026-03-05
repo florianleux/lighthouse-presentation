@@ -337,11 +337,14 @@ transition: slide-down
 ---
 <div class="slide-bg" style="background-image: url('/backgrounds/end-middle.png')">
 
+<div class="px-10 pt-15 text-white ">
+<div  class="w-full text-center text-4xl italic">"Any observed statistical regularity will tend to collapse once pressure is placed upon it for control purposes" </div>
 
-<div class="grid mt-15 pl-15 text-shadow-md grid-cols-2 gap-10 pt-4 text-white">
-<div>
-PLACEHOLDER OUTRO
-</div>
+
+<div class="text-right mt-10 text-3xl">Charles Goodhart, 1975</div> 
+
+
+<div class="v-click w-full text-center mt-15 text-5xl">When a measure becomes a target, it ceases to be a good measure </div>
 
 </div>
 

@@ -95,6 +95,13 @@ function clearTimer() {
   }
 }
 
+// Reset timer display when vote phase resets (e.g. after session reset)
+watch(() => sessionStore.votePhase, (phase) => {
+  if (phase === 'waiting') {
+    timeRemaining.value = VOTE_DURATION
+  }
+})
+
 // Auto-stop when all crew members have voted
 const totalVotes = computed(() => {
   const r = sessionStore.voteResults[voteIndex.value]

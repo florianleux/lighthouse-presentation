@@ -15,17 +15,17 @@ defineProps<{
   <div class="flex flex-col text-center w-[28%] h-[70%]">
     <div class="mb-4">
       <div class="flex flex-col items-center mb-4">
-        <div class="text-xl font-bold font-title">
+        <div class="text-2xl font-title mt-5">
           Option {{ letter }}
         </div>
-        <div class="text-4xl font-bold font-title w-[80%]">{{ title }}</div>
+        <div class="text-5xl mt-5 font-bold font-title w-[80%]">{{ title }}</div>
         <div class="text-lg italic text-center">
           {{ subtitle }}
         </div>
       </div>
 
     </div>
-
+    <!-- 
     <div
       v-if="keywords.length > 0"
       class="grid grid-cols-2 gap-4"
@@ -40,6 +40,6 @@ defineProps<{
       >
         {{ keyword }}
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
