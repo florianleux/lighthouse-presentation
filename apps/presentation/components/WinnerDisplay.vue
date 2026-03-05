@@ -29,9 +29,10 @@ const winner = computed(() => {
       v-if="choice && winner"
       class="flex flex-col items-left h-full pt-5 text-center"
     >
-      <div class="absolute left-[31%] top-[20%] -translate-x-1/2">
-        <div>The crew has voted for</div>
-        <div class="font-bold font-title text-5xl">{{ winner.title }}</div>
+      <div class="absolute left-[31%] top-[30%] w-[50%] -translate-1/2">
+        <div class="text-2xl">The crew has voted for
+        </div>
+        <div class="font-bold font-title text-7xl">{{ winner.title }}</div>
       </div>
 
       <div class="absolute w-[25.5%] h-[73%] left-[79.6%] top-[10.4%] -translate-x-1/2">

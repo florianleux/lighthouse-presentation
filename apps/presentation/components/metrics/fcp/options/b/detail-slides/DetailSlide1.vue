@@ -6,7 +6,7 @@ const jsCodeExample = `document.write()`
 
   <div
     class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-1.webp');"
+    style="background-image: url('/backgrounds/parchment-top-left.png');"
   >
     <DetailSlide
       class="pl-10 pt-5 relative"

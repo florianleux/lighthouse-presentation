@@ -35,14 +35,6 @@ export interface MetricOptions {
 }
 
 /**
- * Business impact case study
- */
-export interface BusinessInfo {
-  company: string
-  comment: string
-}
-
-/**
  * Threshold values for metric scoring
  * Can be numbers (e.g., 0.1) or strings (e.g., '1.8 sec')
  */
@@ -62,8 +54,6 @@ export interface MetricConfig {
   thresholds: [ThresholdValue, ThresholdValue] // [good, poor] boundaries
   formula: string // h3 prop - description/formula
   tags: string[] // Key points (up to 4)
-  businessInfo: BusinessInfo[]
-
   // Vote options
   options: MetricOptions
 }
@@ -98,9 +88,6 @@ export const METRICS: MetricsData = {
       'User-initiated shifts are excluded',
       'Only the worst burst of shift counts',
     ],
-    businessInfo: [
-      { company: 'Yahoo! Japan', comment: 'Reduced CLS by 0.2 → 15% increase in page views' },
-    ],
     options: {
       a: {
         title: 'First-party assets',
@@ -123,7 +110,6 @@ export const METRICS: MetricsData = {
     thresholds: ['1.8 sec', '3.0 sec'],
     formula: 'Text, image, SVG or canvas',
     tags: ['Is anything happening?', 'Low FCP is reassuring'],
-    businessInfo: [],
     options: {
       a: {
         title: 'TTFB',
@@ -151,7 +137,6 @@ export const METRICS: MetricsData = {
       'Usually hero image or heading',
       'Affected by server response time',
     ],
-    businessInfo: [],
     options: {
       a: {
         title: '[PLACEHOLDER Option A]',
@@ -179,7 +164,6 @@ export const METRICS: MetricsData = {
       'Long tasks block main thread',
       'Highest weight in Performance score',
     ],
-    businessInfo: [],
     options: {
       a: {
         title: 'Code Execution',
@@ -207,7 +191,6 @@ export const METRICS: MetricsData = {
       'Affected by render-blocking resources',
       'Complements FCP and LCP',
     ],
-    businessInfo: [],
     options: {
       a: {
         title: 'Above the fold',

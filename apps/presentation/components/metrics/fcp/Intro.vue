@@ -1,4 +1,4 @@
-<!-- TODO: Review MetricIntro content (tags, thresholds, businessInfo, formula) -->
+<!-- TODO: Review MetricIntro content (tags, thresholds, formula) -->
 <script setup lang="ts">
 import MetricIntro from '../../MetricIntro.vue'
 </script>
@@ -6,13 +6,13 @@ import MetricIntro from '../../MetricIntro.vue'
 <template>
   <MetricIntro metric="fcp">
     <template #bottom>
-      <div class="mt-20 relative">
+      <div class="mt-5 relative">
         <div class="pb-2 grid grid-cols-2 gap-2 text-center text-xl">
-          <span class="text-option-a">TTFB</span>
-          <span class="text-green-500">Rendering path</span>
+          <span class="text-blue-500 font-title text-2xl">TTFB</span>
+          <span class="text-green-500 font-title text-2xl">Rendering path</span>
         </div>
         <!-- Timeline bar -->
-        <div class="h-2 bg-gray-300 rounded-full relative">
+        <div class="-mt-1 h-2 bg-gray-300 rounded-full relative">
           <!-- TTFB section -->
           <div class="absolute left-0 w-1/2 h-full bg-blue-400 rounded-l-full"></div>
           <!-- Rendering path section -->

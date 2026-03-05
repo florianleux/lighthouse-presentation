@@ -1,7 +1,10 @@
-
 <template>
-  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-2.webp');">
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/cls-detail-2.webp');"
+  >
     <DetailSlide
+      class="pl-10 pt-5"
       metric="fcp"
       option="a"
     >
@@ -20,4 +23,3 @@
     </DetailSlide>
   </div>
 </template>
-

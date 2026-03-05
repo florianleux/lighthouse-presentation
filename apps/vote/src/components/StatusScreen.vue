@@ -14,3 +14,4 @@ defineProps<{
     <p v-if="variant === 'error'" class="text-sm opacity-60 mt-2">Check your internet connection</p>
   </div>
 </template>
+po

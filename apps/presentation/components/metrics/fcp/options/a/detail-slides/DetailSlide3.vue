@@ -7,6 +7,7 @@
     style="background-image: url('/backgrounds/cls-detail-4.webp');"
   >
     <DetailSlide
+      class="px-10 pt-5"
       metric="fcp"
       option="a"
     >

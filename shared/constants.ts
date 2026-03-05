@@ -15,16 +15,14 @@ export const FIRESTORE_COLLECTIONS = {
 } as const
 
 // Vote configuration
-// TODO: Remettre DURATION_SECONDS à 30 avant la présentation !
 export const VOTE_CONFIG = {
-  DURATION_SECONDS: Infinity,
+  DURATION_SECONDS: 30,
   GRACE_PERIOD_SECONDS: 3,
 } as const
 
 // Poll configuration
-// TODO: Remettre DURATION_SECONDS à 30 avant la présentation !
 export const POLL_CONFIG = {
-  DURATION_SECONDS: Infinity,
+  DURATION_SECONDS: 30,
   GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: 'knowledge-level',
   CHOICES: ['cabin_boy', 'captain', 'admiral'] as const,
