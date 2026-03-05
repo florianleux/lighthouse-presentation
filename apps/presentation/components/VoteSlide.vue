@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
+import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds, debugMode } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
 import { useResolvedMetric } from '../composables/useResolvedMetric'
 import { getMetricByIndex } from '../../../shared/metrics-data'
@@ -23,15 +23,27 @@ const floorB = computed(() => `/floors/floor-${metricName.value}-b.png`)
 const posA = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.a ?? {})
 const posB = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.b ?? {})
 
-const { next } = useNav()
+const { next, currentSlideNo } = useNav()
+
+// Block navigation during active vote (capture phase to intercept before Slidev)
+function blockNavigation(e: KeyboardEvent) {
+  if (!isVoteActive.value) return
+  const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'PageUp', 'PageDown']
+  if (navKeys.includes(e.code) || navKeys.includes(e.key)) {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+}
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeydown)
+  window.addEventListener('keydown', blockNavigation, true)
 })
 
 onUnmounted(() => {
   clearTimer()
   window.removeEventListener('keydown', handleKeydown)
+  window.removeEventListener('keydown', blockNavigation, true)
 })
 
 // --- Vote logic (shared by manual + audience) ---
@@ -115,9 +127,28 @@ watch(totalVotes, (total) => {
   }
 })
 
-// Keyboard shortcut: V to start vote
+// Auto-start vote when arriving on this slide
+// All VoteSlide instances are mounted by Slidev, so check DOM visibility to only start the right one
+const slideEl = ref<HTMLElement | null>(null)
+
+function isSlideVisible(): boolean {
+  if (!slideEl.value) return false
+  const rect = slideEl.value.getBoundingClientRect()
+  return rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.bottom > 0
+}
+
+watch(currentSlideNo, () => {
+  if (sessionStore.manualMode || isVoteDone.value || isVoteActive.value) return
+  setTimeout(() => {
+    if (isSlideVisible() && !isVoteDone.value && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
+      startVoteSession()
+    }
+  }, 200)
+})
+
+// Keyboard shortcut: V to start vote (debug only)
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !sessionStore.manualMode) {
+  if (debugMode && e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !sessionStore.manualMode) {
     startVoteSession()
   }
 }
@@ -185,6 +216,7 @@ async function stopVoteSession() {
 
 <template>
   <div
+    ref="slideEl"
     class="slide-bg relative"
     style="background-image: url('/backgrounds/metric-intro-br.webp');"
   >
@@ -220,9 +252,9 @@ async function stopVoteSession() {
         <div class="font-bold text-sm font-title">{{ titleB }}</div>
       </div>
 
-      <!-- Audience vote control -->
+      <!-- Audience vote control (debug only) -->
       <button
-        v-if="!sessionStore.manualMode && !isVoteDone"
+        v-if="debugMode && !sessionStore.manualMode && !isVoteDone"
         class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
         @click="isVoteActive ? stopVoteSession() : startVoteSession()"
       >

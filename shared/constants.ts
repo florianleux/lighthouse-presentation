@@ -16,7 +16,7 @@ export const FIRESTORE_COLLECTIONS = {
 
 // Vote configuration
 export const VOTE_CONFIG = {
-  DURATION_SECONDS: 30,
+  DURATION_SECONDS: 40,
   GRACE_PERIOD_SECONDS: 3,
 } as const
 
