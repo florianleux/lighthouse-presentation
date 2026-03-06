@@ -1,65 +1,58 @@
 <script setup lang="ts">
-const stickyPositionCodeExample = `
-.sticky-chat {
-  position: sticky;
-  top: 20px;
-  height: 600px;
-  width: 160px;
-}
-`
+import { inject, computed } from 'vue'
 
-const facadeVideoCodeExample = `
-<div class="youtube-facade">
-  <img
-    src="thumbnail.jpg"
-    alt="Video thumbnail"
-    width="1280"
-    height="720"
-  >
-  ... svg for play button ...
-</div>
-`
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
+const stickyPositionCodeExample = `.banner-container {
+  position: sticky;
+  bottom: 0;
+  z-index: 9999;
+}`
 </script>
 
 <template>
-  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-4.webp');">
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/cls-detail-4.webp');"
+  >
     <DetailSlide
-      class="ml-10"
+      class="pl-10 pt-5"
       metric="cls"
       option="b"
     >
-      <div class="grid grid-cols-2">
-        <div class="flex flex-col items-center justify-top gap-6">
-          <div class="text-center">
-            Everything in the flow can cause shifts
-          </div>
-          <div class="text-4xl text-center font-bold">Sticky and fixed elements</div>
-          <CodeSnippet
-            language="css"
-            :code="stickyPositionCodeExample"
-            size="small"
-          />
-
-
-        </div>
-        <div class="flex flex-col items-center justify-top gap-6 pr-10">
-          <div class="text-center">
-            Static content loads faster
-          </div>
-          <div class="text-4xl text-center font-bold">Facade videos</div>
-          <div class="px-10">
-            <CodeSnippet
-              language="html"
-              :code="facadeVideoCodeExample"
-              size="small"
-            />
-          </div>
-
-        </div>
-
+      <div
+        v-click="1"
+        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
+      >
+        Injection is more risky to cause shifts in the flow.
       </div>
 
+      <div
+        v-click="2"
+        class="mt-5 text-5xl text-center font-bold"
+      >Extract it!</div>
+
+      <img
+        v-click="1"
+        src="/images/cls-banner-before.gif"
+        class="absolute left-[27%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
+        alt="Banner CLS before fix"
+      />
+      <img
+        v-click="3"
+        src="/images/cls-banner-after.gif"
+        class="absolute right-[10%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
+        alt="Banner CLS after fix"
+      />
+
+      <CodeSnippet
+        v-click="2"
+        class="absolute top-[72%] left-[52%] -translate-1/2"
+        language="css"
+        :code="stickyPositionCodeExample"
+        size="small"
+      />
     </DetailSlide>
   </div>
 </template>
-
