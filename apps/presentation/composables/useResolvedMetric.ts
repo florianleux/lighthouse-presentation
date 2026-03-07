@@ -33,7 +33,6 @@ export function useResolvedMetric() {
         base.optionB = {
           title: sourceOption.title,
           subtitle: sourceOption.subtitle,
-          keywords: sourceOption.keywords,
         }
       }
     }
@@ -46,7 +45,6 @@ export function useResolvedMetric() {
         base.optionA = {
           title: sourceOption.title,
           subtitle: sourceOption.subtitle,
-          keywords: sourceOption.keywords,
         }
       }
     }

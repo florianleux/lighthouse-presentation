@@ -11,7 +11,7 @@
       metric="fcp"
       option="a"
     >
-      <div class=" flex flex-col items-center pt-5">
+      <div class=" flex flex-col items-center ">
         <div class=" w-[70%] relative ">
           <div class="flex rounded mx-auto overflow-hidden h-8">
             <div
@@ -36,7 +36,7 @@
 
         <div class="text-4xl mt-15">The starting point for all other metrics. </div>
 
-        <!-- TTFB breakdown timeline -->
+        <!-- TTFB breakdown timeline
         <div class="mt-20 w-[90%]">
           <div class="grid grid-cols-7 gap-0.5">
             <div class="bg-yellow-300 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">Redirect
@@ -51,9 +51,29 @@
             <div class="bg-orange-600 text-white text-xs px-2 py-2 rounded text-center font-semibold">Response</div>
           </div>
         </div>
+        -->
 
       </div>
 
+      <!-- Client island (left) -->
+      <img
+        src="/images/ttfb/island-client.png"
+        class="absolute left-[20%] top-[75%] -translate-1/2 h-[35%]"
+      />
+      <img
+        src="/images/ttfb/pirate.png"
+        class="absolute left-[20%] top-[68%] -translate-1/2 h-[25%]"
+      />
+
+      <!-- Server island (right) -->
+      <img
+        src="/images/ttfb/island-server.png"
+        class="absolute left-[80%] top-[75%] -translate-1/2 h-[35%]"
+      />
+      <img
+        src="/images/ttfb/server.png"
+        class="absolute left-[80%] top-[68%] -translate-1/2 h-[25%]"
+      />
 
     </DetailSlide>
   </div>

@@ -38,5 +38,6 @@ const DetailComponent = computed<Component | null>(() => {
   <component
     v-if="DetailComponent"
     :is="DetailComponent"
+    :key="`${metric}-${winner}-${slideIndex}`"
   />
 </template>

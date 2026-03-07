@@ -1,79 +1,62 @@
 <script setup lang="ts">
-const optionalFallbackCodeExample = `@font-face {
-  font-family: 'CustomFont';
-  src: url('font.woff2');
-  font-display: optional;
-}
-`
+import { inject, computed } from 'vue'
+
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
 
 const matchingMetricsCodeExample = `@font-face {
-  font-family: 'Adjusted Fallback';
-  src: local('Arial');
-  size-adjust: 105%;
-  ascent-override: 95%;
-  descent-override: 22%;
+  font-family: 'New Rocker Fallback';
+  src: local('Comic Sans MS');
+  size-adjust: 92.3%;
+  ascent-override: 94.6%;
+  descent-override: 28.3%;
   line-gap-override: 0%;
 }
 `
-const preloadCodeExample = `<link
-  rel="preload"
-  href="/fonts/custom.woff2"
-  as="font"
-  type="font/woff2"
-  crossorigin
->
-`
-
 </script>
 
 <template>
-  <div class="slide-bg" style="background-image: url('/backgrounds/cls-detail-2.webp');">
+  <div
+    class="slide-bg"
+    style="background-image: url('/backgrounds/cls-detail-2.webp');"
+  >
     <DetailSlide
-      class="pl-10"
+      class="pl-10 pt-5"
       metric="cls"
       option="a"
     >
-      <div class="items-center flex-grow justify-center flex mt-10 text-xl gap-20">
-        <div>
-          Flash of unstyled text (FOUT)
-        </div>
-        <div>
-          Flash of invisible text (FOIT) </div>
+      <div
+        v-click="1"
+        :class="[clicks >= 2 ? 'text-xl' : 'text-5xl', 'text-center transition-all duration-800']"
+      >
+        Every font has its own footprint.
       </div>
-      <div class="flex flex-col items-center mt-10 gap-5">
-        <div class="grid grid-cols-3 items-center gap-10">
-          <div class="flex flex-col items-center">
-            <div class="text-4xl text-center font-bold">Optional fallback</div>
 
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="text-4xl text-center font-bold">Matching metrics</div>
+      <div
+        v-click="2"
+        class="mt-5 text-5xl text-center font-bold"
+      >Fill the gap</div>
 
-          </div>
-          <div class="flex flex-col items-center">
-            <div class="text-4xl text-center  font-bold">Preload</div>
+      <img
+        v-click="1"
+        src="/images/cls-font-before.gif"
+        class="absolute left-[21%] top-[68%] -translate-1/2 rounded shadow-lg w-[17%]"
+        alt="Font CLS before fix"
+      />
+      <img
+        v-click="3"
+        src="/images/cls-font-after.gif"
+        class="absolute right-[0%] top-[68%] -translate-1/2 rounded shadow-lg w-[17%]"
+        alt="Font CLS after fix"
+      />
 
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-10">
-          <CodeSnippet
-            language="css"
-            :code="optionalFallbackCodeExample"
-            size="tiny"
-          />
-          <CodeSnippet
-            language="css"
-            :code="matchingMetricsCodeExample"
-            size="tiny"
-          />
-          <CodeSnippet
-            language="html"
-            :code="preloadCodeExample"
-            size="tiny"
-          />
-        </div>
-      </div>
+      <CodeSnippet
+        v-click="2"
+        class="absolute top-[68%] left-[52%] -translate-1/2"
+        language="css"
+        :code="matchingMetricsCodeExample"
+        size="small"
+      />
     </DetailSlide>
   </div>
 </template>
-

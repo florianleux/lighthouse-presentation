@@ -40,10 +40,10 @@ transition: slide-right
 <div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
 <div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-md">
-    <div class="absolute font-bold left-[22%] text-white top-[24%] text-4xl">Performance</div>
-    <div class="absolute font-bold text-2xl left-[47%] text-white top-[43%] ">Accessibility</div>
-    <div class="absolute font-bold text-2xl left-[67%] text-white top-[35%] ">Best<br>Practices</div>
-    <div class="absolute text-2xl left-[90%] text-[#2a384c] top-[40%] font-bold">SEO</div>
+    <div v-click="4"  class="absolute font-bold left-[22%] text-white top-[24%] text-4xl">Performance</div>
+    <div v-click="3"  class="absolute font-bold text-2xl left-[47%] text-white top-[43%] ">Accessibility</div>
+    <div v-click="2"  class="absolute font-bold text-2xl left-[67%] text-white top-[35%] ">Best<br>Practices</div>
+    <div v-click="1" class="absolute text-2xl left-[90%] text-[#2a384c] top-[40%] font-bold">SEO</div>
 </div>
 </div>
 
@@ -52,30 +52,18 @@ transition: slide-up
 ---
 
 <div class="slide-bg" style="background-image: url('/backgrounds/intro/4.png')">
+<div class="text-shadow-md text-white">
+<div class="text-4xl text-white font-title">Why does performance matters ?</div>
 
-<div class="text-4xl text-shadow-md text-white font-title">Why does performance matters ?</div>
 
-<div class="grid mt-8 pl-15 text-shadow-md grid-cols-2 pt-4 text-white">
-<div>
-    <div class="text-8xl font-bold">53%</div>
-    <div class="text-8xl mt-10 font-bold">70%</div>
+<div class="text-center">
+    <div v-click class="text-9xl mt-20 text-white text-center font-bold">24%</div>
+    <div v-click class="text-3xl">fewer visitors abandon a page<br>that meets Google's performance standards</div>
 </div>
-<div class="mt-10">
-    <div class="text-8xl font-bold">32%</div>
-    <div class="text-8xl mt-10 font-bold">3x</div>
-</div>
-
-
 </div>
 
 </div>
 
-<!--
-53% of users leave if page loads > 3s
-70% of consumers say speed affects their purchase decisions
-32% increase in bounce rate when load time goes from 1s to 3s
-3x higher conversion rate for sites loading in 1s vs 5s
--->
 
 ---
 transition: slide-up

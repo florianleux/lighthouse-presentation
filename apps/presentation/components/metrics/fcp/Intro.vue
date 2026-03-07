@@ -6,10 +6,19 @@ import MetricIntro from '../../MetricIntro.vue'
 <template>
   <MetricIntro metric="fcp">
     <template #bottom>
-      <div class="mt-5 relative">
+      <div
+        v-click="6"
+        class="mt-5 relative"
+      >
         <div class="pb-2 grid grid-cols-2 gap-2 text-center text-xl">
-          <span class="text-blue-500 font-title text-2xl">TTFB</span>
-          <span class="text-green-500 font-title text-2xl">Rendering path</span>
+          <span
+            v-click="7"
+            class="text-blue-500 font-title text-2xl"
+          >TTFB</span>
+          <span
+            v-click="8"
+            class="text-green-500 font-title text-2xl"
+          >Rendering path</span>
         </div>
         <!-- Timeline bar -->
         <div class="-mt-1 h-2 bg-gray-300 rounded-full relative">
@@ -24,19 +33,19 @@ import MetricIntro from '../../MetricIntro.vue'
           <div class="text-md mt-1">Navigation</div>
 
           <div class="flex flex-col text-center mt-2">
-            <div class="text-xs"> DNS - TCP - TLS </div>
+            <!-- <div class="text-xs"> DNS - TCP - TLS </div>
             <div class="text-xs"> Request sent</div>
             <div class="text-xs"> Server</div>
-            <div class="text-xs"> Transit </div>
+            <div class="text-xs"> Transit </div> -->
           </div>
           <div class="flex flex-col items-center col-span-2">
             <span class="text-md mt-1">First byte</span>
           </div>
           <div class="flex flex-col text-center mt-2">
-            <div class="text-xs"> Parsing </div>
+            <!-- <div class="text-xs"> Parsing </div>
             <div class="text-xs"> Render Tree</div>
             <div class="text-xs"> Layout</div>
-            <div class="text-xs"> Paint </div>
+            <div class="text-xs"> Paint </div> -->
           </div>
           <div class="text-right text-md mt-1">FCP</div>
 
@@ -44,9 +53,11 @@ import MetricIntro from '../../MetricIntro.vue'
       </div>
     </template>
     <template #right>
-      <div class="w-full h-full bg-gray-700 rounded flex items-center justify-center text-gray-400">
-        Video Placeholder - FCP
-      </div>
+      <img
+        src="/images/fcp.gif"
+        alt="FCP demo"
+        class="absolute right-[10%] top-[12%] h-[75%] w-auto rounded shadow-md"
+      />
     </template>
   </MetricIntro>
 </template>

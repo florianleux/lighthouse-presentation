@@ -1,11 +1,12 @@
 <script setup lang="ts">
-const cssImage = `
-.banner { 
+const cssImage = `/* Preload scanner: NO */
+.banner {
   background-image: url('promo-banner.jpg');
 }
 `
 
-const jsImage = `const img = document.createElement('img');
+const jsImage = `// Preload scanner: NO
+const img = document.createElement('img');
 img.src = 'promo-banner.jpg';
 document.body.appendChild(img);
 `
@@ -16,15 +17,16 @@ const svgImage = `
 </svg>
 `
 
-const injectedSrcImage = `
+const injectedSrcImage = `<!-- Preload scanner: NO -->
 <img id="banner">
 <` + `script>
     document.getElementById('banner').src = 'promo-banner.jpg';
 </` + `script>`
 
-const htmlImage = `<img 
-  src="promo-banner.jpg" 
-  alt = "Promo banner" 
+const htmlImage = `<!-- Preload scanner: YES -->
+<img
+  src="promo-banner.jpg"
+  alt = "Promo banner"
 />`
 
 </script>

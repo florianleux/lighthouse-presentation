@@ -8,67 +8,56 @@
 // ===========================================
 
 /**
- * Keywords for Choice component (1-4 items)
- */
-export type Keywords =
-  | [string]
-  | [string, string]
-  | [string, string, string]
-  | [string, string, string, string]
-
-/**
  * A single choice option (A or B) for a metric
  */
 export interface MetricOption {
-  // For Choice component
-  title: string
-  subtitle: string
-  keywords: Keywords
+  title: string;
+  subtitle: string;
 }
 
 /**
  * Both options for a metric
  */
 export interface MetricOptions {
-  a: MetricOption
-  b: MetricOption
+  a: MetricOption;
+  b: MetricOption;
 }
 
 /**
  * Threshold values for metric scoring
  * Can be numbers (e.g., 0.1) or strings (e.g., '1.8 sec')
  */
-export type ThresholdValue = number | string
+export type ThresholdValue = number | string;
 
 /**
  * Complete metric configuration
  */
 export interface MetricConfig {
   // Core identification
-  index: number
-  name: string // 'CLS', 'FCP', 'LCP', 'TBT', 'SI'
-  fullName: string
-  weight: number // Percentage (25, 10, 25, 30, 10)
+  index: number;
+  name: string; // 'CLS', 'FCP', 'LCP', 'TBT', 'SI'
+  fullName: string;
+  weight: number; // Percentage (25, 10, 25, 30, 10)
 
   // For MetricIntro component
-  thresholds: [ThresholdValue, ThresholdValue] // [good, poor] boundaries
-  formula: string // h3 prop - description/formula
-  tags: string[] // Key points (up to 4)
+  thresholds: [ThresholdValue, ThresholdValue]; // [good, poor] boundaries
+  formula: string; // h3 prop - description/formula
+  tags: string[]; // Key points (up to 4)
   // Vote options
-  options: MetricOptions
+  options: MetricOptions;
 }
 
 /**
  * Lowercase metric name keys for API access
  */
-export type MetricName = 'cls' | 'fcp' | 'lcp' | 'tbt' | 'si'
+export type MetricName = "cls" | "fcp" | "lcp" | "tbt" | "si";
 
 /**
  * The full metrics data structure supporting access like METRICS.fcp.options.a.title
  */
 export type MetricsData = {
-  [K in MetricName]: MetricConfig
-}
+  [K in MetricName]: MetricConfig;
+};
 
 // ===========================================
 // Metrics Configuration Data
@@ -77,134 +66,119 @@ export type MetricsData = {
 export const METRICS: MetricsData = {
   cls: {
     index: 0,
-    name: 'CLS',
-    fullName: 'Cumulative Layout Shift',
+    name: "CLS",
+    fullName: "Cumulative Layout Shift",
     weight: 25,
     thresholds: [0.1, 0.25],
-    formula: 'Impact fraction × Distance fraction',
-    tags: [
-      'Core Web Vital: Impacts SEO!',
-      'High CLS destroys trust',
-      'User-initiated shifts are excluded',
-      'Only the worst burst of shift counts',
-    ],
+    formula: "Unexpected movement during loading",
+    tags: ["Trust killer", "Will impact SEO!"],
     options: {
       a: {
-        title: 'First-party assets',
-        subtitle: 'Optimize what you control',
-        keywords: ['Images', 'Fonts'],
+        title: "Content",
+        subtitle: "Control what you own",
       },
       b: {
-        title: 'Third-party content',
-        subtitle: 'Tame the unpredictable',
-        keywords: ['Ads', 'Embeds'],
+        title: "Ads",
+        subtitle: "Tame the injected",
       },
     },
   },
 
   fcp: {
     index: 1,
-    name: 'FCP',
-    fullName: 'First Contentful Paint',
+    name: "FCP",
+    fullName: "First Contentful Paint",
     weight: 10,
-    thresholds: ['1.8 sec', '3.0 sec'],
-    formula: 'Text, image, SVG or canvas',
-    tags: ['Is anything happening?', 'Low FCP is reassuring'],
+    thresholds: ["1.8 sec", "3.0 sec"],
+    formula: "Text, image, SVG or canvas",
+    tags: ["Is anything happening?", "Low FCP is reassuring"],
     options: {
       a: {
-        title: 'TTFB',
-        subtitle: 'Reduce the time of delivery',
-        keywords: ['Reduce distance', 'Save time'],
+        title: "TTFB",
+        subtitle: "Reduce the time of delivery",
       },
       b: {
-        title: 'The critical rendering path',
-        subtitle: 'Smooth the painting process',
-        keywords: ['Rendering blockers', 'Parsing blockers'],
+        title: "The critical rendering path",
+        subtitle: "Smooth the painting process",
       },
     },
   },
 
   lcp: {
     index: 2,
-    name: 'LCP',
-    fullName: 'Largest Contentful Paint',
+    name: "LCP",
+    fullName: "Largest Contentful Paint",
     weight: 25,
-    thresholds: ['2.5 sec', '4.0 sec'],
-    formula: 'Time to render largest element',
+    thresholds: ["2.5 sec", "4.0 sec"],
+    formula: "Time to render largest element",
     tags: [
-      'Core Web Vital: Impacts SEO!',
-      'Measures perceived load speed',
-      'Usually hero image or heading',
-      'Affected by server response time',
+      "Core Web Vital: Impacts SEO!",
+      "Measures perceived load speed",
+      "Usually hero image or heading",
+      "Affected by server response time",
     ],
     options: {
       a: {
-        title: '[PLACEHOLDER Option A]',
-        subtitle: '[PLACEHOLDER subtitle]',
-        keywords: ['[Keyword 1]', '[Keyword 2]'],
+        title: "[PLACEHOLDER Option A]",
+        subtitle: "[PLACEHOLDER subtitle]",
       },
       b: {
-        title: 'Focus on LCP',
-        subtitle: 'Save effort, target smart',
-        keywords: ['Identify', 'Optimize'],
+        title: "Focus on LCP",
+        subtitle: "Save effort, target smart",
       },
     },
   },
 
   tbt: {
     index: 3,
-    name: 'TBT',
-    fullName: 'Total Blocking Time',
+    name: "TBT",
+    fullName: "Total Blocking Time",
     weight: 30,
-    thresholds: ['200 ms', '600 ms'],
-    formula: 'Sum of blocking time beyond 50ms',
+    thresholds: ["200 ms", "600 ms"],
+    formula: "Sum of blocking time beyond 50ms",
     tags: [
-      'Lab metric (not field)',
-      'Proxy for First Input Delay',
-      'Long tasks block main thread',
-      'Highest weight in Performance score',
+      "Lab metric (not field)",
+      "Proxy for First Input Delay",
+      "Long tasks block main thread",
+      "Highest weight in Performance score",
     ],
     options: {
       a: {
-        title: 'Code Execution',
-        subtitle: 'Break up the work',
-        keywords: ['Split tasks', 'Avoid forced layouts'],
+        title: "Code Execution",
+        subtitle: "Break up the work",
       },
       b: {
-        title: 'Page Structure',
-        subtitle: 'Simplify calculations',
-        keywords: ['CSS selectors', 'DOM complexity'],
+        title: "Page Structure",
+        subtitle: "Simplify calculations",
       },
     },
   },
 
   si: {
     index: 4,
-    name: 'SI',
-    fullName: 'Speed Index',
+    name: "SI",
+    fullName: "Speed Index",
     weight: 10,
-    thresholds: ['3.4 sec', '5.8 sec'],
-    formula: 'How quickly content is visually displayed',
+    thresholds: ["3.4 sec", "5.8 sec"],
+    formula: "How quickly content is visually displayed",
     tags: [
-      'Measures visual progression',
-      'Lower is better',
-      'Affected by render-blocking resources',
-      'Complements FCP and LCP',
+      "Measures visual progression",
+      "Lower is better",
+      "Affected by render-blocking resources",
+      "Complements FCP and LCP",
     ],
     options: {
       a: {
-        title: 'Above the fold',
-        subtitle: 'Trick the metrics',
-        keywords: ['Critical CSS', 'Hero takeover'],
+        title: "Above the fold",
+        subtitle: "Trick the metrics",
       },
       b: {
-        title: 'Compression',
-        subtitle: 'Trim to the bone',
-        keywords: ['Font subsetting', 'Text compression'],
+        title: "Compression",
+        subtitle: "Trim to the bone",
       },
     },
   },
-}
+};
 
 // ===========================================
 // Derived Options (cross-metric option reuse)
@@ -216,8 +190,8 @@ export const METRICS: MetricsData = {
  * Value: sourceMetricIndex of the vote whose loser provides the content
  */
 export const DERIVED_OPTIONS: Record<string, { sourceMetricIndex: number }> = {
-  'lcp:a': { sourceMetricIndex: 1 }, // LCP option A = FCP loser
-}
+  "lcp:a": { sourceMetricIndex: 1 }, // LCP option A = FCP loser
+};
 
 /**
  * Resolves a potentially derived option to its actual source.
@@ -228,32 +202,32 @@ export const DERIVED_OPTIONS: Record<string, { sourceMetricIndex: number }> = {
  */
 export function resolveDerivedOption(
   metricIndex: number,
-  option: 'a' | 'b',
+  option: "a" | "b",
   getWinner: (metricIndex: number) => string | null,
-): { metricIndex: number; metricName: MetricName; option: 'a' | 'b' } {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return { metricIndex, metricName: 'cls', option }
+): { metricIndex: number; metricName: MetricName; option: "a" | "b" } {
+  const metric = getMetricByIndex(metricIndex);
+  if (!metric) return { metricIndex, metricName: "cls", option };
 
-  const metricName = metric.name.toLowerCase() as MetricName
-  const key = `${metricName}:${option}`
-  const derived = DERIVED_OPTIONS[key]
+  const metricName = metric.name.toLowerCase() as MetricName;
+  const key = `${metricName}:${option}`;
+  const derived = DERIVED_OPTIONS[key];
 
-  if (!derived) return { metricIndex, metricName, option }
+  if (!derived) return { metricIndex, metricName, option };
 
-  const sourceWinner = getWinner(derived.sourceMetricIndex)
-  if (!sourceWinner) return { metricIndex, metricName, option }
+  const sourceWinner = getWinner(derived.sourceMetricIndex);
+  if (!sourceWinner) return { metricIndex, metricName, option };
 
-  const loserOption = sourceWinner === 'A' ? 'b' : 'a'
-  const sourceMetric = getMetricByIndex(derived.sourceMetricIndex)
-  if (!sourceMetric) return { metricIndex, metricName, option }
+  const loserOption = sourceWinner === "A" ? "b" : "a";
+  const sourceMetric = getMetricByIndex(derived.sourceMetricIndex);
+  if (!sourceMetric) return { metricIndex, metricName, option };
 
-  const sourceMetricName = sourceMetric.name.toLowerCase() as MetricName
+  const sourceMetricName = sourceMetric.name.toLowerCase() as MetricName;
 
   return {
     metricIndex: derived.sourceMetricIndex,
     metricName: sourceMetricName,
     option: loserOption,
-  }
+  };
 }
 
 /**
@@ -263,7 +237,7 @@ export function resolveDerivedOption(
 export function getAffectedDerivedKeys(sourceMetricIndex: number): string[] {
   return Object.entries(DERIVED_OPTIONS)
     .filter(([, config]) => config.sourceMetricIndex === sourceMetricIndex)
-    .map(([key]) => key)
+    .map(([key]) => key);
 }
 
 // Export as array for iteration (maintains order by index)
@@ -273,7 +247,7 @@ export const METRICS_LIST: readonly MetricConfig[] = [
   METRICS.lcp,
   METRICS.tbt,
   METRICS.si,
-] as const
+] as const;
 
 // ===========================================
 // Helper Functions
@@ -283,15 +257,15 @@ export const METRICS_LIST: readonly MetricConfig[] = [
  * Get metric by index (0-4)
  */
 export function getMetricByIndex(index: number): MetricConfig | undefined {
-  return METRICS_LIST[index]
+  return METRICS_LIST[index];
 }
 
 /**
  * Get metric by name (case-insensitive)
  */
 export function getMetricByName(name: string): MetricConfig | undefined {
-  const key = name.toLowerCase() as MetricName
-  return METRICS[key]
+  const key = name.toLowerCase() as MetricName;
+  return METRICS[key];
 }
 
 /**
@@ -299,11 +273,11 @@ export function getMetricByName(name: string): MetricConfig | undefined {
  */
 export function getMetricOption(
   metricIndex: number,
-  choice: 'A' | 'B' | 'a' | 'b'
+  choice: "A" | "B" | "a" | "b",
 ): MetricOption | undefined {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
-  return metric.options[choice.toLowerCase() as 'a' | 'b']
+  const metric = getMetricByIndex(metricIndex);
+  if (!metric) return undefined;
+  return metric.options[choice.toLowerCase() as "a" | "b"];
 }
 
 /**
@@ -311,8 +285,8 @@ export function getMetricOption(
  * Returns format: { A: { title }, B: { title } }
  */
 export function getVoteData(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
+  const metric = getMetricByIndex(metricIndex);
+  if (!metric) return undefined;
   return {
     A: {
       title: metric.options.a.title,
@@ -320,38 +294,36 @@ export function getVoteData(metricIndex: number) {
     B: {
       title: metric.options.b.title,
     },
-  }
+  };
 }
 
 /**
  * Get Choice props for a metric
  */
 export function getChoiceProps(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
+  const metric = getMetricByIndex(metricIndex);
+  if (!metric) return undefined;
   return {
     optionA: {
       title: metric.options.a.title,
       subtitle: metric.options.a.subtitle,
-      keywords: metric.options.a.keywords,
     },
     optionB: {
       title: metric.options.b.title,
       subtitle: metric.options.b.subtitle,
-      keywords: metric.options.b.keywords,
     },
-  }
+  };
 }
 
 /**
  * Get Vote props for a metric
  */
 export function getVoteProps(metricIndex: number) {
-  const metric = getMetricByIndex(metricIndex)
-  if (!metric) return undefined
+  const metric = getMetricByIndex(metricIndex);
+  if (!metric) return undefined;
   return {
     titleA: metric.options.a.title,
     titleB: metric.options.b.title,
     voteIndex: metric.index,
-  }
+  };
 }

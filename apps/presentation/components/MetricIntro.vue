@@ -10,6 +10,11 @@ const metricData = computed(() => METRICS[props.metric])
 
 const slots = useSlots()
 const hasRightSlot = computed(() => !!slots.right)
+
+// Offset click numbers when right slot adds an extra step (click 3)
+const formulaClick = 2
+const tagsClick = computed(() => hasRightSlot.value ? 4 : 3)
+const thresholdClick = computed(() => hasRightSlot.value ? 5 : 4)
 </script>
 
 <template>
@@ -21,11 +26,17 @@ const hasRightSlot = computed(() => !!slots.right)
             <span class="!m-0 text-6xl font-bold font-title">{{ metricData.name }}</span>
             <span class="ml-4 text-lg italic">{{ metricData.fullName }}</span>
           </div>
-          <div class="text-orange-black font-bold text-4xl">{{ metricData.weight }}%</div>
+          <div
+            v-click="1"
+            class="text-orange-black font-bold text-5xl"
+          >{{ metricData.weight }}%</div>
         </div>
 
 
-        <div class="relative mt-2">
+        <div
+          v-click="thresholdClick"
+          class="relative mt-12"
+        >
           <div class="flex rounded overflow-hidden h-8 mt-8">
             <div
               class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 text-bold flex-1 flex items-center justify-center text-md"
@@ -47,8 +58,14 @@ const hasRightSlot = computed(() => !!slots.right)
           >{{ metricData.thresholds[1] }}</span>
         </div>
 
-        <div class="mt-15 text-4xl font-bold text-center">{{ metricData.formula }}</div>
-        <div class="grid grid-cols-2 gap-10 mt-10 text-xl text-center">
+        <div
+          v-click="formulaClick"
+          class="mt-15 text-5xl font-bold text-center"
+        >{{ metricData.formula }}</div>
+        <div
+          v-click="tagsClick"
+          class="grid grid-cols-2 gap-10 mt-10 text-2xl text-center"
+        >
           <span v-if="metricData.tags[0]">{{ metricData.tags[0] }}</span>
           <span v-if="metricData.tags[1]">{{ metricData.tags[1] }}</span>
           <span
@@ -70,6 +87,7 @@ const hasRightSlot = computed(() => !!slots.right)
 
     <div
       v-if="hasRightSlot"
+      v-click="3"
       class="col-span-1 flex items-center justify-center"
     >
       <slot name="right" />

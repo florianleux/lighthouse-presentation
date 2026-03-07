@@ -5,8 +5,10 @@ const purgeHtmlCode = `
 </div>
 `
 const purgeCssCode = `
-.text - red - 500 { color: red; }
-.p - 4 { padding: 1rem; }
+/* ~193 used / ~15,000+ available
+   ~3.5 MB → ~6 KB (99.8% purged) */
+.text-red-500 { color: red; }
+.p-4 { padding: 1rem; }
 `
 const minifyCodeBefore = `
 /* This is my beautiful button */

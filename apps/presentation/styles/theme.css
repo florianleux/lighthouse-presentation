@@ -140,3 +140,12 @@ kbd {
   animation: sway 2s ease-in-out infinite;
 }
 
+/* Smooth v-click transitions */
+.slidev-vclick-target {
+  transition: opacity 0.6s ease;
+}
+
+.slidev-vclick-hidden {
+  opacity: 0;
+}
+
