@@ -157,19 +157,17 @@ export const METRICS: MetricsData = {
     thresholds: ["3.4 sec", "5.8 sec"],
     formula: "How quickly content is visually displayed",
     tags: [
-      "Measures visual progression",
-      "Lower is better",
-      "Affected by render-blocking resources",
-      "Complements FCP and LCP",
+      "Total filling speed, not a moment",
+      "Lab only, not measured in the field",
     ],
     options: {
       a: {
-        title: "Above the fold",
-        subtitle: "Trick the metrics",
+        title: "Leaner text",
+        subtitle: "Compress and trim",
       },
       b: {
-        title: "Compression",
-        subtitle: "Trim to the bone",
+        title: "Smarter images",
+        subtitle: "Tailored, compressed, intact",
       },
     },
   },

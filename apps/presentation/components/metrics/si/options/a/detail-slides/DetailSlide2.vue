@@ -2,6 +2,14 @@
 import { inject, computed } from 'vue'
 const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
 const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
+const subsetCode = `
+<link
+  href="fonts.googleapis.com/css2?
+    family=Germania+One&text=BlackMarket"
+  rel="stylesheet"
+>
+`
 </script>
 
 <template>
@@ -11,14 +19,72 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
       metric="si"
       option="a"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">One optimized image dominates the viewport</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Fonts are
+        everywhere.</div>
 
-      <div v-click="1" class="text-4xl text-center font-bold my-6">Optimize hero as single LCP!</div>
+      <div
+        v-click="1"
+        class="text-4xl text-center font-bold my-7"
+      >There are still bytes to save!</div>
 
-      <div v-click="2" class="flex flex-col items-center text-center gap-10">
-        <div class="text-lg bg-green-500 p-10">PLACEHOLDER SCHEMA HERO FULL SCREEN</div>
+      <div :class="[clicks >= 5 ? 'grid grid-cols-2 gap-x-6' : '', 'transition-all duration-800 items-start']">
+        <!-- Fonts formats (full width → left column) -->
+        <div class="grid grid-cols-3 gap-x-6 mt-10 items-start">
+          <!-- Column 1: TTF -->
+          <div
+            v-click="2"
+            class="flex flex-col items-center gap-0"
+          >
+            <div class="text-base text-center opacity-70">1991</div>
+            <div class="text-4xl text-center font-bold">TTF</div>
+            <div class="text-sm text-center opacity-70">No compression</div>
+            <div class="text-3xl text-center mt-5">~90 KB</div>
+          </div>
+
+          <!-- Column 2: WOFF -->
+          <div
+            v-click="3"
+            class="flex flex-col items-center gap-0"
+          >
+            <div class="text-base text-center opacity-70">2010</div>
+            <div class="text-4xl text-center font-bold">WOFF</div>
+            <div class="text-sm text-center opacity-70">zlib (gzip)</div>
+            <div class="text-3xl text-center mt-5">~50 KB</div>
+          </div>
+
+          <!-- Column 3: WOFF2 -->
+          <div
+            v-click="4"
+            class="flex flex-col items-center gap-0"
+          >
+            <div class="text-base text-center opacity-70">2014</div>
+            <div class="text-4xl text-center font-bold">WOFF2</div>
+            <div class="text-sm text-center opacity-70">Brotli</div>
+            <div class="text-3xl text-center mt-5">~35 KB</div>
+          </div>
+        </div>
+
+        <!-- Subsetting (right column) -->
+        <div class="flex flex-col items-center gap-2">
+          <div
+            v-click="5"
+            class="text-5xl font-title text-black"
+          >BlackMarket</div>
+
+          <CodeSnippet
+            v-click="6"
+            class="text-left px-4"
+            language="html"
+            :code="subsetCode"
+            size="small"
+          />
+
+          <div
+            v-click="7"
+            class="text-3xl text-center mt-2"
+          >~2-3 KB</div>
+        </div>
       </div>
-
     </DetailSlide>
   </DetailSlideLayered>
 </template>
