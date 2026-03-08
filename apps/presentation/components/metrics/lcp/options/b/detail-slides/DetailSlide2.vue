@@ -6,33 +6,34 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
 const cssImage = `/* Preload scanner: NO */
 .banner {
   background-image: url('promo-banner.jpg');
-}
-`
-
-const jsImage = `// Preload scanner: NO
-const img = document.createElement('img');
-img.src = 'promo-banner.jpg';
-document.body.appendChild(img);
-`
-
-const svgImage = `
-<svg>
-  <image href="promo-banner.jpg" />
-</svg>
-`
-
-const injectedSrcImage = `<!-- Preload scanner: NO -->
-<img id="banner">
-<` + `script>
-    document.getElementById('banner').src = 'promo-banner.jpg';
-</` + `script>`
+}`
 
 const htmlImage = `<!-- Preload scanner: YES -->
 <img
   src="promo-banner.jpg"
-  alt = "Promo banner"
+  alt="Promo Banner"
 />`
 
+const highPriority = `<img
+  src="promo-banner.jpg"
+  fetchpriority="high"
+  alt="Promo Banner"
+/>`
+
+const lazyLoading = `<img
+  src="red-parrot.jpg"
+  loading="lazy"
+  alt="Red Parrot"
+>`
+
+const nextGenFormats = `<picture>
+  <source type="image/avif"
+    srcset="promo-banner.avif" />
+  <source type="image/webp"
+    srcset="promo-banner.webp" />
+  <img src="promo-banner.jpg"
+    alt="Promo Banner" />
+</picture>`
 </script>
 
 <template>
@@ -42,37 +43,54 @@ const htmlImage = `<!-- Preload scanner: YES -->
       metric="lcp"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Early discovery means early download</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Can't avoid an image as LCP?</div>
+      <div v-click="1" class="text-4xl text-center font-bold mb-7">Optimize it!</div>
 
-      <div v-click="1" class="text-4xl text-center font-bold mb-7">Preload scanner must see the LCP</div>
+      <div class="grid grid-cols-3 gap-x-6 items-start">
+        <!-- Column 1: Shrink it -->
+        <div v-click="2" class="flex flex-col items-center gap-2">
+          <div class="text-3xl text-center font-bold">Shrink it!</div>
 
-      <div class="text-left grid grid-cols-2  text-center items-top gap-y-10 ">
-
-        <div v-click="2" class="contents">
           <CodeSnippet
-            class="px-10"
+            class="text-left px-4"
+            language="html"
+            :code="nextGenFormats"
+            size="small"
+          />
+        </div>
+
+        <!-- Column 2: Prioritize it -->
+        <div v-click="3" class="flex flex-col items-center gap-2">
+          <div class="text-3xl text-center font-bold">Prioritize it!</div>
+
+          <CodeSnippet
+            class="text-left px-4"
+            language="html"
+            :code="highPriority"
+            size="tiny"
+          />
+
+          <CodeSnippet
+            class="text-left px-4"
+            language="html"
+            :code="lazyLoading"
+            size="tiny"
+          />
+        </div>
+
+        <!-- Column 3: Make it discoverable -->
+        <div v-click="4" class="flex flex-col items-center gap-2">
+          <div class="text-3xl text-center font-bold">Make it discoverable</div>
+
+          <CodeSnippet
+            class="text-left px-4"
             language="css"
             :code="cssImage"
             size="tiny"
           />
 
           <CodeSnippet
-            class="px-10"
-            language="js"
-            :code="jsImage"
-            size="tiny"
-          />
-        </div>
-
-        <div v-click="3" class="contents">
-          <CodeSnippet
-            language="js"
-            :code="injectedSrcImage"
-            size="tiny"
-          />
-
-          <CodeSnippet
-            class="px-10"
+            class="text-left px-4"
             language="html"
             :code="htmlImage"
             size="tiny"

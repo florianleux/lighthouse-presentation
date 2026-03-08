@@ -1,27 +1,15 @@
 <script setup lang="ts">
-const highPriority = `
-<img
-  src="promo-banner.jpg"
-  fetchpriority="high"
-  alt="Promo Banner"
-/>`
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
 
-const lazyLoading = `
-<img
-  src="product-gallery-5.jpg"
-  loading="lazy"
-  alt="Red Parrot"
->`
-
-const nextGenFormats = `
-<picture>
-  <source type="image/avif"
-    srcset="banner.avif" />
-  <source type="image/webp"
-    srcset="banner.webp" />
-  <img src="banner.jpg"
-    alt="Promo Banner" />
-</picture>`
+const heroCSS = `.hero {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('hero.jpg');
+  background-size: cover;
+  background-position: center;
+}`
 </script>
 
 <template>
@@ -31,39 +19,23 @@ const nextGenFormats = `
       metric="lcp"
       option="b"
     >
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">What if we could have the best of both worlds?</div>
+      <div v-click="1" class="text-4xl text-center font-bold mb-7">Hide it in plain sight!</div>
 
-      <div class="text-4xl text-center font-bold mb-7">Load LCP first, lightest possible</div>
-
-      <div class="text-left grid grid-cols-2 text-center items-top gap-x-6">
-        <div v-click="1" class="flex flex-col items-top gap-2">
-          <div class="text-3xl text-center font-bold">Prioritize it!</div>
-
+      <div class="grid grid-cols-2 gap-x-10 items-start">
+        <!-- Column 1: Full viewport cover -->
+        <div v-click="2">
           <CodeSnippet
-            class="text-left px-20"
-            language="html"
-            :code="highPriority"
-            size="tiny"
-          />
-
-          <CodeSnippet
-            class="text-left px-20"
-            language="html"
-            :code="lazyLoading"
-            size="tiny"
-          />
-
-        </div>
-        <div v-click="2" class="flex flex-col items-top gap-2">
-          <div class="text-3xl text-center font-bold">Shrink it!</div>
-
-          <CodeSnippet
-            class="text-left mt-5 px-10"
-            language="html"
-            :code="nextGenFormats"
+            class="text-left px-4"
+            language="css"
+            :code="heroCSS"
             size="small"
           />
-
         </div>
+
+        <!-- Column 2: Placeholder -->
+        <div v-click="3" class="w-full h-[250px] bg-[#39FF14] rounded-lg" />
+
       </div>
     </DetailSlide>
   </DetailSlideLayered>

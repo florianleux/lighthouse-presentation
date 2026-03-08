@@ -61,20 +61,22 @@
         />
       </svg>
 
-      <!-- ===== STEP 2: Redirections — Skull Island (clicks 3-5, hide at 6) ===== -->
+      <!-- ===== STEP 1b: Empty step (click 3) — direct trip hides, pause ===== -->
+
+      <!-- ===== STEP 2: Redirections — Skull Island (clicks 4-6, hide at 7) ===== -->
       <div
-        v-click="[3, 6]"
+        v-click="[4, 7]"
         class="absolute w-[10%] left-[60%] top-[43%] -translate-x-1/2 text-center"
       >
         <div class="text-2xl font-bold font-title">Skull Island</div>
       </div>
       <img
-        v-click="[3, 6]"
+        v-click="[4, 7]"
         src="/images/ttfb/island-cdn.webp"
         class="absolute left-[60%] top-[30%] -translate-1/2 h-[20%]"
       />
       <svg
-        v-click="[3, 6]"
+        v-click="[4, 7]"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -88,7 +90,7 @@
         />
       </svg>
       <svg
-        v-click="[4, 6]"
+        v-click="[5, 7]"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -102,7 +104,7 @@
         />
       </svg>
       <svg
-        v-click="[5, 6]"
+        v-click="[6, 7]"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -116,22 +118,22 @@
         />
       </svg>
 
-      <!-- ===== STEP 3a: Empty step (click 6) — step 2 hides, pause ===== -->
+      <!-- ===== STEP 3a: Empty step (click 7) — step 2 hides, pause ===== -->
 
-      <!-- ===== STEP 3b: CDN — Boat + rum (click 7, stays through backend) ===== -->
+      <!-- ===== STEP 3b: CDN — Boat + rum (click 8, stays through backend) ===== -->
       <img
-        v-click="7"
+        v-click="8"
         src="/images/ttfb/cdn.webp"
         class="absolute left-[50%] top-[38%] -translate-1/2 h-[18%]"
       />
       <img
-        v-click="7"
+        v-click="8"
         src="/images/ttfb/rum.webp"
         class="absolute left-[50%] top-[24%] -translate-1/2 h-[12%] rotate-[2deg]"
       />
-      <!-- ===== STEP 3c: Trip to CDN (clicks 8-9, hide at 10) ===== -->
+      <!-- ===== STEP 3c: Trip to CDN (clicks 9-10, hide at 11) ===== -->
       <svg
-        v-click="[8, 10]"
+        v-click="[9, 11]"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -145,7 +147,7 @@
         />
       </svg>
       <svg
-        v-click="[9, 10]"
+        v-click="[10, 11]"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -159,17 +161,17 @@
         />
       </svg>
 
-      <!-- ===== STEP 4a: Empty step (click 10) — CDN hides, pause ===== -->
+      <!-- ===== STEP 4a: Empty step (click 11) — CDN hides, pause ===== -->
 
-      <!-- ===== STEP 4b: Backend optimization (clicks 11-14) ===== -->
+      <!-- ===== STEP 4b: Backend optimization (clicks 12-15) ===== -->
       <img
-        v-click="11"
+        v-click="12"
         src="/images/ttfb/tequila.webp"
         class="absolute left-[92%] top-[52%] -translate-1/2 h-[18%] rotate-[2deg]"
       />
       <!-- pirate → CDN -->
       <svg
-        v-click="12"
+        v-click="13"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -184,7 +186,7 @@
       </svg>
       <!-- CDN → server -->
       <svg
-        v-click="13"
+        v-click="14"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -199,7 +201,7 @@
       </svg>
       <!-- server → pirate (return) -->
       <svg
-        v-click="14"
+        v-click="15"
         class="absolute inset-0 w-full h-full pointer-events-none"
       >
         <line
@@ -216,19 +218,19 @@
       <!-- ===== Bottom labels ===== -->
       <div class="absolute bottom-[19%] left-0 w-full flex justify-center gap-8">
         <div
-          v-click="5"
+          v-click="6"
           class="text-4xl font-bold"
         >Avoid redirects</div>
         <div
-          v-click="9"
+          v-click="10"
           class="text-4xl font-bold"
         >CDN</div>
         <div
-          v-click="7"
+          v-click="10"
           class="text-4xl font-bold"
         >Caching</div>
         <div
-          v-click="14"
+          v-click="15"
           class="text-4xl font-bold"
         >Backend Optimization</div>
       </div>

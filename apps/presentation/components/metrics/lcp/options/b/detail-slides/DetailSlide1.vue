@@ -11,8 +11,12 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
       metric="lcp"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">LCP changes with screen size (and user behavior)</div>
-      <div v-click="1" class="text-4xl text-center font-bold -mt-5">Google judges mobile, users experience both</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">LCP changes with
+        screen size</div>
+      <div
+        v-click="1"
+        class="text-4xl text-center font-bold "
+      >Google judges mobile, users experience both</div>
 
       <div v-click="2">
         <img
@@ -20,7 +24,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
           alt="LCP Desktop"
           class="absolute left-[13%] bottom-[13%] h-[40%] w-auto"
         />
-        <div class="absolute left-[21%] bottom-[22%] w-[33%] h-[15%] bg-[#39FF14]/40 border-2 border-[#39FF14]" />
+        <div class="absolute left-[21%] bottom-[22%] w-[30%] h-[15%] bg-[#39FF14]/40 border-2 border-[#39FF14]" />
       </div>
 
       <div v-click="3">
