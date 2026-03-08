@@ -4,10 +4,7 @@ const jsCodeExample = `document.write()`
 
 <template>
 
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-top-left.png');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
       class="pl-10 pt-5 relative"
       metric="fcp"
@@ -147,5 +144,5 @@ const jsCodeExample = `document.write()`
 
 
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

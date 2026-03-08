@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
 const badFont = `
 <link 
   href="fonts.googleapis.com/css2?
@@ -16,20 +20,17 @@ const goodFont = `
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-4.webp');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
       class="pl-10"
       metric="si"
       option="b"
     >
-      <div class="text-center text-xl">Load only the characters you actually use</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Load only the characters you actually use</div>
 
-      <div class="text-4xl text-center font-bold my-6">Subset custom fonts!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-6">Subset custom fonts!</div>
 
-      <div class="text-left grid grid-cols-2 text-center gap-10">
+      <div v-click="2" class="text-left grid grid-cols-2 text-center gap-10">
         <div>
           <CodeSnippet
             class="text-left px-5"
@@ -49,5 +50,5 @@ const goodFont = `
         </div>
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

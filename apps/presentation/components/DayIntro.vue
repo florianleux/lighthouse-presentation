@@ -14,7 +14,7 @@ const metricData = computed(() => METRICS[props.metric])
 <template>
   <div
     class="relative slide-bg text-shadow-md"
-    style="background-image: url('/backgrounds/day-intro.png')"
+    style="background-image: url('/backgrounds/day-intro.webp')"
   >
     <div class="absolute">
       <div class="text-4xl text-[#F9A8C2] ">Day {{ day }}/5</div>

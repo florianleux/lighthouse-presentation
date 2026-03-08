@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
 const badLayout = `
 // Forces 100 layout calculations
 productCards.forEach(card => {
@@ -16,20 +20,17 @@ productCards.forEach(card => {
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-2.webp');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
       class="pl-10"
       metric="tbt"
       option="a"
     >
-      <div class="text-center text-xl">Reading geometry after writing forces recalculation</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Reading geometry after writing forces recalculation</div>
 
-      <div class="text-4xl text-center font-bold my-10">Batch reads, then writes!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-10">Batch reads, then writes!</div>
 
-      <div class="text-left grid grid-cols-2 text-center gap-10">
+      <div v-click="2" class="text-left grid grid-cols-2 text-center gap-10">
         <div>
           <CodeSnippet
             class="text-left px-5"
@@ -49,5 +50,5 @@ productCards.forEach(card => {
         </div>
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

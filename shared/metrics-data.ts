@@ -111,12 +111,7 @@ export const METRICS: MetricsData = {
     weight: 25,
     thresholds: ["2.5 sec", "4.0 sec"],
     formula: "Time to render largest element",
-    tags: [
-      "Core Web Vital: Impacts SEO!",
-      "Measures perceived load speed",
-      "Usually hero image or heading",
-      "Affected by server response time",
-    ],
+    tags: ["Core Web Vital: Impacts SEO!", "Measures perceived load speed"],
     options: {
       a: {
         title: "[PLACEHOLDER Option A]",

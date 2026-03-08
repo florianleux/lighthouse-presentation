@@ -20,7 +20,7 @@ css: unocss
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/1.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/1.webp')">
   <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
 
@@ -28,7 +28,7 @@ css: unocss
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/2.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/2.webp')">
   <PollButtons poll-id="knowledge-level" />
 </div>
 
@@ -36,7 +36,7 @@ transition: slide-down
 transition: slide-right
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/3.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/3.webp')">
 <div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
 <div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-md">
@@ -51,7 +51,7 @@ transition: slide-right
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.webp')">
 <div class="text-shadow-md text-white">
 <div class="text-4xl text-white font-title">Why does performance matters ?</div>
 
@@ -69,13 +69,13 @@ transition: slide-up
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/5.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/5.webp')"></div>
 
 ---
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/6.png')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro/6.webp')"></div>
 
   <div class="w-[68%] absolute right-[16%] top-[16%] aspect-[1960/1250] -rotate-1">
     <BlackMarketIframe />
@@ -85,13 +85,13 @@ transition: slide-up
 transition: slide-left
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/score-2.png');"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/score-2.webp');"></div>
 
 ---
 transition: fade
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/score-3.png');"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/score-3.webp');"></div>
 
 ---
 transition: fade
@@ -323,7 +323,7 @@ transition: slide-down
 ---
 transition: slide-down
 ---
-<div class="slide-bg" style="background-image: url('/backgrounds/end-middle.png')">
+<div class="slide-bg" style="background-image: url('/backgrounds/end-middle.webp')">
 
 <div class="px-10 pt-15 text-white ">
 <div  class="w-full text-center text-4xl italic">"Any observed statistical regularity will tend to collapse once pressure is placed upon it for control purposes" </div>

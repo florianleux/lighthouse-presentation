@@ -11,25 +11,22 @@ const codeExample = `.ad-container {
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-3.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
-      class="pt-5 pl-5"
+      class="pl-10 pt-5 relative"
       metric="cls"
       option="b"
     >
       <div
         v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-5xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         No placeholder: layout shift at injection.
       </div>
 
       <div
         v-click="2"
-        class="mt-5 text-5xl text-center font-bold"
+        class="mt-5 text-4xl text-center font-bold"
       >Reserve space</div>
 
       <img
@@ -53,5 +50,5 @@ const codeExample = `.ad-container {
         size="small"
       />
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

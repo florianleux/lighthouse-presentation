@@ -2,22 +2,19 @@
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-2.webp');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
-      class="px-10 pt-5"
+      class="pl-10"
       metric="fcp"
       option="a"
     >
       <!-- ===== ALWAYS VISIBLE: Client island + pirate ===== -->
       <img
-        src="/images/ttfb/island-client.png"
+        src="/images/ttfb/island-client.webp"
         class="absolute left-[20%] top-[50%] -translate-1/2 h-[38%]"
       />
       <img
-        src="/images/ttfb/pirate.png"
+        src="/images/ttfb/pirate.webp"
         class="absolute left-[20%] top-[50%] -translate-1/2 h-[22%]"
       />
 
@@ -26,11 +23,11 @@
         <div class="text-2xl font-bold font-title">Island of the Skull</div>
       </div>
       <img
-        src="/images/ttfb/island-server.png"
+        src="/images/ttfb/island-server.webp"
         class="absolute left-[82%] top-[60%] -translate-1/2 h-[30%]"
       />
       <img
-        src="/images/ttfb/server.png"
+        src="/images/ttfb/server.webp"
         class="absolute left-[82%] top-[60%] -translate-1/2 h-[22%]"
       />
 
@@ -73,7 +70,7 @@
       </div>
       <img
         v-click="[3, 6]"
-        src="/images/ttfb/island-cdn.png"
+        src="/images/ttfb/island-cdn.webp"
         class="absolute left-[60%] top-[30%] -translate-1/2 h-[20%]"
       />
       <svg
@@ -124,12 +121,12 @@
       <!-- ===== STEP 3b: CDN — Boat + rum (click 7, stays through backend) ===== -->
       <img
         v-click="7"
-        src="/images/ttfb/cdn.png"
+        src="/images/ttfb/cdn.webp"
         class="absolute left-[50%] top-[38%] -translate-1/2 h-[18%]"
       />
       <img
         v-click="7"
-        src="/images/ttfb/rum.png"
+        src="/images/ttfb/rum.webp"
         class="absolute left-[50%] top-[24%] -translate-1/2 h-[12%] rotate-[2deg]"
       />
       <!-- ===== STEP 3c: Trip to CDN (clicks 8-9, hide at 10) ===== -->
@@ -167,7 +164,7 @@
       <!-- ===== STEP 4b: Backend optimization (clicks 11-14) ===== -->
       <img
         v-click="11"
-        src="/images/ttfb/tequila.png"
+        src="/images/ttfb/tequila.webp"
         class="absolute left-[92%] top-[52%] -translate-1/2 h-[18%] rotate-[2deg]"
       />
       <!-- pirate → CDN -->
@@ -237,5 +234,5 @@
       </div>
 
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

@@ -29,10 +29,7 @@ const preloadCode = `
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-bottom-left.png');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
       class="pl-10"
       metric="fcp"
@@ -58,7 +55,7 @@ const preloadCode = `
           </div>
 
         </div>
-        <div class="flex flex-col items-center gap-8">
+        <div v-click="1" class="flex flex-col items-center gap-8">
           <div class="text-xl font-bold">Too heavy</div>
           <div class="text-4xl font-bold">Minify it!</div>
           <div class="text-left">
@@ -77,5 +74,5 @@ const preloadCode = `
         </div>
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

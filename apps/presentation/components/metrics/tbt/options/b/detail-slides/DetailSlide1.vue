@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
 const badSelector = `
 .product-grid 
   > div.card 
@@ -16,20 +20,17 @@ const goodSelector = `
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-3.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
       class="pl-10 pt-5 relative"
       metric="tbt"
       option="b"
     >
-      <div class="text-center my-5 text-xl">Complex selectors slow style matching</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center my-5 transition-all duration-800']">Complex selectors slow style matching</div>
 
-      <div class="text-4xl text-center font-bold my-7">Simplify!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-7">Simplify!</div>
 
-      <div class="text-left grid grid-cols-2 text-center gap-10">
+      <div v-click="2" class="text-left grid grid-cols-2 text-center gap-10">
         <div>
           <CodeSnippet
             class="text-left px-5"
@@ -49,5 +50,5 @@ const goodSelector = `
         </div>
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

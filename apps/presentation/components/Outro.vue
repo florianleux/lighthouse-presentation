@@ -5,7 +5,7 @@ import LighthouseBuilding from './LighthouseBuilding.vue'
 <template>
   <div
     class="relative slide-bg text-shadow-md"
-    style="background-image: url('/backgrounds/end-bottom.png')"
+    style="background-image: url('/backgrounds/end-bottom.webp')"
   >
     <div class="absolute">
       <div class="text-4xl text-[#F9A8C2]">End of day 5</div>

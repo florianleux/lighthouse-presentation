@@ -15,7 +15,7 @@ function getFloorSrc(floor: { key: string; index: number }) {
   const choice = voteStore.path[floor.index]
   if (!choice) return null
   if (!METRICS_WITH_PNG.includes(floor.key)) return null
-  return `/floors/floor-${floor.key}-${choice.toLowerCase()}.png`
+  return `/floors/floor-${floor.key}-${choice.toLowerCase()}.webp`
 }
 
 function getBuildingPos(key: string, index: number) {

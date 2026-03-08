@@ -12,12 +12,9 @@ const stickyPositionCodeExample = `.banner-container {
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-4.webp');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
-      class="pl-10 pt-5"
+      class="pl-10"
       metric="cls"
       option="b"
     >
@@ -30,7 +27,7 @@ const stickyPositionCodeExample = `.banner-container {
 
       <div
         v-click="2"
-        class="mt-5 text-5xl text-center font-bold"
+        class="mt-5 text-4xl text-center font-bold"
       >Extract it!</div>
 
       <img
@@ -54,5 +51,5 @@ const stickyPositionCodeExample = `.banner-container {
         size="small"
       />
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

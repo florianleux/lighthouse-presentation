@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
 const badInit = `
 // Runs 800ms blocking everything
 function initBlackMarket() {
@@ -26,20 +30,17 @@ async function initBlackMarket() {
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-1.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
       class="pl-10 pt-5 relative"
       metric="tbt"
       option="a"
     >
-      <div class="text-center mb-5 text-xl">Monolithic init blocks the main thread</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Monolithic init blocks the main thread</div>
 
-      <div class="text-4xl text-center font-bold my-7">Yield between tasks!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-7">Yield between tasks!</div>
 
-      <div class="text-left grid grid-cols-2 text-center gap-10">
+      <div v-click="2" class="text-left grid grid-cols-2 text-center gap-10">
         <div>
           <CodeSnippet
             class="text-left px-5"
@@ -59,5 +60,5 @@ async function initBlackMarket() {
         </div>
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

@@ -10,7 +10,7 @@ const crewNames = computed(() =>
 <template>
   <div
     class="relative slide-bg text-shadow-md overflow-hidden"
-    style="background-image: url('/backgrounds/end-top.png')"
+    style="background-image: url('/backgrounds/end-top.webp')"
   >
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center z-10 pointer-events-none">
       <div class="text-9xl text-white font-bold font-title">Thank you!</div>

@@ -16,25 +16,22 @@ const htmlAfterCodeExample = `<img
 
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-1.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
-      class="pl-10 pt-5"
+      class="pl-10 pt-5 relative"
       metric="cls"
       option="a"
     >
       <div
         v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-5xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         No size specified: no space reserved.
       </div>
 
       <div
         v-click="2"
-        class="mt-5 text-5xl text-center font-bold"
+        class="mt-5 text-4xl text-center font-bold"
       >Specify dimensions</div>
 
       <img
@@ -58,5 +55,5 @@ const htmlAfterCodeExample = `<img
         size="small"
       />
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

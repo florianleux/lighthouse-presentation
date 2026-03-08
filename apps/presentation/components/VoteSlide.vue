@@ -18,8 +18,8 @@ const titleA = computed(() => voteProps.value.titleA)
 const titleB = computed(() => voteProps.value.titleB)
 
 const metricName = computed(() => getMetricByIndex(props.metricIndex)?.name.toLowerCase() ?? '')
-const floorA = computed(() => `/floors/floor-${metricName.value}-a.png`)
-const floorB = computed(() => `/floors/floor-${metricName.value}-b.png`)
+const floorA = computed(() => `/floors/floor-${metricName.value}-a.webp`)
+const floorB = computed(() => `/floors/floor-${metricName.value}-b.webp`)
 const posA = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.a ?? {})
 const posB = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.b ?? {})
 

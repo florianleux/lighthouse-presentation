@@ -16,25 +16,22 @@ const matchingMetricsCodeExample = `@font-face {
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-2.webp');"
-  >
+  <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
-      class="pl-10 pt-5"
+      class="pl-10"
       metric="cls"
       option="a"
     >
       <div
         v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-5xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         Every font has its own footprint.
       </div>
 
       <div
         v-click="2"
-        class="mt-5 text-5xl text-center font-bold"
+        class="mt-5 text-4xl text-center font-bold"
       >Fill the gap</div>
 
       <img
@@ -58,5 +55,5 @@ const matchingMetricsCodeExample = `@font-face {
         size="small"
       />
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

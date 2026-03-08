@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+
 const badCompression = `
 # No compression configured
 # 500KB HTML sent uncompressed
@@ -15,21 +19,18 @@ brotli_types text/html text/css application/javascript;
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-3.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
       class="pl-10 pt-5 relative"
       metric="si"
       option="b"
     >
-      <div class="text-center my-5 text-xl">Compress HTML, CSS, and JavaScript transfers</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Compress HTML, CSS, and JavaScript transfers</div>
 
-      <div class="text-4xl text-center font-bold my-7">Enable text compression!</div>
-
+      <div v-click="1" class="text-4xl text-center font-bold my-7">Enable text compression!</div>
 
       <CodeSnippet
+        v-click="2"
         class="text-left px-35"
         language="nginx"
         :code="goodCompression"
@@ -38,5 +39,5 @@ brotli_types text/html text/css application/javascript;
 
 
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

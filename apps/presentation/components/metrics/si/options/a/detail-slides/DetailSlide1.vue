@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { inject, computed } from 'vue'
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
 
 const goodCss = `
 <head>
@@ -14,20 +17,17 @@ const goodCss = `
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/cls-detail-1.webp');"
-  >
+  <DetailSlideLayered quadrant="top-left">
     <DetailSlide
       class="pl-10 pt-5 relative"
       metric="si"
       option="a"
     >
-      <div class="text-center my-5 text-xl">Deliver styles instantly for visible content</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Deliver styles instantly for visible content</div>
 
-      <div class="text-4xl text-center font-bold my-7">Inline critical CSS!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-7">Inline critical CSS!</div>
 
-      <div>
+      <div v-click="2">
         <CodeSnippet
           class="text-left px-35"
           language="html"
@@ -36,5 +36,5 @@ const goodCss = `
         />
       </div>
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>

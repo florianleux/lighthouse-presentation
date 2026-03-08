@@ -11,10 +11,7 @@ const noLodashCode = `
 </script>
 
 <template>
-  <div
-    class="slide-bg"
-    style="background-image: url('/backgrounds/parchment-bottom-right.png');"
-  >
+  <DetailSlideLayered quadrant="bottom-right">
     <DetailSlide
       class="pl-10"
       metric="fcp"
@@ -40,7 +37,7 @@ const noLodashCode = `
           </div>
 
         </div>
-        <div class="flex flex-col col-span-2 items-center gap-5">
+        <div v-click="1" class="flex flex-col col-span-2 items-center gap-5">
           <div class="text-xl font-bold">Probably doesn't need to be blocking</div>
           <div class="text-4xl font-bold">Defer or async it!</div>
           <div class="text-left w-full">
@@ -83,5 +80,5 @@ const noLodashCode = `
 
 
     </DetailSlide>
-  </div>
+  </DetailSlideLayered>
 </template>
