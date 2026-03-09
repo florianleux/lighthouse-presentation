@@ -19,33 +19,33 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
         <!-- Column 1: JPG -->
         <div class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">1992</div>
-          <div class="text-4xl text-center font-bold">JPG</div>
+          <div class="text-3xl text-center font-bold">JPG</div>
           <div class="text-sm text-center opacity-70">Lossy</div>
-          <div class="text-3xl text-center mt-5">86 KB</div>
+          <div class="text-xl text-center mt-5">86 KB</div>
         </div>
 
         <!-- Column 2: PNG -->
         <div v-click="3" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">1996</div>
-          <div class="text-4xl text-center font-bold">PNG</div>
+          <div class="text-3xl text-center font-bold">PNG</div>
           <div class="text-sm text-center opacity-70">Lossless</div>
-          <div class="text-3xl text-center mt-5">189 KB</div>
+          <div class="text-xl text-center mt-5">189 KB</div>
         </div>
 
         <!-- Column 3: WebP -->
         <div v-click="4" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">2010</div>
-          <div class="text-4xl text-center font-bold">WebP</div>
+          <div class="text-3xl text-center font-bold">WebP</div>
           <div class="text-sm text-center opacity-70">Lossy / Lossless</div>
-          <div class="text-3xl text-center mt-5">24 KB</div>
+          <div class="text-xl text-center mt-5">24 KB</div>
         </div>
 
         <!-- Column 4: AVIF -->
         <div v-click="5" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">2019</div>
-          <div class="text-4xl text-center font-bold">AVIF</div>
+          <div class="text-3xl text-center font-bold">AVIF</div>
           <div class="text-sm text-center opacity-70">Lossy / Lossless</div>
-          <div class="text-3xl text-center mt-5">16 KB</div>
+          <div class="text-xl text-center mt-5">16 KB</div>
         </div>
       </div>
     </DetailSlide>

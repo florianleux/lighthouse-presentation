@@ -36,9 +36,9 @@ const subsetCode = `
             class="flex flex-col items-center gap-0"
           >
             <div class="text-base text-center opacity-70">1991</div>
-            <div class="text-4xl text-center font-bold">TTF</div>
+            <div class="text-3xl text-center font-bold">TTF</div>
             <div class="text-sm text-center opacity-70">No compression</div>
-            <div class="text-3xl text-center mt-5">~90 KB</div>
+            <div class="text-xl text-center mt-5">~90 KB</div>
           </div>
 
           <!-- Column 2: WOFF -->
@@ -47,9 +47,9 @@ const subsetCode = `
             class="flex flex-col items-center gap-0"
           >
             <div class="text-base text-center opacity-70">2010</div>
-            <div class="text-4xl text-center font-bold">WOFF</div>
+            <div class="text-3xl text-center font-bold">WOFF</div>
             <div class="text-sm text-center opacity-70">zlib (gzip)</div>
-            <div class="text-3xl text-center mt-5">~50 KB</div>
+            <div class="text-xl text-center mt-5">~50 KB</div>
           </div>
 
           <!-- Column 3: WOFF2 -->
@@ -58,9 +58,9 @@ const subsetCode = `
             class="flex flex-col items-center gap-0"
           >
             <div class="text-base text-center opacity-70">2014</div>
-            <div class="text-4xl text-center font-bold">WOFF2</div>
+            <div class="text-3xl text-center font-bold">WOFF2</div>
             <div class="text-sm text-center opacity-70">Brotli</div>
-            <div class="text-3xl text-center mt-5">~35 KB</div>
+            <div class="text-xl text-center mt-5">~35 KB</div>
           </div>
         </div>
 
@@ -81,7 +81,7 @@ const subsetCode = `
 
           <div
             v-click="7"
-            class="text-3xl text-center mt-2"
+            class="text-xl text-center mt-2"
           >~2-3 KB</div>
         </div>
       </div>
