@@ -132,19 +132,17 @@ export const METRICS: MetricsData = {
     thresholds: ["200 ms", "600 ms"],
     formula: "Sum of blocking time beyond 50ms",
     tags: [
-      "Lab metric (not field)",
-      "Proxy for First Input Delay",
-      "Long tasks block main thread",
-      "Highest weight in Performance score",
+      "JSON parsing",
+      "Layout calculations",
     ],
     options: {
       a: {
-        title: "Code Execution",
-        subtitle: "Break up the work",
+        title: "Data Parsimony",
+        subtitle: "Don't parse the unnecessary",
       },
       b: {
-        title: "Page Structure",
-        subtitle: "Simplify calculations",
+        title: "Design Sobriety",
+        subtitle: "Fancyness has a cost",
       },
     },
   },

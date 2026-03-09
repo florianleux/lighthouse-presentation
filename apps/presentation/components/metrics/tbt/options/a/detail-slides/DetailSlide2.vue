@@ -3,19 +3,33 @@ import { inject, computed } from 'vue'
 const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
 const clicks = computed(() => clicksContext?.value?.current ?? 0)
 
-const badLayout = `
-// Forces 100 layout calculations
-productCards.forEach(card => {
-  card.style.height = tallestCard.offsetHeight + 'px';
-});
+const badObject = `
+// Every product carries 150+ fields
+{
+  "id": 1,
+  "name": "Rusty Hook",
+  "price": 29.99,
+  "image": "/hook.webp",
+  ...
+  "manufacturer": "...",
+  "warehouse_location": "...",
+  "internal_sku": "...",
+  "supplier_notes": "...",
+  // ... 136 more fields
+}
 `
 
-const goodLayout = `
-const height = tallestCard.offsetHeight; // Read once
-
-productCards.forEach(card => {
-  card.style.height = height + 'px'; // Write all
-});
+const goodObject = `
+// Only what the card needs
+{
+  "id": 1,
+  "name": "Rusty Hook",
+  "price": 29.99,
+  "image": "/hook.webp",
+  "rating": 4.5,
+  "reviews": 42,
+  "badge": "Bestseller"
+}
 `
 </script>
 
@@ -26,25 +40,25 @@ productCards.forEach(card => {
       metric="tbt"
       option="a"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Reading geometry after writing forces recalculation</div>
+      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Entities have more attributes than what will be displayed</div>
 
-      <div v-click="1" class="text-4xl text-center font-bold my-10">Batch reads, then writes!</div>
+      <div v-click="1" class="text-4xl text-center font-bold my-7">Trim the objects!</div>
 
-      <div v-click="2" class="text-left grid grid-cols-2 text-center gap-10">
-        <div>
+      <div class="text-left grid grid-cols-2 text-center gap-10">
+        <div v-click="2">
           <CodeSnippet
             class="text-left px-5"
-            language="js"
-            :code="badLayout"
+            language="json"
+            :code="badObject"
             size="tiny"
           />
         </div>
 
-        <div>
+        <div v-click="3">
           <CodeSnippet
             class="text-left px-5"
-            language="js"
-            :code="goodLayout"
+            language="json"
+            :code="goodObject"
             size="tiny"
           />
         </div>
