@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import AvatarPreview from './AvatarPreview.vue'
 import GenderSelector from './GenderSelector.vue'
 import SkinToneSelector from './SkinToneSelector.vue'
@@ -10,6 +11,11 @@ const emit = defineEmits<{
 }>()
 
 const { avatar, isSpinning, spinAndRandomize, setSkinTone, setGender, serialize } = useAvatar()
+
+// Initial roll to show the randomize mechanic
+onMounted(() => {
+  spinAndRandomize()
+})
 
 function handleGenderChange(gender: Gender) {
   setGender(gender)
