@@ -10,7 +10,7 @@ const emit = defineEmits<{
 }>()
 
 const choices: { value: PollChoice; emoji: string; label: string; colorClass: string }[] = [
-  { value: 'cabin_boy', emoji: '🪣', label: 'Cabin Boy', colorClass: 'border-blue-500 hover:enabled:bg-blue-500' },
+  { value: 'newbie', emoji: '🪣', label: 'Newbie', colorClass: 'border-blue-500 hover:enabled:bg-blue-500' },
   { value: 'captain', emoji: '⚓', label: 'Captain', colorClass: 'border-amber-500 hover:enabled:bg-amber-500' },
   { value: 'admiral', emoji: '🏴‍☠️', label: 'Admiral', colorClass: 'border-purple-500 hover:enabled:bg-purple-500' },
 ]

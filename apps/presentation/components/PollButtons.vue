@@ -16,7 +16,7 @@ const isPollActive = computed(() =>
 const results = computed(() => {
   const raw = sessionStore.pollResults[props.pollId]
   return {
-    cabin_boy: raw?.cabin_boy ?? [],
+    newbie: raw?.newbie ?? [],
     captain: raw?.captain ?? [],
     admiral: raw?.admiral ?? [],
   }
@@ -119,7 +119,7 @@ function stopPollSession() {
   // Compute results
   const r = results.value
   const pollResults: Record<string, number> = {
-    cabin_boy: r.cabin_boy.length,
+    newbie: r.newbie.length,
     captain: r.captain.length,
     admiral: r.admiral.length,
   }
@@ -140,7 +140,7 @@ function stopPollSession() {
 <template>
   <div>
     <div class="absolute top-[88%] left-[21%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title">{{ results.cabin_boy.length }}</div>
+      <div class="text-4xl font-bold font-title">{{ results.newbie.length }}</div>
     </div>
     <div class="absolute top-[88%] left-[54%] p-1 px-2 text-center -translate-x-1/2">
       <div class="text-4xl font-bold font-title ">{{ results.captain.length }}</div>

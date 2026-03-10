@@ -134,7 +134,7 @@ export const sessionStore = reactive({
 
   // Poll results
   pollResults: (initialSessionData?.pollResults ?? {
-    [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], captain: [], admiral: [] },
+    [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { newbie: [], captain: [], admiral: [] },
   }) as Record<string, PollResults>,
 
   // Internal poll state (for PollButtons timer)
@@ -169,10 +169,10 @@ export const sessionStore = reactive({
   recordPollVote(participantId: string, pollId: string, choice: PollChoice) {
     let results = this.pollResults[pollId]
     if (!results) {
-      results = { cabin_boy: [], captain: [], admiral: [] }
+      results = { newbie: [], captain: [], admiral: [] }
       this.pollResults[pollId] = results
     }
-    if (results.cabin_boy.includes(participantId) ||
+    if (results.newbie.includes(participantId) ||
         results.captain.includes(participantId) ||
         results.admiral.includes(participantId)) return
     results[choice].push(participantId)
@@ -214,7 +214,7 @@ export const sessionStore = reactive({
     this.votePhase = 'waiting'
     this.startedVoteIndices = new Set<number>()
     this.pollResults = {
-      [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], captain: [], admiral: [] },
+      [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { newbie: [], captain: [], admiral: [] },
     }
     this.activePollId = null
     this.pollPhase = 'waiting'

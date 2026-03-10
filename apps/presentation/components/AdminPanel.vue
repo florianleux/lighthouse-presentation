@@ -34,14 +34,14 @@ const activeCrewCount = computed(() => sessionStore.activeCrew.length)
 const pollResults = computed(() => {
   const raw = sessionStore.pollResults['knowledge-level']
   return {
-    cabin_boy: raw?.cabin_boy ?? [],
+    newbie: raw?.newbie ?? [],
     captain: raw?.captain ?? [],
     admiral: raw?.admiral ?? [],
   }
 })
 
 const totalPollVotes = computed(() =>
-  pollResults.value.cabin_boy.length +
+  pollResults.value.newbie.length +
   pollResults.value.captain.length +
   pollResults.value.admiral.length
 )

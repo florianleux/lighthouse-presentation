@@ -563,7 +563,7 @@ async function simulateFakePollResponses(
 ) {
   if (!db || !presentationId || participants.length === 0) return
 
-  const choices: PollChoice[] = ['cabin_boy', 'captain', 'admiral']
+  const choices: PollChoice[] = ['newbie', 'captain', 'admiral']
   const delay = maxDurationMs / participants.length
 
   for (let i = 0; i < participants.length; i++) {

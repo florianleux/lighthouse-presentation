@@ -64,7 +64,7 @@ export interface SessionStateMessage {
 // Poll choice type
 // ===========================================
 
-export type PollChoice = 'cabin_boy' | 'captain' | 'admiral'
+export type PollChoice = 'newbie' | 'captain' | 'admiral'
 
 // ===========================================
 // Firestore document types
@@ -133,7 +133,7 @@ export interface VoteResults {
 }
 
 export interface PollResults {
-  cabin_boy: string[]
+  newbie: string[]
   captain: string[]
   admiral: string[]
 }

@@ -25,7 +25,7 @@ export const POLL_CONFIG = {
   DURATION_SECONDS: 30,
   GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: 'knowledge-level',
-  CHOICES: ['cabin_boy', 'captain', 'admiral'] as const,
+  CHOICES: ['newbie', 'captain', 'admiral'] as const,
 } as const
 
 // Performance metrics - Re-exported from centralized metrics-data.ts
