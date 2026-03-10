@@ -18,32 +18,30 @@ const codeExample = `.ad-container {
       option="b"
     >
       <div
-        v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         No placeholder: layout shift at injection.
       </div>
 
       <div
-        v-click="2"
+        v-click="1"
         class="mt-5 text-4xl text-center font-bold"
       >Reserve space</div>
 
       <img
-        v-click="1"
         src="/images/cls-ads-before.gif"
         class="absolute left-[20%] top-[72%] -translate-1/2 rounded shadow-lg w-[30%]"
         alt="Ads CLS before fix"
       />
       <img
-        v-click="3"
+        v-click="2"
         src="/images/cls-ads-after.gif"
         class="absolute right-[-7%] top-[72%] -translate-1/2 rounded shadow-lg w-[28%]"
         alt="Ads CLS after fix"
       />
 
       <CodeSnippet
-        v-click="2"
+        v-click="1"
         class="absolute top-[72%] left-[50%] -translate-1/2"
         language="css"
         :code="codeExample"

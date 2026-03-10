@@ -20,7 +20,7 @@ css: unocss
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
 
-<div class="slide-bg" style="background-image: url('/backgrounds/title-bottom-left.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-left.webp')">
   <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
 
@@ -28,7 +28,7 @@ css: unocss
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/title-bottom-right.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-right.webp')">
   <PollButtons poll-id="knowledge-level" />
 </div>
 
@@ -36,7 +36,7 @@ transition: slide-down
 transition: slide-right
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/3.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/home-top-right.webp')">
 <div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
 <div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-md">
@@ -51,7 +51,7 @@ transition: slide-right
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/4.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/home-top-left.webp')">
 <div class="text-shadow-md text-white">
 <div class="text-4xl text-white font-title">Why does performance matters ?</div>
 

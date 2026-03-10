@@ -19,32 +19,30 @@ const stickyPositionCodeExample = `.banner-container {
       option="b"
     >
       <div
-        v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         Injection is more risky to cause shifts in the flow.
       </div>
 
       <div
-        v-click="2"
+        v-click="1"
         class="mt-5 text-4xl text-center font-bold"
       >Extract it!</div>
 
       <img
-        v-click="1"
         src="/images/cls-banner-before.gif"
         class="absolute left-[27%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
         alt="Banner CLS before fix"
       />
       <img
-        v-click="3"
+        v-click="2"
         src="/images/cls-banner-after.gif"
         class="absolute right-[10%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
         alt="Banner CLS after fix"
       />
 
       <CodeSnippet
-        v-click="2"
+        v-click="1"
         class="absolute top-[72%] left-[52%] -translate-1/2"
         language="css"
         :code="stickyPositionCodeExample"

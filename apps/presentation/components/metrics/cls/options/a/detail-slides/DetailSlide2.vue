@@ -23,32 +23,30 @@ const matchingMetricsCodeExample = `@font-face {
       option="a"
     >
       <div
-        v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         Every font has its own footprint.
       </div>
 
       <div
-        v-click="2"
+        v-click="1"
         class="mt-5 text-4xl text-center font-bold"
       >Fill the gap</div>
 
       <img
-        v-click="1"
         src="/images/cls-font-before.gif"
         class="absolute left-[21%] top-[68%] -translate-1/2 rounded shadow-lg w-[17%]"
         alt="Font CLS before fix"
       />
       <img
-        v-click="3"
+        v-click="2"
         src="/images/cls-font-after.gif"
         class="absolute right-[0%] top-[68%] -translate-1/2 rounded shadow-lg w-[17%]"
         alt="Font CLS after fix"
       />
 
       <CodeSnippet
-        v-click="2"
+        v-click="1"
         class="absolute top-[68%] left-[52%] -translate-1/2"
         language="css"
         :code="matchingMetricsCodeExample"

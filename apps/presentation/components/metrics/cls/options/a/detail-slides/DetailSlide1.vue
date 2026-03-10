@@ -23,32 +23,30 @@ const htmlAfterCodeExample = `<img
       option="a"
     >
       <div
-        v-click="1"
-        :class="[clicks >= 2 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
+        :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']"
       >
         No size specified: no space reserved.
       </div>
 
       <div
-        v-click="2"
+        v-click="1"
         class="mt-5 text-4xl text-center font-bold"
       >Specify dimensions</div>
 
       <img
-        v-click="1"
         src="/images/cls-before.gif"
         class="absolute left-[27%] top-[72%] -translate-1/2 rounded shadow-lg w-[17%]"
         alt="CLS before fix"
       />
       <img
-        v-click="3"
+        v-click="2"
         src="/images/cls-after.gif"
         class="absolute right-[10%] top-[72%]  -translate-1/2 rounded shadow-lg w-[17%]"
         alt="CLS after fix"
       />
 
       <CodeSnippet
-        v-click="2"
+        v-click="1"
         class="absolute top-[72%] left-[50%] -translate-1/2"
         language="html"
         :code="htmlAfterCodeExample"

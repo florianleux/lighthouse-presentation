@@ -18,27 +18,41 @@ const masonryCss = `
 <template>
   <DetailSlideLayered quadrant="bottom-left">
     <DetailSlide
-      class="pl-10"
+      class="pl-10 pt-5 relative"
       metric="tbt"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Is the design worth the cost?</div>
+      <span
+        v-click="2"
+        class="hidden"
+      />
 
-      <div v-click="1" class="text-4xl text-center font-bold my-7">That might be an alternative!</div>
-
-      <div v-click="2" class="grid grid-cols-2 gap-10 items-start">
-        <div class="flex flex-col items-center justify-center">
-          <div class="text-3xl font-bold mb-4">Challenge the design</div>
-          <img src="/images/grid-screenshot.webp" class="w-full max-h-[280px] object-contain rounded-lg" alt="CSS Grid layout" />
+      <div class="grid grid-cols-[1fr_2fr] gap-6">
+        <div class="flex items-start justify-center">
+          <img
+            src="/images/grid-screenshot.webp"
+            class="w-full ml-10 -mt-5 max-h-[325px] object-contain rounded-sm -rotate-1 shadow-sm"
+            alt="CSS Grid layout"
+          />
         </div>
 
-        <div>
-          <CodeSnippet
-            class="text-left px-5"
-            language="css"
-            :code="masonryCss"
-            size="small"
-          />
+        <div class="flex flex-col">
+          <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Is the design
+            worth the cost?</div>
+
+          <div
+            v-click="1"
+            class="text-4xl text-center font-bold my-7"
+          >That might be an alternative!</div>
+
+          <div v-if="clicks >= 2">
+            <CodeSnippet
+              class="text-left px-5"
+              language="css"
+              :code="masonryCss"
+              size="small"
+            />
+          </div>
         </div>
       </div>
     </DetailSlide>
