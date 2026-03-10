@@ -41,6 +41,8 @@ export interface MetricConfig {
 
   // For MetricIntro component
   thresholds: [ThresholdValue, ThresholdValue]; // [good, poor] boundaries
+  thresholdsMs: [number, number]; // numeric thresholds in ms (or raw for CLS)
+  baseline: number; // baseline value in ms (or raw for CLS)
   formula: string; // h3 prop - description/formula
   tags: string[]; // Key points (up to 4)
   // Vote options
@@ -70,6 +72,8 @@ export const METRICS: MetricsData = {
     fullName: "Cumulative Layout Shift",
     weight: 25,
     thresholds: [0.1, 0.25],
+    thresholdsMs: [0.1, 0.25],
+    baseline: 0.35,
     formula: "Unexpected movement during loading",
     tags: ["Trust killer", "Will impact SEO!"],
     options: {
@@ -90,6 +94,8 @@ export const METRICS: MetricsData = {
     fullName: "First Contentful Paint",
     weight: 10,
     thresholds: ["1.8 sec", "3.0 sec"],
+    thresholdsMs: [1800, 3000],
+    baseline: 6000,
     formula: "Text, image, SVG or canvas",
     tags: ["Is anything happening?", "Low FCP is reassuring"],
     options: {
@@ -110,6 +116,8 @@ export const METRICS: MetricsData = {
     fullName: "Largest Contentful Paint",
     weight: 25,
     thresholds: ["2.5 sec", "4.0 sec"],
+    thresholdsMs: [2500, 4000],
+    baseline: 15000,
     formula: "Time to render largest element",
     tags: ["Core Web Vital: Impacts SEO!", "Measures perceived load speed"],
     options: {
@@ -130,11 +138,10 @@ export const METRICS: MetricsData = {
     fullName: "Total Blocking Time",
     weight: 30,
     thresholds: ["200 ms", "600 ms"],
+    thresholdsMs: [200, 600],
+    baseline: 750,
     formula: "Sum of blocking time beyond 50ms",
-    tags: [
-      "JSON parsing",
-      "Layout calculations",
-    ],
+    tags: ["JSON parsing", "Layout calculations"],
     options: {
       a: {
         title: "Data Parsimony",
@@ -153,6 +160,8 @@ export const METRICS: MetricsData = {
     fullName: "Speed Index",
     weight: 10,
     thresholds: ["3.4 sec", "5.8 sec"],
+    thresholdsMs: [3400, 5800],
+    baseline: 6500,
     formula: "How quickly content is visually displayed",
     tags: [
       "Total filling speed, not a moment",

@@ -15,9 +15,29 @@ const hasRightSlot = computed(() => !!slots.right)
 const formulaClick = 2
 const tagsClick = computed(() => hasRightSlot.value ? 4 : 3)
 const thresholdClick = computed(() => hasRightSlot.value ? 5 : 4)
+const baselineClick = computed(() => thresholdClick.value + 1)
+
+// Baseline logo position on the threshold bar (%)
+// Bar: 0–33% = Good, 33–66% = Average, 66–100% = Poor
+const baselinePosition = computed(() => {
+  const m = metricData.value
+  const [good, poor] = m.thresholdsMs
+  const v = m.baseline
+  if (v <= good) return (v / good) * 33
+  if (v <= poor) return 33 + ((v - good) / (poor - good)) * 33
+  // Beyond poor: extend proportionally but cap at 97%
+  return Math.min(97, 66 + ((v - poor) / (poor - good)) * 33)
+})
+
+const baselineLabel = computed(() => {
+  const v = metricData.value.baseline
+  if (metricData.value.name === 'CLS') return v.toFixed(2)
+  if (v >= 1000) return (v / 1000).toFixed(1) + ' s'
+  return v + ' ms'
+})
 </script>
 
-<template>
+<template :key="metricData.name">
   <div class="grid grid-cols-3 gap-8 h-full pt-6 pl-10 pr-5 pb-6">
     <div :class="[hasRightSlot ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
       <div>
@@ -56,6 +76,26 @@ const thresholdClick = computed(() => hasRightSlot.value ? 5 : 4)
             class="absolute text-black font-title font-bold text-xl"
             style="left: 66%; top: 150%; transform: translate(-50%, -50%)"
           >{{ metricData.thresholds[1] }}</span>
+
+          <!-- Baseline logo marker -->
+          <div
+            p
+            v-click="baselineClick"
+            class="absolute flex flex-col items-center"
+            :style="{
+              left: baselinePosition + '%',
+              top: '-5%',
+              transform: 'translate(-50%, -50%)',
+            }"
+          >
+
+            <span class="text-xl font-bold font-title mt-2 whitespace-nowrap">{{ baselineLabel }}</span>
+            <img
+              src="/images/bm-logo.png"
+              alt="BM"
+              class="h-7 w-7 drop-shadow-md"
+            >
+          </div>
         </div>
 
         <div

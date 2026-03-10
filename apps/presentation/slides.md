@@ -20,7 +20,7 @@ css: unocss
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/1.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/title-bottom-left.webp')">
   <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
 
@@ -28,7 +28,7 @@ css: unocss
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/2.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/title-bottom-right.webp')">
   <PollButtons poll-id="knowledge-level" />
 </div>
 
@@ -58,7 +58,7 @@ transition: slide-up
 
 <div class="text-center">
     <div v-click class="text-9xl mt-20 text-white text-center font-bold">24%</div>
-    <div v-click class="text-3xl">fewer visitors abandon a page<br>that meets Google's performance standards</div>
+    <div v-click class="text-3xl">less <span class="font-bold">abandonment</span> on pages<br>that meets Google's performance standards</div>
 </div>
 </div>
 
@@ -69,7 +69,7 @@ transition: slide-up
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro/5.webp')"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/blackmarket-middle.webp')"></div>
 
 ---
 transition: slide-up
@@ -316,7 +316,7 @@ transition: fade
 <DetailSlideLoader metric="si" :slide-index="2" />
 
 ---
-transition: slide-down
+transition: slide-left
 ---
 <Outro />
 

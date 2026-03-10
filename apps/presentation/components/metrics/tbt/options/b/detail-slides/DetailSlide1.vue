@@ -26,25 +26,37 @@ items.forEach(item => {
       metric="tbt"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Fancy layouts might require heavy JS!</div>
+      <!-- Click 0: Screenshot gauche + Phrase 1 grande droite -->
+      <!-- Click 1: Phrase 2 apparait, Phrase 1 rétrécit -->
+      <!-- Click 2: Code snippet apparait sous les phrases -->
+      <span v-click="2" class="hidden" />
 
-      <div v-click="1" class="text-4xl text-center font-bold my-7">Synchronous layout calculations block the main thread</div>
-
-      <div v-click="2" class="grid grid-cols-2 gap-10 items-start">
-        <div class="flex items-center justify-center">
-          <!-- Screenshot placeholder -->
-          <div class="w-full h-[300px] bg-[#39FF14] rounded-lg flex items-center justify-center">
-            <span class="text-black text-2xl font-bold">📸 Masonry screenshot</span>
-          </div>
+      <div class="grid grid-cols-[1fr_2fr] gap-6">
+        <div class="flex items-start justify-center">
+          <img
+            src="/images/masonry-screenshot.webp"
+            class="w-full ml-20 max-h-[375px] object-contain rounded-sm -rotate-1 shadow-sm"
+            alt="Masonry layout"
+          />
         </div>
 
-        <div>
-          <CodeSnippet
-            class="text-left px-5"
-            language="js"
-            :code="masonryJs"
-            size="tiny"
-          />
+        <div class="flex flex-col">
+          <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Fancy layouts
+            might require heavy JS!</div>
+
+          <div
+            v-click="1"
+            class="text-4xl text-center font-bold my-7"
+          >Synchronous layout calculations block the main thread</div>
+
+          <div v-if="clicks >= 2">
+            <CodeSnippet
+              class="text-left px-5"
+              language="js"
+              :code="masonryJs"
+              size="tiny"
+            />
+          </div>
         </div>
       </div>
     </DetailSlide>

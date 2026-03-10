@@ -29,10 +29,7 @@ const masonryCss = `
       <div v-click="2" class="grid grid-cols-2 gap-10 items-start">
         <div class="flex flex-col items-center justify-center">
           <div class="text-3xl font-bold mb-4">Challenge the design</div>
-          <!-- Screenshot placeholder -->
-          <div class="w-full h-[280px] bg-[#39FF14] rounded-lg flex items-center justify-center">
-            <span class="text-black text-2xl font-bold">📸 CSS Grid screenshot</span>
-          </div>
+          <img src="/images/grid-screenshot.webp" class="w-full max-h-[280px] object-contain rounded-lg" alt="CSS Grid layout" />
         </div>
 
         <div>

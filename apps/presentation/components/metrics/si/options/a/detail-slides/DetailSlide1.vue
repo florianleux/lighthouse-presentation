@@ -42,10 +42,6 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
             class="h-16 object-contain"
           />
           <div class="text-xl text-center mt-4">~175 KB <span class="text-green-400">(-65%)</span></div>
-          <div
-            v-click="7"
-            class="text-base text-center mt-2 opacity-70"
-          >Dynamic: SSR</div>
         </div>
 
         <!-- Column 3: Brotli -->
@@ -56,8 +52,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
           <div
             v-click="5"
             class="absolute -top-5 left-1/2 -translate-x-1/2 text-sm text-red-500 font-bold whitespace-nowrap"
-          >CPU
-            cost on dynamic compression!</div>
+          >CPU cost</div>
           <div class="text-3xl text-center font-bold">Brotli</div>
           <img
             src="/images/logo-brotli.png"
@@ -65,10 +60,6 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
             class="h-16 object-contain"
           />
           <div class="text-xl text-center mt-4">~150 KB <span class="text-green-400">(-70%)</span></div>
-          <div
-            v-click="6"
-            class="text-base text-center mt-2 opacity-70"
-          >Static: bundles</div>
         </div>
       </div>
     </DetailSlide>
