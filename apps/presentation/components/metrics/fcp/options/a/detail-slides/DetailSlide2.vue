@@ -30,6 +30,10 @@
         src="/images/ttfb/server.webp"
         class="absolute left-[82%] top-[60%] -translate-1/2 h-[22%]"
       />
+      <img
+        src="/images/ttfb/rum.webp"
+        class="absolute left-[92%] top-[52%] -translate-1/2 h-[18%] rotate-[2deg]"
+      />
 
       <!-- ===== STEP 1: Direct round trip (clicks 1-2, hide at 3) ===== -->
       <svg
@@ -161,60 +165,6 @@
         />
       </svg>
 
-      <!-- ===== STEP 4a: Empty step (click 11) — CDN hides, pause ===== -->
-
-      <!-- ===== STEP 4b: Backend optimization (clicks 12-15) ===== -->
-      <img
-        v-click="12"
-        src="/images/ttfb/tequila.webp"
-        class="absolute left-[92%] top-[52%] -translate-1/2 h-[18%] rotate-[2deg]"
-      />
-      <!-- pirate → CDN -->
-      <svg
-        v-click="13"
-        class="absolute inset-0 w-full h-full pointer-events-none"
-      >
-        <line
-          x1="31%"
-          y1="45%"
-          x2="42%"
-          y2="40%"
-          stroke="#000000"
-          stroke-width="9"
-          stroke-dasharray="42,24"
-        />
-      </svg>
-      <!-- CDN → server -->
-      <svg
-        v-click="14"
-        class="absolute inset-0 w-full h-full pointer-events-none"
-      >
-        <line
-          x1="58%"
-          y1="40%"
-          x2="72%"
-          y2="52%"
-          stroke="#000000"
-          stroke-width="9"
-          stroke-dasharray="42,24"
-        />
-      </svg>
-      <!-- server → pirate (return) -->
-      <svg
-        v-click="15"
-        class="absolute inset-0 w-full h-full pointer-events-none"
-      >
-        <line
-          x1="72%"
-          y1="62%"
-          x2="30%"
-          y2="55%"
-          stroke="#000000"
-          stroke-width="9"
-          stroke-dasharray="42,24"
-        />
-      </svg>
-
       <!-- ===== Bottom labels ===== -->
       <div class="absolute bottom-[19%] left-0 w-full flex justify-center gap-8">
         <div
@@ -229,10 +179,6 @@
           v-click="10"
           class="text-4xl font-bold"
         >Caching</div>
-        <div
-          v-click="15"
-          class="text-4xl font-bold"
-        >Backend Optimization</div>
       </div>
 
     </DetailSlide>

@@ -130,6 +130,7 @@ export const sessionStore = reactive({
   // Internal vote state (for VoteSlide timer)
   activeVoteIndex: null as number | null,
   votePhase: 'waiting' as 'waiting' | 'voting' | 'ended',
+  startedVoteIndices: new Set<number>(),
 
   // Poll results
   pollResults: (initialSessionData?.pollResults ?? {
@@ -211,6 +212,7 @@ export const sessionStore = reactive({
     }
     this.activeVoteIndex = null
     this.votePhase = 'waiting'
+    this.startedVoteIndices = new Set<number>()
     this.pollResults = {
       [POLL_CONFIG.KNOWLEDGE_POLL_ID]: { cabin_boy: [], captain: [], admiral: [] },
     }

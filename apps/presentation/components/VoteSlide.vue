@@ -107,10 +107,11 @@ function clearTimer() {
   }
 }
 
-// Reset timer display when vote phase resets (e.g. after session reset)
+// Clear timer interval when vote phase resets (e.g. after session reset or vote ends)
+// Note: timeRemaining is NOT reset here — startTimer() handles that when a new vote begins
 watch(() => sessionStore.votePhase, (phase) => {
   if (phase === 'waiting') {
-    timeRemaining.value = VOTE_DURATION
+    clearTimer()
   }
 })
 
@@ -137,10 +138,14 @@ function isSlideVisible(): boolean {
   return rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.bottom > 0
 }
 
+// A vote can only be started once per session — prevents re-triggering on back/forward navigation
+const hasBeenStarted = computed(() => sessionStore.startedVoteIndices.has(voteIndex.value))
+
 watch(currentSlideNo, () => {
-  if (sessionStore.manualMode || isVoteDone.value || isVoteActive.value) return
+  if (sessionStore.manualMode || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
+  if (currentPhase.value === 'lobby') return // Don't auto-start during reset/lobby
   setTimeout(() => {
-    if (isSlideVisible() && !isVoteDone.value && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
+    if (isSlideVisible() && !isVoteDone.value && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
       startVoteSession()
     }
   }, 200)
@@ -148,12 +153,13 @@ watch(currentSlideNo, () => {
 
 // Keyboard shortcut: V to start vote (debug only)
 function handleKeydown(e: KeyboardEvent) {
-  if (debugMode && e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !sessionStore.manualMode) {
+  if (debugMode && e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !hasBeenStarted.value && !sessionStore.manualMode) {
     startVoteSession()
   }
 }
 
 function startVoteSession() {
+  sessionStore.startedVoteIndices.add(voteIndex.value)
   sessionStore.activeVoteIndex = voteIndex.value
   sessionStore.votePhase = 'voting'
   startTimer()

@@ -2,13 +2,17 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import AdminPanel from './components/AdminPanel.vue'
-import { sessionStore, publishSessionState } from './setup/main'
+import { sessionStore, currentPhase, publishSessionState } from './setup/main'
 
 const { currentSlideNo } = useNav()
 
 // Track slide changes and publish state to Firestore
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
+    // Transition from lobby to idle once presenter navigates beyond slide 1
+    if (currentPhase.value === 'lobby' && slide > 1) {
+      currentPhase.value = 'idle'
+    }
     sessionStore.updateLastSlide(slide)
     publishSessionState()
   }

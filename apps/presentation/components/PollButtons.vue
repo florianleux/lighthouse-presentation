@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
@@ -60,6 +60,14 @@ function clearTimer() {
   }
   isInGracePeriod.value = false
 }
+
+// Reset timer when poll phase resets (e.g. after session reset)
+watch(() => sessionStore.pollPhase, (phase) => {
+  if (phase === 'waiting') {
+    clearTimer()
+    timeRemaining.value = 0
+  }
+})
 
 // Keyboard shortcut: V to start poll
 function handleKeydown(e: KeyboardEvent) {
