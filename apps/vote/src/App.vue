@@ -80,7 +80,9 @@ const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
 const isSubmitting = ref(false)
-const imagesReady = ref(false)
+const nameFormReady = ref(false)
+const avatarsReady = ref(false)
+const voteReady = ref(false)
 
 // ===========================================
 // Computed
@@ -144,13 +146,13 @@ function handleSessionState(msg: SessionStateMessage) {
     name.value = ''
     currentStep.value = 'name'
     participantId.value = getOrCreateParticipantId()
-    status.value = imagesReady.value ? 'idle' : 'connecting'
+    status.value = nameFormReady.value ? 'idle' : 'connecting'
     return
   }
 
   // First session state: transition from connecting/waiting (only when images are loaded)
   if (status.value === 'connecting' || status.value === 'waiting') {
-    if (!imagesReady.value) return
+    if (!nameFormReady.value) return
     const savedCrew = loadCrew()
     if (savedCrew) {
       joinedName.value = savedCrew.name
@@ -163,7 +165,7 @@ function handleSessionState(msg: SessionStateMessage) {
 }
 
 // When images finish loading, complete any deferred transition
-watch(imagesReady, (ready) => {
+watch(nameFormReady, (ready) => {
   if (ready && sessionState.value && (status.value === 'connecting' || status.value === 'waiting')) {
     handleSessionState(sessionState.value)
   }
@@ -262,17 +264,25 @@ function requestFullscreen() {
 document.addEventListener('click', requestFullscreen, { once: true })
 
 // ===========================================
-// Preload images
+// Preload images (progressive per step)
 // ===========================================
 
-function preloadImages(): Promise<void> {
-  const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
-  const urls: string[] = [
-    '/vote/Bg.webp', '/vote/A.webp', '/vote/B.webp', '/vote/light.webp', '/vote/blueprint.webp', '/vote/shadow.webp',
-    ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
-  ]
+function preloadUrls(urls: string[]): Promise<void> {
+  const promises = urls.map(src => new Promise<void>((resolve) => {
+    const img = new Image()
+    img.onload = () => resolve()
+    img.onerror = () => resolve()
+    img.src = src
+  }))
+  return Promise.all(promises).then(() => {})
+}
 
-  // Avatar assets (~200 small webp layers)
+function preloadNameFormImages(): Promise<void> {
+  return preloadUrls(['/vote/blueprint.webp', '/vote/shadow.webp', '/vote/light.webp'])
+}
+
+function preloadAvatarImages(): Promise<void> {
+  const urls: string[] = []
   const { GENDERS, SKIN_TONES, MOUTH_COUNT, NOSE_COUNT, EYE_OPTIONS, EYE_COLORS, ACCESSORY_COUNT, ACCESSORY_COUNT_FEMALE, HAIR_OPTIONS, HAIR_COLORS, HAT_OPTIONS, HAT_COLORS } = AVATAR_CONFIG
   for (const gender of GENDERS) {
     const maxAcc = gender === 'male' ? ACCESSORY_COUNT : ACCESSORY_COUNT_FEMALE
@@ -288,22 +298,37 @@ function preloadImages(): Promise<void> {
     for (let o = 1; o <= HAIR_OPTIONS; o++) for (let c = 1; c <= HAIR_COLORS; c++) urls.push(`/avatars/${gender}/hair/option_${o}/color_${c}.webp`)
     for (let o = 1; o <= HAT_OPTIONS; o++) for (let c = 1; c <= HAT_COLORS; c++) urls.push(`/avatars/${gender}/hats/option_${o}/color_${c}.webp`)
   }
-
-  const promises = urls.map(src => new Promise<void>((resolve) => {
-    const img = new Image()
-    img.onload = () => resolve()
-    img.onerror = () => resolve()
-    img.src = src
-  }))
-  return Promise.all(promises).then(() => {})
+  return preloadUrls(urls)
 }
+
+function preloadVoteImages(): Promise<void> {
+  const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
+  return preloadUrls([
+    '/vote/A.webp', '/vote/B.webp',
+    ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
+  ])
+}
+
+// Preload avatars when NameForm is shown
+watch(status, (newStatus) => {
+  if (newStatus === 'idle') {
+    preloadAvatarImages().then(() => { avatarsReady.value = true })
+  }
+})
+
+// Preload vote images when AvatarStep is shown
+watch(currentStep, (step) => {
+  if (step === 'avatar') {
+    preloadVoteImages().then(() => { voteReady.value = true })
+  }
+})
 
 // ===========================================
 // Lifecycle
 // ===========================================
 
 onMounted(async () => {
-  preloadImages().then(() => { imagesReady.value = true })
+  preloadNameFormImages().then(() => { nameFormReady.value = true })
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
@@ -334,8 +359,12 @@ onMounted(async () => {
 <template>
   <div class=" p-0">
     <!-- Immersive vote screen (replaces card when actively voting) -->
+    <StatusScreen
+      v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric && !voteReady"
+      variant="connecting"
+    />
     <VoteScreen
-      v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
+      v-else-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
       :metric="currentMetric"
       :vote-winners="voteWinners"
       :is-submitting="isSubmitting"
@@ -399,7 +428,11 @@ onMounted(async () => {
         variant="error"
       />
 
-      <!-- Onboarding: Avatar -->
+      <!-- Onboarding: Avatar (loading screen if avatars not ready) -->
+      <StatusScreen
+        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar' && !avatarsReady"
+        variant="connecting"
+      />
       <AvatarStep
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
         :name="name"
