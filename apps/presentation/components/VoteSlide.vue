@@ -272,6 +272,13 @@ async function stopVoteSession() {
         {{ timeRemaining }}
       </div>
 
+      <!-- Participation counter -->
+      <div
+        class="absolute bottom-[29%] text-[#17443e] text-shadow-md left-1/2 -translate-x-1/2 text-3xl uppercase font-title opacity-80"
+      >
+        {{ totalVotes }}/{{ sessionStore.crew.length }} voted
+      </div>
+
       <!-- Vote proportion bar -->
       <VoteProportionBar
         v-if="isVoteActive || isVoteDone"

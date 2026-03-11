@@ -43,7 +43,7 @@ const masonryCss = `
           <div
             v-click="1"
             class="text-4xl text-center font-bold my-7"
-          >That might be an alternative!</div>
+          >There might be an alternative!</div>
 
           <div v-if="clicks >= 2">
             <CodeSnippet
