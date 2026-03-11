@@ -5,8 +5,7 @@ import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../sha
 import { getMetricByIndex } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
 import AvatarStep from './components/AvatarStep.vue'
-import ConfirmationScreen from './components/ConfirmationScreen.vue'
-import JoinedWaiting from './components/JoinedWaiting.vue'
+import WaitingScreen from './components/WaitingScreen.vue'
 import NameForm from './components/NameForm.vue'
 import PollScreen from './components/PollScreen.vue'
 import StatusScreen from './components/StatusScreen.vue'
@@ -79,7 +78,6 @@ const sessionState = ref<SessionStateMessage | null>(null)
 const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
-const isSubmitting = ref(false)
 const nameFormReady = ref(false)
 
 // ===========================================
@@ -214,17 +212,14 @@ async function handleJoin(avatar: string) {
 
 async function handleVote(choice: 'A' | 'B') {
   const vote = sessionState.value?.vote
-  if (!vote || hasVotedThisRound.value || isSubmitting.value || !keynoteId.value) return
+  if (!vote || hasVotedThisRound.value || !keynoteId.value) return
 
-  isSubmitting.value = true
   try {
     await submitVote(vote.index, participantId.value, choice)
     votedRounds.value = [...votedRounds.value, vote.index]
     saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
     console.error('Failed to vote:', err)
-  } finally {
-    isSubmitting.value = false
   }
 }
 
@@ -234,17 +229,14 @@ async function handleVote(choice: 'A' | 'B') {
 
 async function handlePoll(choice: PollChoice) {
   const poll = sessionState.value?.poll
-  if (!poll || hasPolledThisRound.value || isSubmitting.value || !keynoteId.value) return
+  if (!poll || hasPolledThisRound.value || !keynoteId.value) return
 
-  isSubmitting.value = true
   try {
     await submitPoll(poll.id, participantId.value, choice)
     polledIds.value = [...polledIds.value, poll.id]
     saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
   } catch (err) {
     console.error('Failed to submit poll:', err)
-  } finally {
-    isSubmitting.value = false
   }
 }
 
@@ -264,7 +256,7 @@ function preloadNameFormImages(): Promise<void> {
     img.onerror = () => resolve()
     img.src = src
   }))
-  return Promise.all(promises).then(() => {})
+  return Promise.all(promises).then(() => { })
 }
 
 // ===========================================
@@ -290,6 +282,9 @@ onMounted(async () => {
     polledIds.value = savedVotes.polledIds
   }
 
+  // DEBUG: block on connecting screen
+  return
+
   // Connect to Firestore
   const connected = connect()
   if (connected) {
@@ -307,7 +302,6 @@ onMounted(async () => {
       v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
       :metric="currentMetric"
       :vote-winners="voteWinners"
-      :is-submitting="isSubmitting"
       @vote="handleVote"
     />
 
@@ -332,7 +326,7 @@ onMounted(async () => {
         alt=""
         class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-48 mix-blend-multiply"
       />
-      <div class="absolute bottom-[10%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
+      <div class="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
         <NameForm
           v-model="name"
           :validation-message="validationMessage"
@@ -341,6 +335,62 @@ onMounted(async () => {
           @submit="handleNext"
         />
       </div>
+      <img
+        src="/vote/light.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+      />
+    </div>
+
+    <!-- AvatarStep: full-screen with decorative layers -->
+    <div
+      v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
+      class="relative w-screen h-dvh overflow-hidden"
+    >
+      <img
+        src="/vote/Bg.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-0"
+      />
+      <img
+        src="/vote/shadow.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
+      />
+      <AvatarStep
+        class="z-3"
+        :name="name"
+        :is-joining="status === 'joining'"
+        @back="handleBack"
+        @join="handleJoin"
+      />
+      <img
+        src="/vote/light.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+      />
+    </div>
+
+    <!-- WaitingScreen: full-screen with decorative layers -->
+    <div
+      v-else-if="status === 'joined' && !(phase === 'voting' && !hasVotedThisRound) && !(phase === 'polling' && !hasPolledThisRound)"
+      class="relative w-screen h-dvh overflow-hidden"
+    >
+      <img
+        src="/vote/Bg.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-0"
+      />
+      <img
+        src="/vote/shadow.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
+      />
+      <WaitingScreen
+        class="z-3"
+        :avatar="selectedAvatar"
+        :name="joinedName"
+      />
       <img
         src="/vote/light.webp"
         alt=""
@@ -368,59 +418,12 @@ onMounted(async () => {
         variant="error"
       />
 
-      <!-- Onboarding: Avatar -->
-      <AvatarStep
-        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
-        :name="name"
-        :is-joining="status === 'joining'"
-        @back="handleBack"
-        @join="handleJoin"
-      />
-
-      <!-- Vote submitted -->
-      <ConfirmationScreen
-        v-else-if="status === 'joined' && phase === 'voting' && hasVotedThisRound"
-        title="Vote recorded!"
-        hint="Results on the big screen..."
-        show-checkmark
-      />
-
-      <!-- Vote closed -->
-      <ConfirmationScreen
-        v-else-if="status === 'joined' && phase === 'vote-results'"
-        title="Vote closed!"
-        hint="Check the results on screen!"
-      />
-
       <!-- Poll voting -->
       <PollScreen
         v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound"
-        :is-submitting="isSubmitting"
         @poll="handlePoll"
       />
 
-      <!-- Poll submitted -->
-      <ConfirmationScreen
-        v-else-if="status === 'joined' && phase === 'polling' && hasPolledThisRound"
-        title="Thanks!"
-        hint="Your response has been recorded"
-        show-checkmark
-      />
-
-      <!-- Poll closed -->
-      <ConfirmationScreen
-        v-else-if="status === 'joined' && phase === 'poll-results'"
-        title="Poll closed!"
-        hint="Check the results on screen!"
-        show-checkmark
-      />
-
-      <!-- Default: waiting between votes -->
-      <JoinedWaiting
-        v-else-if="status === 'joined'"
-        :avatar="selectedAvatar"
-        :name="joinedName"
-      />
     </div>
 
   </div>

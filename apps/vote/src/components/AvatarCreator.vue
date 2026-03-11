@@ -31,119 +31,81 @@ function handleJoin() {
 </script>
 
 <template>
-  <div class="avatar-creator">
-    <h2>Create Your Pirate</h2>
+  <div class="flex flex-col px-8 items-center gap-6 rounded-2xl w-full max-w-[400px]">
 
-    <div class="preview-wrapper" :class="{ spinning: isSpinning }">
-      <AvatarPreview :avatar="avatar" :size="200" />
+    <div class="
+      absolute
+      top-[36%]
+      left-[50%]
+      -translate-x-1/2
+      -translate-y-1/2">
+      <img
+        src="/vote/A.webp"
+        alt=""
+        class="block max-h-[50dvh] max-w-[90vw]"
+      />
+      <div class="absolute inset-0 flex items-center justify-center">
+        <AvatarPreview
+          :avatar="avatar"
+          :size="0"
+          class="h-[60%] z-10 aspect-square"
+        />
+      </div>
     </div>
 
-    <div class="selectors">
-      <GenderSelector
-        :model-value="avatar.gender"
-        :disabled="isSpinning"
-        @update:model-value="handleGenderChange"
-      />
 
-      <SkinToneSelector
-        :model-value="avatar.skinTone"
-        :disabled="isSpinning"
-        @update:model-value="handleSkinToneChange"
-      />
-    </div>
+    <GenderSelector
+      class="
+      absolute
+      bottom-[25%]
+      left-[50%]
+      -translate-x-1/2
+      -translate-y-1/2
+      z-1000
+      flex
+      flex-col
+      gap-8
+      items-center"
+      :model-value="avatar.gender"
+      :disabled="isSpinning"
+      @update:model-value="handleGenderChange"
+    />
 
-    <div class="actions">
-      <button class="random-btn" type="button" :disabled="isSpinning" @click="spinAndRandomize()">
-        {{ isSpinning ? 'Spinning...' : 'Randomize' }}
+    <SkinToneSelector
+      class="
+      absolute
+      bottom-[13%]
+      left-[50%]
+      -translate-x-1/2
+      -translate-y-1/2
+      z-1000
+      flex
+      flex-col
+      gap-8
+      items-center"
+      :model-value="avatar.skinTone"
+      :disabled="isSpinning"
+      @update:model-value="handleSkinToneChange"
+    />
+
+
+    <div class="absolute bottom-[3%] left-1/2 -translate-x-1/2 flex gap-3 w-[90%] z-1000">
+      <button
+        class="flex-1 appearance-none py-4 px-4 text-xl font-semibold text-black bg-white shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed font-title uppercase"
+        type="button"
+        :disabled="isSpinning"
+        @click="spinAndRandomize()"
+      >
+        {{ isSpinning ? 'SPINNING...' : 'RANDOMIZE' }}
       </button>
-      <button class="join-btn" type="button" :disabled="isSpinning" @click="handleJoin">
-        Join the crew
+      <button
+        class="flex-1 appearance-none py-4 px-4 text-xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed font-title uppercase"
+        type="button"
+        :disabled="isSpinning"
+        @click="handleJoin"
+      >
+        JOIN THE CREW
       </button>
     </div>
   </div>
 </template>
-
-<style scoped>
-.avatar-creator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  padding: 32px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 400px;
-}
-
-h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #ffd700;
-  text-align: center;
-}
-
-.preview-wrapper {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
-  padding: 16px;
-  transition: box-shadow 0.2s;
-}
-
-.preview-wrapper.spinning {
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-}
-
-.selectors {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-}
-
-.actions {
-  display: flex;
-  gap: 16px;
-  width: 100%;
-}
-
-.random-btn,
-.join-btn {
-  flex: 1;
-  padding: 14px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-}
-
-.random-btn {
-  background: transparent;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.random-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.random-btn:disabled,
-.join-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.join-btn {
-  background: #ffd700;
-  color: #1e3a5f;
-}
-
-.join-btn:hover:not(:disabled) {
-  background: #ffed4a;
-  transform: scale(1.02);
-}
-</style>

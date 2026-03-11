@@ -41,33 +41,17 @@ const layers = computed(() => getAllLayerPaths(parsedAvatar.value))
 
 <template>
   <div
-    class="avatar-container"
-    :style="{ width: size + 'px', height: size + 'px' }"
+    class="avatar-container relative rounded-2xl overflow-hidden"
+    :style="size ? { width: size + 'px', height: size + 'px' } : {}"
   >
     <img
       v-for="layer in layers"
       :key="layer.name"
       :src="layer.path"
       :alt="layer.name"
-      class="avatar-layer"
+      class="avatar-layer absolute top-0 left-0 w-full h-full object-contain"
       :style="{ zIndex: layer.zIndex }"
     />
   </div>
 </template>
 
-<style scoped>
-.avatar-container {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.avatar-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-</style>

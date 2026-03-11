@@ -25,13 +25,16 @@ function handleClick(gender: Gender) {
 </script>
 
 <template>
-  <div class="gender-selector" :class="{ disabled }">
-    <span class="label">Gender</span>
-    <div class="options">
+  <div
+    class="flex items-center gap-4"
+    :class="{ 'opacity-70': disabled }"
+  >
+    <div class="flex gap-2">
       <button
         v-for="gender in genders"
         :key="gender.value"
-        :class="['gender-btn', { selected: modelValue === gender.value }]"
+        class="py-2 px-4 text-bold rounded-[20px] border-4 bg-transparent text-white text-3xl font-bold cursor-pointer transition-all duration-200 hover:enabled:border-white/50 hover:enabled:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="modelValue === gender.value ? 'border-[#ffd700] bg-[rgba(255,215,0,0.2)] text-[#ffd700]!' : 'border-white'"
         type="button"
         :disabled="disabled"
         @click="handleClick(gender.value)"
@@ -41,53 +44,3 @@ function handleClick(gender: Gender) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.gender-selector {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.label {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.options {
-  display: flex;
-  gap: 8px;
-}
-
-.gender-btn {
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.gender-btn:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.gender-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.gender-btn.selected {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.2);
-  color: #ffd700;
-}
-
-.gender-selector.disabled {
-  opacity: 0.7;
-}
-</style>

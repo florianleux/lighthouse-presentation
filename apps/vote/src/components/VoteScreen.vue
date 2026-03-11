@@ -8,7 +8,6 @@ import VoteOption from './VoteOption.vue'
 const props = defineProps<{
   metric: MetricConfig
   voteWinners: Record<number, 'A' | 'B'>
-  isSubmitting: boolean
 }>()
 
 const emit = defineEmits<{
@@ -59,9 +58,7 @@ const options = computed(() => {
 })
 
 function handleVote(choice: 'A' | 'B') {
-  if (!props.isSubmitting) {
-    emit('vote', choice)
-  }
+  emit('vote', choice)
 }
 </script>
 
@@ -86,11 +83,6 @@ function handleVote(choice: 'A' | 'B') {
       @click="handleVote(opt.key)"
     />
 
-    <p
-      v-if="isSubmitting"
-      class="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm text-amber-300 z-2"
-    >Sending...</p>
-
     <img
       src="/vote/light.webp"
       alt=""
@@ -98,4 +90,3 @@ function handleVote(choice: 'A' | 'B') {
     />
   </div>
 </template>
-

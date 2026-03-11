@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import type { PollChoice } from '../../../../shared/types'
 
-defineProps<{
-  isSubmitting: boolean
-}>()
-
 const emit = defineEmits<{
   poll: [choice: PollChoice]
 }>()
@@ -26,16 +22,11 @@ const choices: { value: PollChoice; emoji: string; label: string; colorClass: st
         :key="choice.value"
         :class="['flex items-center gap-4 py-4 px-6 text-lg font-semibold border-3 rounded-xl bg-transparent cursor-pointer transition-all duration-200 text-white disabled:opacity-50 disabled:cursor-not-allowed', choice.colorClass]"
         @click="emit('poll', choice.value)"
-        :disabled="isSubmitting"
       >
         <span class="text-[32px]">{{ choice.emoji }}</span>
         <span class="flex-1 text-left">{{ choice.label }}</span>
       </button>
     </div>
-    <p
-      v-if="isSubmitting"
-      class="text-sm text-[#ffd700] opacity-80 mt-2"
-    >Sending...</p>
   </div>
 </template>
 

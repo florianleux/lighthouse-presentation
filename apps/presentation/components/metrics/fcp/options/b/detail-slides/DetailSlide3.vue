@@ -42,8 +42,8 @@ const noLodashCode = `
           <div class="text-4xl font-bold">Defer or async it!</div>
           <div class="text-left w-full">
             <!-- JavaScript (defer) -->
-            <div class="mb-2">
-              <div class="text-lg font-bold mb-2">defer</div>
+            <div v-click="2" class="mb-2">
+              <div class="text-lg font-bold mb-2">defer <span class="font-normal italic text-sm opacity-70">(analytics, tracking)</span></div>
               <div class="grid grid-cols-4 gap-0.5">
                 <!-- Row 1: HTML parsing continues -->
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
@@ -58,8 +58,8 @@ const noLodashCode = `
               </div>
             </div>
             <!-- JavaScript (async) -->
-            <div>
-              <div class="text-lg font-bold mb-2">async</div>
+            <div v-click="3">
+              <div class="text-lg font-bold mb-2">async <span class="font-normal italic text-sm opacity-70">(chat widget, ads)</span></div>
               <div class="grid grid-cols-4 gap-0.5">
                 <!-- Row 1: HTML parsing interrupted -->
                 <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
