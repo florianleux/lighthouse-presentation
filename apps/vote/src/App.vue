@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { STORAGE_KEYS, AVATAR_CONFIG } from '../../../shared/constants'
+import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
-import { getMetricByIndex, METRICS_LIST } from '../../../shared/metrics-data'
+import { getMetricByIndex } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
 import AvatarStep from './components/AvatarStep.vue'
 import ConfirmationScreen from './components/ConfirmationScreen.vue'
@@ -265,7 +265,8 @@ document.addEventListener('click', requestFullscreen, { once: true })
 // Preload images (progressive per step)
 // ===========================================
 
-function preloadUrls(urls: string[]): Promise<void> {
+function preloadNameFormImages(): Promise<void> {
+  const urls = ['/vote/blueprint.webp', '/vote/shadow.webp', '/vote/light.webp']
   const promises = urls.map(src => new Promise<void>((resolve) => {
     const img = new Image()
     img.onload = () => resolve()
@@ -275,60 +276,12 @@ function preloadUrls(urls: string[]): Promise<void> {
   return Promise.all(promises).then(() => {})
 }
 
-function preloadNameFormImages(): Promise<void> {
-  return preloadUrls(['/vote/blueprint.webp', '/vote/shadow.webp', '/vote/light.webp'])
-}
-
-function getAvatarUrlsForGenderTone(gender: string, tone: string): string[] {
-  const { MOUTH_COUNT, NOSE_COUNT, EYE_OPTIONS, EYE_COLORS, ACCESSORY_COUNT, ACCESSORY_COUNT_FEMALE, HAIR_OPTIONS, HAIR_COLORS, HAT_OPTIONS, HAT_COLORS } = AVATAR_CONFIG
-  const urls: string[] = []
-  const maxAcc = gender === 'male' ? ACCESSORY_COUNT : ACCESSORY_COUNT_FEMALE
-  const base = `/avatars/${gender}/${tone}_tone`
-  urls.push(`${base}/face.webp`)
-  for (let i = 1; i <= MOUTH_COUNT; i++) urls.push(`${base}/mouth/mouth_${i}.webp`)
-  for (let o = 1; o <= EYE_OPTIONS; o++) for (let c = 1; c <= EYE_COLORS; c++) urls.push(`${base}/eyes/option_${o}/color_${c}.webp`)
-  for (let i = 1; i <= NOSE_COUNT; i++) urls.push(`${base}/nose/nose_${i}.webp`)
-  for (let i = 1; i <= maxAcc; i++) urls.push(`${base}/accessories/accessory_${i}.webp`)
-  urls.push(`${base}/accessories/eye_patch_left.webp`, `${base}/accessories/eye_patch_right.webp`)
-  for (let o = 1; o <= HAIR_OPTIONS; o++) for (let c = 1; c <= HAIR_COLORS; c++) urls.push(`/avatars/${gender}/hair/option_${o}/color_${c}.webp`)
-  for (let o = 1; o <= HAT_OPTIONS; o++) for (let c = 1; c <= HAT_COLORS; c++) urls.push(`/avatars/${gender}/hats/option_${o}/color_${c}.webp`)
-  return urls
-}
-
-async function preloadAvatarImages(): Promise<void> {
-  const { GENDERS, SKIN_TONES } = AVATAR_CONFIG
-  // Priority: default selection (male/light) first
-  await preloadUrls(getAvatarUrlsForGenderTone('male', 'light'))
-  // Then load remaining gender/tone combos in background
-  const remaining: string[] = []
-  for (const gender of GENDERS) {
-    for (const tone of SKIN_TONES) {
-      if (gender === 'male' && tone === 'light') continue
-      remaining.push(...getAvatarUrlsForGenderTone(gender, tone))
-    }
-  }
-  preloadUrls(remaining)
-}
-
-function preloadVoteImages(): Promise<void> {
-  const metrics = METRICS_LIST.map(m => m.name.toLowerCase())
-  return preloadUrls([
-    '/vote/A.webp', '/vote/B.webp',
-    ...metrics.flatMap(m => [`/floors/floor-${m}-a.webp`, `/floors/floor-${m}-b.webp`]),
-  ])
-}
-
 // ===========================================
 // Lifecycle
 // ===========================================
 
 onMounted(async () => {
-  preloadNameFormImages().then(() => {
-    nameFormReady.value = true
-    // Start lower-priority preloads only after first screen is ready
-    preloadAvatarImages()
-    preloadVoteImages()
-  })
+  preloadNameFormImages().then(() => { nameFormReady.value = true })
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
