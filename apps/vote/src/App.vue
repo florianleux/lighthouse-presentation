@@ -282,9 +282,6 @@ onMounted(async () => {
     polledIds.value = savedVotes.polledIds
   }
 
-  // DEBUG: block on connecting screen
-  return
-
   // Connect to Firestore
   const connected = connect()
   if (connected) {

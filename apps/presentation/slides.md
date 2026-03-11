@@ -91,7 +91,7 @@ transition: slide-left
 transition: fade
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/score-3.webp');"></div>
+<div class="slide-bg" style="background-image: url('/backgrounds/intro-ter-br.webp');"></div>
 
 ---
 transition: fade

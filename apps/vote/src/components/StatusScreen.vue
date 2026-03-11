@@ -6,7 +6,7 @@ defineProps<{
 
 <template>
   <div
-    :class="['py-5 absolute top-[40%] w-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 text-3xl font-title text-shadow-md text-shadow-black text-white text-center', { 'text-red-400': variant === 'error' }]"
+    :class="['py-5 absolute top-[40%] w-[90%] left-[50%] -translate-x-1/2 -translate-y-1/2 text-5xl font-title text-shadow-md text-shadow-black text-white text-center', { 'text-red-400': variant === 'error' }]"
   >
     <img
       v-if="variant !== 'error'"
