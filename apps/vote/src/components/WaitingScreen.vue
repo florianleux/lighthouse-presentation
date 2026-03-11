@@ -31,7 +31,7 @@ defineProps<{
   </div>
 
   <p
-    class="absolute w-[80%] bottom-[15%] left-[50%] -translate-x-1/2 z-1000 text-6xl font-title text-shadow-md text-shadow-black text-white text-center">
+    class="absolute w-[90%] bottom-[10%] left-[50%] -translate-x-1/2 z-1000 text-6xl font-title text-shadow-md text-shadow-black text-white text-center">
     The captain will let you know about the next vote!
   </p>
 

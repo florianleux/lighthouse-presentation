@@ -29,9 +29,13 @@ const emit = defineEmits<{
       <AvatarCreator @join="(avatar: string) => emit('join', avatar)" />
       <div
         v-if="isJoining"
-        class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center rounded-2xl z-10"
+        class="absolute inset-0 bg-black/20 bckground-blur-md flex flex-col items-center justify-center rounded-2xl z-10"
       >
-        <img src="/vote/wheel.webp" alt="" class="w-16 h-16 animate-[spin_3s_linear_infinite] mx-auto mb-4" />
+        <img
+          src="/vote/wheel.webp"
+          alt=""
+          class=" animate-[spin_3s_linear_infinite] mx-auto mb-4"
+        />
         <p>Boarding...</p>
       </div>
 
