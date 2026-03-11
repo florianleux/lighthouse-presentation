@@ -252,15 +252,6 @@ async function handlePoll(choice: PollChoice) {
 // Fullscreen on first interaction (Android)
 // ===========================================
 
-function requestFullscreen() {
-  const el = document.documentElement
-  if (!document.fullscreenElement && el.requestFullscreen) {
-    el.requestFullscreen().catch(() => { })
-  }
-  document.removeEventListener('click', requestFullscreen)
-}
-document.addEventListener('click', requestFullscreen, { once: true })
-
 // ===========================================
 // Preload images (progressive per step)
 // ===========================================
