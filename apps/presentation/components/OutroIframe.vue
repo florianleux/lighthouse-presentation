@@ -54,15 +54,31 @@ const metricKeys = ['CLS', 'FCP', 'LCP', 'TBT', 'SI'] as const
 const revealedCount = ref(0)
 
 function revealNext() {
-  if (revealedCount.value <= metricKeys.length) {
+  if (revealedCount.value <= metricKeys.length + 1) {
     revealedCount.value++
   }
 }
+
+const metricPositions = [
+  { left: '15%', top: '15%' },
+  { left: '26%', top: '15%' },
+  { left: '37%', top: '15%' },
+  { left: '20%', top: '45%' },
+  { left: '32%', top: '45%' },
+]
 
 function formatValue(key: string, value: number): string {
   if (key === 'CLS') return value.toFixed(2)
   if (value >= 1000) return (value / 1000).toFixed(1) + ' s'
   return value + ' ms'
+}
+function thresholdColor(key: string, value: number): string {
+  const metric = METRICS_LIST.find(m => m.name === key)
+  if (!metric) return 'text-white'
+  const [good, poor] = metric.thresholdsMs
+  if (value <= good) return 'text-green-400'
+  if (value <= poor) return 'text-orange-400'
+  return 'text-red-400'
 }
 </script>
 
@@ -80,39 +96,34 @@ function formatValue(key: string, value: number): string {
       />
     </div>
 
-    <!-- Metrics comparison -->
+    <!-- Metric cards -->
     <div
-      class="absolute left-[4%] top-[15%] flex flex-col gap-3 text-white"
+      v-for="(key, i) in metricKeys"
+      :key="key"
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      :style="{ left: metricPositions[i].left, top: metricPositions[i].top }"
     >
-      <div
-        v-for="(key, i) in metricKeys"
-        :key="key"
-        class="flex items-center gap-4 text-lg"
-      >
-        <span class="w-12 font-bold font-title">{{ key }}</span>
-        <span class="w-28 text-right font-body">{{ formatValue(key, baseline[key]) }}</span>
-
-        <Transition name="fade">
-          <span v-if="revealedCount > i && optimized" class="flex items-center gap-2">
-            <span class="opacity-50">→</span>
-            <span class="font-bold font-body">{{ formatValue(key, optimized[key]) }}</span>
-          </span>
-        </Transition>
-      </div>
-
-      <!-- Performance score -->
-      <div class="flex items-center gap-4 text-xl mt-2 border-t border-white/20 pt-2">
-        <span class="w-12 font-bold font-title">Perf</span>
-        <span class="w-28 text-right font-body">{{ baseline.perf }}</span>
-
-        <Transition name="fade">
-          <span v-if="revealedCount > metricKeys.length && optimized" class="flex items-center gap-2">
-            <span class="opacity-50">→</span>
-            <span class="font-bold font-body text-2xl">{{ optimized.perf }}</span>
-          </span>
-        </Transition>
-      </div>
+      <div class="font-title text-6xl text-white">{{ key }}</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue(key, baseline[key]) }}</div>
+      <Transition name="fade">
+        <div
+          v-if="revealedCount > i && optimized"
+          :class="[thresholdColor(key, optimized[key]), 'font-bold font-body text-2xl']"
+        >
+          {{ formatValue(key, optimized[key]) }}
+        </div>
+      </Transition>
     </div>
+
+    <!-- Final Lighthouse score -->
+    <Transition name="fade">
+      <div
+        v-if="revealedCount > metricKeys.length && optimized"
+        class="absolute left-[69%] top-[68%] -rotate-2 font-title text-white text-8xl"
+      >
+        {{ optimized.perf }}
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -120,6 +131,7 @@ function formatValue(key: string, value: number): string {
 .fade-enter-active {
   transition: all 0.4s ease-out;
 }
+
 .fade-enter-from {
   opacity: 0;
   transform: translateX(-10px);
