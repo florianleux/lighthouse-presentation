@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
 import AdminPanel from './components/AdminPanel.vue'
-import CrewJoinToast from './components/CrewJoinToast.vue'
+
 import { sessionStore, currentPhase, publishSessionState } from './setup/main'
 
 const { currentSlideNo } = useNav()
@@ -41,7 +41,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <CrewJoinToast />
+
   <AdminPanel
     :visible="showAdminPanel"
     @close="showAdminPanel = false"

@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { reactive, computed, watch } from 'vue'
-import { useNav } from '@slidev/client'
+import { reactive, watch } from 'vue'
 import { sessionStore } from '../setup/main'
 import type { CrewMember } from '../../../shared/types'
-
-const { currentSlideNo } = useNav()
-const isVisible = computed(() => currentSlideNo.value === 1)
 
 const SLOT_COUNT = 5
 const TOAST_DURATION = 2000
@@ -65,7 +61,6 @@ watch(
 <template>
   <!-- Crew counter -->
   <div
-    v-if="isVisible"
     class="flex flex-col text-center w-[5%] -rotate-34 items-center absolute right-[11.2%] -translate-1/2 top-[14.1%] text-white text-md font-bold font-title"
   >
     <span class="text-[#36A300] mr-1 text-3xl">{{ sessionStore.crew.length }}</span>
@@ -75,7 +70,6 @@ watch(
     }}</span>
   </div>
   <div
-    v-if="isVisible"
     class="absolute top-35 -right-2 z-100 flex flex-col gap-0 pointer-events-none"
   >
     <div
@@ -87,7 +81,8 @@ watch(
         <div
           v-if="slot.member"
           :key="slot.key"
-          class="absolute top-0 right-0 flex items-center gap-2.5 py-1 pl-2 pr-4 bg-[#C7F900] border border-[#39A400] rounded-md  text-white text-sm whitespace-nowrap pointer-events-auto shadow-sm"
+          class="absolute top-0 right-0 flex items-center gap-2.5 py-1 pl-2 pr-4 border border-[#39A400] rounded-md text-white text-sm whitespace-nowrap pointer-events-auto shadow-sm"
+          style="background: linear-gradient(to top right, #F2F700, #6BFF00)"
         >
           <div class="shrink-0 w-8 h-8">
             <AvatarPreview
@@ -96,8 +91,8 @@ watch(
               :size="32"
             />
           </div>
-          <span class="font-bold text-white text-md">{{ slot.member.name }}</span>
-          <span class="text-[#facb00] text-md">joined!</span>
+          <span class="font-bold text-[#36A300] text-md">{{ slot.member.name }}</span>
+          <span class="text-[#36A300] text-md">joined!</span>
         </div>
       </Transition>
     </div>

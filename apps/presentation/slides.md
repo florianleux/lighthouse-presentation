@@ -19,8 +19,8 @@ css: unocss
 
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
-
 <div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-left.webp')">
+  <CrewJoinToast />
   <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
 
