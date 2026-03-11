@@ -37,11 +37,6 @@ const crewNames = computed(() =>
             v-for="(name, i) in crewNames"
             :key="i"
           >{{ name }}</span>
-          <!-- Duplicate for seamless loop -->
-          <span
-            v-for="(name, i) in crewNames"
-            :key="'dup-' + i"
-          >{{ name }}</span>
         </template>
 
       </div>

@@ -447,7 +447,7 @@ async function persistVoteWinner(voteIndex: number, winner: 'A' | 'B') {
   }
 }
 
-// ---- Fake participants (debug) ----
+// ---- Fake participants ----
 
 const PIRATE_NAMES = [
   'Blackbeard', 'Red Anne', 'Captain Hook', 'Calico Jack', 'Long John',

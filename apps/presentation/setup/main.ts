@@ -10,14 +10,6 @@ import type {
   SessionPhase,
 } from '../../../shared/types'
 
-// Debug mode detection (?debug in URL)
-function isDebugMode(): boolean {
-  if (typeof window === 'undefined') return false
-  return new URLSearchParams(window.location.search).has('debug')
-}
-
-export const debugMode = isDebugMode()
-
 // ===========================================
 // Session phase (communicated to vote apps)
 // ===========================================
@@ -142,7 +134,7 @@ export const sessionStore = reactive({
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
 
   // Manual mode (presenter picks directly)
-  manualMode: debugMode,
+  manualMode: false,
 
   // Actions
   addCrewMember(member: CrewMember) {
@@ -218,7 +210,7 @@ export const sessionStore = reactive({
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
-    this.manualMode = debugMode
+    this.manualMode = false
     voteStore.reset()
     currentPhase.value = 'lobby'
     phaseData.value = {}
@@ -290,10 +282,6 @@ export function getFakeCrewIds(): string[] {
 // ===========================================
 
 export default defineAppSetup(({ app }) => {
-  if (debugMode) {
-    console.log('[Debug] Debug mode enabled - manual vote mode active')
-  }
-
   // Connect to Firestore
   const connected = firestore.connect()
   sessionStore.isRealtimeConnected = connected

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds, debugMode } from '../setup/main'
+import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
 import { useResolvedMetric } from '../composables/useResolvedMetric'
 import { getMetricByIndex } from '../../../shared/metrics-data'
@@ -36,13 +36,11 @@ function blockNavigation(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeydown)
   window.addEventListener('keydown', blockNavigation, true)
 })
 
 onUnmounted(() => {
   clearTimer()
-  window.removeEventListener('keydown', handleKeydown)
   window.removeEventListener('keydown', blockNavigation, true)
 })
 
@@ -65,9 +63,20 @@ async function applyVote(choice: 'A' | 'B') {
   next()
 }
 
-// Manual mode: vote directly from option blocks
+// Direct vote from option block clicks (always available, overrides any ongoing/completed vote)
 function manualVote(choice: 'A' | 'B') {
-  if (!sessionStore.manualMode) return
+  if (isVoteActive.value) {
+    // Terminate ongoing vote session cleanly before applying override
+    clearTimer()
+    sessionStore.votePhase = 'ended'
+    firestore.stopListeningToBallots()
+    const r = sessionStore.voteResults[voteIndex.value]
+    firestore.closeVote(voteIndex.value, {
+      winner: choice,
+      counts: { A: r?.A.length ?? 0, B: r?.B.length ?? 0 },
+      total: (r?.A.length ?? 0) + (r?.B.length ?? 0),
+    })
+  }
   applyVote(choice)
 }
 
@@ -151,13 +160,6 @@ watch(currentSlideNo, () => {
   }, 200)
 })
 
-// Keyboard shortcut: V to start vote (debug only)
-function handleKeydown(e: KeyboardEvent) {
-  if (debugMode && e.key.toLowerCase() === 'v' && !isVoteActive.value && !isVoteDone.value && !hasBeenStarted.value && !sessionStore.manualMode) {
-    startVoteSession()
-  }
-}
-
 function startVoteSession() {
   sessionStore.startedVoteIndices.add(voteIndex.value)
   sessionStore.activeVoteIndex = voteIndex.value
@@ -240,8 +242,7 @@ async function stopVoteSession() {
 
       <!-- Option A -->
       <div
-        class="absolute text-center right-[85%] left-[2%] top-[18.5%]"
-        :class="sessionStore.manualMode && 'cursor-pointer hover:text-option-a '"
+        class="absolute text-center right-[85%] left-[2%] top-[18.5%] cursor-pointer hover:text-option-a"
         style="transform: rotate(-24deg)"
         @click="manualVote('A')"
       >
@@ -250,17 +251,16 @@ async function stopVoteSession() {
 
       <!-- Option B -->
       <div
-        class="absolute right-[3%] top-[17%] text-center left-[82.5%]"
-        :class="sessionStore.manualMode && 'cursor-pointer hover:text-option-b'"
+        class="absolute right-[3%] top-[17%] text-center left-[82.5%] cursor-pointer hover:text-option-b"
         @click="manualVote('B')"
         style="transform: rotate(25deg)"
       >
         <div class="font-bold text-sm font-title">{{ titleB }}</div>
       </div>
 
-      <!-- Audience vote control (debug only) -->
+      <!-- Manual vote control (start/stop button, only in manual mode) -->
       <button
-        v-if="debugMode && !sessionStore.manualMode && !isVoteDone"
+        v-if="sessionStore.manualMode && !isVoteDone"
         class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
         @click="isVoteActive ? stopVoteSession() : startVoteSession()"
       >

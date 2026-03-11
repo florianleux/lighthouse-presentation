@@ -81,8 +81,6 @@ const polledIds = ref<string[]>([])
 
 const isSubmitting = ref(false)
 const nameFormReady = ref(false)
-const avatarsReady = ref(false)
-const voteReady = ref(false)
 
 // ===========================================
 // Computed
@@ -281,24 +279,35 @@ function preloadNameFormImages(): Promise<void> {
   return preloadUrls(['/vote/blueprint.webp', '/vote/shadow.webp', '/vote/light.webp'])
 }
 
-function preloadAvatarImages(): Promise<void> {
+function getAvatarUrlsForGenderTone(gender: string, tone: string): string[] {
+  const { MOUTH_COUNT, NOSE_COUNT, EYE_OPTIONS, EYE_COLORS, ACCESSORY_COUNT, ACCESSORY_COUNT_FEMALE, HAIR_OPTIONS, HAIR_COLORS, HAT_OPTIONS, HAT_COLORS } = AVATAR_CONFIG
   const urls: string[] = []
-  const { GENDERS, SKIN_TONES, MOUTH_COUNT, NOSE_COUNT, EYE_OPTIONS, EYE_COLORS, ACCESSORY_COUNT, ACCESSORY_COUNT_FEMALE, HAIR_OPTIONS, HAIR_COLORS, HAT_OPTIONS, HAT_COLORS } = AVATAR_CONFIG
+  const maxAcc = gender === 'male' ? ACCESSORY_COUNT : ACCESSORY_COUNT_FEMALE
+  const base = `/avatars/${gender}/${tone}_tone`
+  urls.push(`${base}/face.webp`)
+  for (let i = 1; i <= MOUTH_COUNT; i++) urls.push(`${base}/mouth/mouth_${i}.webp`)
+  for (let o = 1; o <= EYE_OPTIONS; o++) for (let c = 1; c <= EYE_COLORS; c++) urls.push(`${base}/eyes/option_${o}/color_${c}.webp`)
+  for (let i = 1; i <= NOSE_COUNT; i++) urls.push(`${base}/nose/nose_${i}.webp`)
+  for (let i = 1; i <= maxAcc; i++) urls.push(`${base}/accessories/accessory_${i}.webp`)
+  urls.push(`${base}/accessories/eye_patch_left.webp`, `${base}/accessories/eye_patch_right.webp`)
+  for (let o = 1; o <= HAIR_OPTIONS; o++) for (let c = 1; c <= HAIR_COLORS; c++) urls.push(`/avatars/${gender}/hair/option_${o}/color_${c}.webp`)
+  for (let o = 1; o <= HAT_OPTIONS; o++) for (let c = 1; c <= HAT_COLORS; c++) urls.push(`/avatars/${gender}/hats/option_${o}/color_${c}.webp`)
+  return urls
+}
+
+async function preloadAvatarImages(): Promise<void> {
+  const { GENDERS, SKIN_TONES } = AVATAR_CONFIG
+  // Priority: default selection (male/light) first
+  await preloadUrls(getAvatarUrlsForGenderTone('male', 'light'))
+  // Then load remaining gender/tone combos in background
+  const remaining: string[] = []
   for (const gender of GENDERS) {
-    const maxAcc = gender === 'male' ? ACCESSORY_COUNT : ACCESSORY_COUNT_FEMALE
     for (const tone of SKIN_TONES) {
-      const base = `/avatars/${gender}/${tone}_tone`
-      urls.push(`${base}/face.webp`)
-      for (let i = 1; i <= MOUTH_COUNT; i++) urls.push(`${base}/mouth/mouth_${i}.webp`)
-      for (let o = 1; o <= EYE_OPTIONS; o++) for (let c = 1; c <= EYE_COLORS; c++) urls.push(`${base}/eyes/option_${o}/color_${c}.webp`)
-      for (let i = 1; i <= NOSE_COUNT; i++) urls.push(`${base}/nose/nose_${i}.webp`)
-      for (let i = 1; i <= maxAcc; i++) urls.push(`${base}/accessories/accessory_${i}.webp`)
-      urls.push(`${base}/accessories/eye_patch_left.webp`, `${base}/accessories/eye_patch_right.webp`)
+      if (gender === 'male' && tone === 'light') continue
+      remaining.push(...getAvatarUrlsForGenderTone(gender, tone))
     }
-    for (let o = 1; o <= HAIR_OPTIONS; o++) for (let c = 1; c <= HAIR_COLORS; c++) urls.push(`/avatars/${gender}/hair/option_${o}/color_${c}.webp`)
-    for (let o = 1; o <= HAT_OPTIONS; o++) for (let c = 1; c <= HAT_COLORS; c++) urls.push(`/avatars/${gender}/hats/option_${o}/color_${c}.webp`)
   }
-  return preloadUrls(urls)
+  preloadUrls(remaining)
 }
 
 function preloadVoteImages(): Promise<void> {
@@ -309,26 +318,17 @@ function preloadVoteImages(): Promise<void> {
   ])
 }
 
-// Preload avatars when NameForm is shown
-watch(status, (newStatus) => {
-  if (newStatus === 'idle') {
-    preloadAvatarImages().then(() => { avatarsReady.value = true })
-  }
-})
-
-// Preload vote images when AvatarStep is shown
-watch(currentStep, (step) => {
-  if (step === 'avatar') {
-    preloadVoteImages().then(() => { voteReady.value = true })
-  }
-})
-
 // ===========================================
 // Lifecycle
 // ===========================================
 
 onMounted(async () => {
-  preloadNameFormImages().then(() => { nameFormReady.value = true })
+  preloadNameFormImages().then(() => {
+    nameFormReady.value = true
+    // Start lower-priority preloads only after first screen is ready
+    preloadAvatarImages()
+    preloadVoteImages()
+  })
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
@@ -359,12 +359,8 @@ onMounted(async () => {
 <template>
   <div class=" p-0">
     <!-- Immersive vote screen (replaces card when actively voting) -->
-    <StatusScreen
-      v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric && !voteReady"
-      variant="connecting"
-    />
     <VoteScreen
-      v-else-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
+      v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
       :metric="currentMetric"
       :vote-winners="voteWinners"
       :is-submitting="isSubmitting"
@@ -428,11 +424,7 @@ onMounted(async () => {
         variant="error"
       />
 
-      <!-- Onboarding: Avatar (loading screen if avatars not ready) -->
-      <StatusScreen
-        v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar' && !avatarsReady"
-        variant="connecting"
-      />
+      <!-- Onboarding: Avatar -->
       <AvatarStep
         v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
         :name="name"

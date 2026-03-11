@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { voteStore } from '../setup/main'
 import BlackMarketIframe from './BlackMarketIframe.vue'
 import { METRICS_LIST } from '../../../shared/metrics-data'
@@ -49,24 +49,6 @@ const baseline: ScoreEntry = {
 
 const optimized = computed(() => scores.value?.[votePath.value] ?? null)
 
-const metricKeys = ['CLS', 'FCP', 'LCP', 'TBT', 'SI'] as const
-
-const revealedCount = ref(0)
-
-function revealNext() {
-  if (revealedCount.value <= metricKeys.length + 1) {
-    revealedCount.value++
-  }
-}
-
-const metricPositions = [
-  { left: '15%', top: '15%' },
-  { left: '26%', top: '15%' },
-  { left: '37%', top: '15%' },
-  { left: '20%', top: '45%' },
-  { left: '32%', top: '45%' },
-]
-
 function formatValue(key: string, value: number): string {
   if (key === 'CLS') return value.toFixed(2)
   if (value >= 1000) return (value / 1000).toFixed(1) + ' s'
@@ -86,7 +68,6 @@ function thresholdColor(key: string, value: number): string {
   <div
     class="slide-bg"
     style="background-image: url('/backgrounds/end-bottom-right.webp')"
-    @click="revealNext"
   >
     <div class="w-[34%] absolute right-[5%] top-[8.3%] aspect-[1960/1250] -rotate-0.7">
       <BlackMarketIframe
@@ -96,44 +77,58 @@ function thresholdColor(key: string, value: number): string {
       />
     </div>
 
-    <!-- Metric cards -->
-    <div
-      v-for="(key, i) in metricKeys"
-      :key="key"
-      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
-      :style="{ left: metricPositions[i].left, top: metricPositions[i].top }"
-    >
-      <div class="font-title text-6xl text-white">{{ key }}</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue(key, baseline[key]) }}</div>
-      <Transition name="fade">
-        <div
-          v-if="revealedCount > i && optimized"
-          :class="[thresholdColor(key, optimized[key]), 'font-bold font-body text-2xl']"
-        >
-          {{ formatValue(key, optimized[key]) }}
-        </div>
-      </Transition>
+    <!-- CLS -->
+    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 15%; top: 15%">
+      <div class="font-title text-6xl text-white">CLS</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue('CLS', baseline.CLS) }}</div>
+      <div v-click="1" v-if="optimized" :class="[thresholdColor('CLS', optimized.CLS), 'font-bold font-body text-2xl']">
+        {{ formatValue('CLS', optimized.CLS) }}
+      </div>
+    </div>
+
+    <!-- FCP -->
+    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 26%; top: 15%">
+      <div class="font-title text-6xl text-white">FCP</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue('FCP', baseline.FCP) }}</div>
+      <div v-click="2" v-if="optimized" :class="[thresholdColor('FCP', optimized.FCP), 'font-bold font-body text-2xl']">
+        {{ formatValue('FCP', optimized.FCP) }}
+      </div>
+    </div>
+
+    <!-- LCP -->
+    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 37%; top: 15%">
+      <div class="font-title text-6xl text-white">LCP</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue('LCP', baseline.LCP) }}</div>
+      <div v-click="3" v-if="optimized" :class="[thresholdColor('LCP', optimized.LCP), 'font-bold font-body text-2xl']">
+        {{ formatValue('LCP', optimized.LCP) }}
+      </div>
+    </div>
+
+    <!-- TBT -->
+    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 20%; top: 45%">
+      <div class="font-title text-6xl text-white">TBT</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue('TBT', baseline.TBT) }}</div>
+      <div v-click="4" v-if="optimized" :class="[thresholdColor('TBT', optimized.TBT), 'font-bold font-body text-2xl']">
+        {{ formatValue('TBT', optimized.TBT) }}
+      </div>
+    </div>
+
+    <!-- SI -->
+    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 32%; top: 45%">
+      <div class="font-title text-6xl text-white">SI</div>
+      <div class="text-red-400 font-body text-2xl">{{ formatValue('SI', baseline.SI) }}</div>
+      <div v-click="5" v-if="optimized" :class="[thresholdColor('SI', optimized.SI), 'font-bold font-body text-2xl']">
+        {{ formatValue('SI', optimized.SI) }}
+      </div>
     </div>
 
     <!-- Final Lighthouse score -->
-    <Transition name="fade">
-      <div
-        v-if="revealedCount > metricKeys.length && optimized"
-        class="absolute left-[69%] top-[68%] -rotate-2 font-title text-white text-8xl"
-      >
-        {{ optimized.perf }}
-      </div>
-    </Transition>
+    <div
+      v-click="6"
+      v-if="optimized"
+      class="absolute left-[69%] top-[68%] -rotate-2 font-title text-white text-8xl"
+    >
+      {{ optimized.perf }}
+    </div>
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active {
-  transition: all 0.4s ease-out;
-}
-
-.fade-enter-from {
-  opacity: 0;
-  transform: translateX(-10px);
-}
-</style>

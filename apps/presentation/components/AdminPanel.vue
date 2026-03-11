@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, firestore, debugMode } from '../setup/main'
+import { sessionStore, voteStore, firestore } from '../setup/main'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()
@@ -138,7 +138,7 @@ async function startNewSession() {
                   <span class="stat-label">Active</span>
                 </div>
               </div>
-              <div v-if="debugMode" style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+              <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
                 <input
                   v-model.number="fakeCrewCount"
                   type="number"
