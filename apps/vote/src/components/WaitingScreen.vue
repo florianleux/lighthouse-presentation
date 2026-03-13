@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import AvatarPreview from './AvatarPreview.vue'
 
-defineProps<{
+const props = defineProps<{
   avatar: string | null
   name: string
+  hasVotedOnce: boolean
 }>()
 </script>
 
@@ -32,7 +33,7 @@ defineProps<{
 
   <p
     class="absolute w-[90%] bottom-[10%] left-[50%] -translate-x-1/2 z-1000 text-6xl font-title text-shadow-md text-shadow-black text-white text-center">
-    The captain will let you know about the next vote!
+    {{ hasVotedOnce ? 'Thanks for your vote! The captain will let you know about the next vote!' : 'Get ready for your next adventure!' }}
   </p>
 
 </template>

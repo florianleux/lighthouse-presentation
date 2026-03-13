@@ -19,8 +19,8 @@
       />
 
       <!-- ===== ALWAYS VISIBLE: Server island + server ===== -->
-      <div class="absolute left-[82%] w-[10%] top-[35%] -translate-x-1/2 text-center">
-        <div class="text-2xl font-bold font-title">Island of the Skull</div>
+      <div class="absolute left-[76%] w-[9%] top-[38%] -translate-x-1/2 text-center">
+        <div class="text-lg font-bold font-title">https://www.blackmarket.com</div>
       </div>
       <img
         src="/images/ttfb/island-server.webp"
@@ -32,7 +32,7 @@
       />
       <img
         src="/images/ttfb/rum.webp"
-        class="absolute left-[92%] top-[52%] -translate-1/2 h-[18%] rotate-[2deg]"
+        class="absolute left-[92%] top-[52%] -translate-1/2 h-[12%] rotate-[2deg]"
       />
 
       <!-- ===== STEP 1: Direct round trip (clicks 1-2, hide at 3) ===== -->
@@ -70,9 +70,9 @@
       <!-- ===== STEP 2: Redirections — Skull Island (clicks 4-6, hide at 7) ===== -->
       <div
         v-click="[4, 7]"
-        class="absolute w-[10%] left-[60%] top-[43%] -translate-x-1/2 text-center"
+        class="absolute w-[10%] left-[55%] top-[15%] -translate-x-1/2 text-center"
       >
-        <div class="text-2xl font-bold font-title">Skull Island</div>
+        <div class="text-lg font-bold font-title">https://blackmarket.com</div>
       </div>
       <img
         v-click="[4, 7]"
@@ -133,7 +133,7 @@
       <img
         v-click="8"
         src="/images/ttfb/rum.webp"
-        class="absolute left-[50%] top-[24%] -translate-1/2 h-[12%] rotate-[2deg]"
+        class="absolute left-[57%] top-[27%] -translate-1/2 h-[12%] rotate-[25deg]"
       />
       <!-- ===== STEP 3c: Trip to CDN (clicks 9-10, hide at 11) ===== -->
       <svg
@@ -166,19 +166,19 @@
       </svg>
 
       <!-- ===== Bottom labels ===== -->
-      <div class="absolute bottom-[19%] left-0 w-full flex justify-center gap-8">
+      <div class="absolute bottom-[17%] left-0 w-full flex justify-center gap-8">
         <div
           v-click="6"
-          class="text-4xl font-bold"
+          class="text-3xl font-bold"
         >Avoid redirects</div>
         <div
           v-click="10"
-          class="text-4xl font-bold"
-        >CDN</div>
+          class="text-3xl font-bold"
+        >Setup a CDN</div>
         <div
           v-click="10"
-          class="text-4xl font-bold"
-        >Caching</div>
+          class="text-3xl font-bold"
+        >Cache your assets</div>
       </div>
 
     </DetailSlide>

@@ -53,12 +53,12 @@ transition: slide-up
 
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-left.webp')">
 <div class="text-shadow-md text-white">
-<div class="text-4xl text-white font-title">Why does performance matters ?</div>
+<div class="text-4xl text-white font-title">Why does performance matter?</div>
 
 
 <div class="text-center">
     <div v-click class="text-9xl mt-20 text-white text-center font-bold">24%</div>
-    <div v-click class="text-3xl">less <span class="font-bold">abandonment</span> on pages<br>that meets Google's performance standards</div>
+    <div v-click class="text-3xl">less <span class="font-bold">abandonment</span><br> on pages that meet<br> Google's performance standards</div>
 </div>
 </div>
 

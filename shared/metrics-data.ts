@@ -149,7 +149,7 @@ export const METRICS: MetricsData = {
       },
       b: {
         title: "Design Sobriety",
-        subtitle: "Fancyness has a cost",
+        subtitle: "Fanciness has a cost",
       },
     },
   },

@@ -387,6 +387,7 @@ onMounted(async () => {
         class="z-3"
         :avatar="selectedAvatar"
         :name="joinedName"
+        :has-voted-once="votedRounds.length > 0"
       />
       <img
         src="/vote/light.webp"
