@@ -10,7 +10,7 @@
     >
       <!-- Web pages label -->
       <div
-        v-click="2"
+        v-click="1"
         class="absolute left-[53%] top-[17%] -translate-x-1/2 text-center"
       >
         <div class="text-5xl font-bold font-title">Web pages</div>
@@ -40,17 +40,17 @@
 
       <!-- Glasses -->
       <img
-        v-click="3"
+        v-click="2"
         src="/images/ttfb/glass-1.webp"
         class="absolute left-[15%] top-[60%] -translate-1/2 h-[25%] rotate-[-2deg]"
       />
       <img
-        v-click="3"
+        v-click="2"
         src="/images/ttfb/glass-2.webp"
         class="absolute left-[25%] top-[60%] -translate-1/2 h-[25%] rotate-[3deg]"
       />
       <div
-        v-click="4"
+        v-click="2"
         class="absolute left-[20%] top-[72%] -translate-x-1/2 text-center"
       >
         <div class="text-4xl font-bold font-title">Immutable</div>
@@ -59,17 +59,17 @@
 
       <!-- Alcohols -->
       <img
-        v-click="5"
+        v-click="3"
         src="/images/ttfb/rum.webp"
         class="absolute left-[46%] top-[60%] -translate-1/2 h-[23%] rotate-[3deg]"
       />
       <img
-        v-click="5"
+        v-click="3"
         src="/images/ttfb/tequila.webp"
         class="absolute left-[56%] top-[60%] -translate-1/2 h-[23%] rotate-[-1deg]"
       />
       <div
-        v-click="6"
+        v-click="3"
         class="absolute left-[52%] top-[72%] -translate-x-1/2 text-center"
       >
         <div class="text-4xl font-bold font-title">Short-lived</div>
@@ -78,17 +78,17 @@
 
       <!-- Fruits -->
       <img
-        v-click="7"
+        v-click="4"
         src="/images/ttfb/banana.webp"
         class="absolute left-[77%] top-[60%] -translate-1/2 h-[21%] rotate-[1deg]"
       />
       <img
-        v-click="7"
+        v-click="4"
         src="/images/ttfb/cherries.webp"
         class="absolute left-[86%] top-[60%] -translate-1/2 h-[25%] rotate-[-2deg]"
       />
       <div
-        v-click="8"
+        v-click="4"
         class="absolute w-80% left-[82%] top-[72%] -translate-x-1/2 text-center"
       >
         <div class="text-4xl font-bold font-title">None to minutes</div>

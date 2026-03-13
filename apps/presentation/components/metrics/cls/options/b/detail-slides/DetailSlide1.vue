@@ -12,25 +12,25 @@ const codeExample = `.ad-container {
       metric="cls"
       option="b"
     >
-      <div class="text-4xl text-center mb-20">
+      <div class="text-5xl text-center mb-20">
         No placeholder: layout shift at injection.
       </div>
 
       <img
         src="/images/cls-ads-before.gif"
-        class="absolute left-[20%] top-[72%] -translate-1/2 rounded shadow-lg w-[30%]"
+        class="absolute left-[21%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
         alt="Ads CLS before fix"
       />
       <img
         v-click="1"
         src="/images/cls-ads-after.gif"
-        class="absolute right-[-7%] top-[72%] -translate-1/2 rounded shadow-lg w-[28%]"
+        class="absolute left-[83%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
         alt="Ads CLS after fix"
       />
 
       <CodeSnippet
         v-click="1"
-        class="absolute top-[72%] left-[50%] -translate-1/2"
+        class="absolute top-[72%] left-[52%] -translate-1/2"
         language="css"
         :code="codeExample"
         size="small"

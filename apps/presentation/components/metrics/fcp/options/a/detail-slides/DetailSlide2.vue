@@ -168,7 +168,7 @@
       </svg>
 
       <!-- ===== Bottom labels ===== -->
-      <div class="flex-col  absolute bottom-[17%] left-[7%] w-full flex justify-center gap-0">
+      <div class="flex-col  absolute bottom-[16%] left-[7%] w-full flex justify-center gap-2">
         <div
           v-click="6"
           class="text-4xl font-bold"

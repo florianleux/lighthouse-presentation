@@ -23,19 +23,19 @@ const jsCodeExample = `document.write()`
 
       <div v-click="2">
         <CodeSnippet
-          class="absolute w-35  top-[35%] left-[4%]"
+          class="absolute w-40  top-[35%] left-[3%]"
           language="js"
           :code="jsCodeExample"
-          size="tiny"
+          size="small"
         />
         <div
-          class="absolute top-[53%] left-[13%] w-38.5 h-0.5 bg-[#FF2626] origin-left"
-          style="transform: rotate(-20deg)"
+          class="absolute top-[53%] left-[16%] w-30 h-0.5 bg-[#FF2626] origin-left"
+          style="transform: rotate(-30deg)"
         >
         </div>
         <div
-          class="absolute top-[41%] left-[23%] text-[#FF2626] font-bold origin-left"
-          style="transform: rotate(-20deg)"
+          class="absolute top-[50%] left-[20%] text-2xl text-[#FF2626] font-bold origin-left"
+          style="transform: rotate(-30deg)"
         >
           stop!
         </div>
@@ -58,7 +58,7 @@ const jsCodeExample = `document.write()`
         <span class="i-svg-spinners-bars-fade inline-block w-8 h-8 align-middle " /> JS
       </div>
 
-      <div class="absolute text-center text-5xl top-[85%] left-[47%]">
+      <div class="absolute text-center text-5xl top-[85%] left-[50%]">
         FCP <div class="text-2xl -mt-3"> (interactive pixels)</div>
       </div>
 
@@ -66,7 +66,7 @@ const jsCodeExample = `document.write()`
       <!-- Parsing HTML -->
       <div
         v-click="1"
-        class="absolute italic text-xl top-[36%] left-[30%]"
+        class="absolute italic text-2xl top-[36%] left-[30%]"
       >
         Parsing
       </div>
@@ -97,15 +97,15 @@ const jsCodeExample = `document.write()`
       </div>
 
       <div v-click="5">
-        <div class="absolute top-[55.5%] left-[45.5%] w-60 h-0.5 bg-black origin-left"></div>
+        <div class="absolute top-[55.5%] left-[44%] w-71.5 h-0.5 bg-black origin-left"></div>
 
 
         <!-- Ligne DOM - CSSOM - FCP-->
         <div
-          class="absolute top-[55.5%] left-[57%] w-34 h-0.5 bg-black origin-left"
+          class="absolute top-[55.5%] left-[60%] w-34 h-0.5 bg-black origin-left"
           style="transform: rotate(90deg);"
         ></div>
-        <div class="absolute italic text-2xl top-[65%] left-[59%]">
+        <div class="absolute italic text-2xl top-[66%] left-[62%]">
           Rendering
         </div>
 

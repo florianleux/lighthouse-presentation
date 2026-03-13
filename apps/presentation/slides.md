@@ -39,11 +39,11 @@ transition: slide-right
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-right.webp')">
 <div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
 <div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
-<div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-md">
-    <div v-click="4"  class="absolute font-bold left-[22%] text-white top-[24%] text-4xl">Performance</div>
-    <div v-click="3"  class="absolute font-bold text-2xl left-[47%] text-white top-[43%] ">Accessibility</div>
-    <div v-click="2"  class="absolute font-bold text-2xl left-[67%] text-white top-[35%] ">Best<br>Practices</div>
-    <div v-click="1" class="absolute text-2xl left-[90%] text-[#2a384c] top-[40%] font-bold">SEO</div>
+<div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-lg text-shadow-black">
+    <div v-click="4"  class="absolute font-bold left-[19%] text-white top-[24%] text-5xl">Performance</div>
+    <div v-click="3"  class="absolute font-bold text-4xl left-[44%] text-white top-[41%] ">Accessibility</div>
+    <div v-click="2"  class="absolute font-bold text-4xl left-[65%] text-white top-[28%] ">Best<br>Practices</div>
+    <div v-click="1" class="absolute text-4xl left-[89%] text-[#2a384c] top-[40%] font-bold">SEO</div>
 </div>
 </div>
 

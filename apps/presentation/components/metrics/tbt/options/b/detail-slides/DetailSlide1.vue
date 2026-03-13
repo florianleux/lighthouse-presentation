@@ -26,7 +26,10 @@ items.forEach(item => {
       metric="tbt"
       option="b"
     >
-      <span v-click="1" class="hidden" />
+      <span
+        v-click="1"
+        class="hidden"
+      />
 
       <div class="grid grid-cols-[1fr_2fr] gap-6">
         <div class="flex items-start justify-center">
@@ -38,7 +41,7 @@ items.forEach(item => {
         </div>
 
         <div class="flex flex-col">
-          <div class="text-4xl text-center mb-20">Fancy layouts
+          <div class="text-5xl text-center mb-2 -mt-2">Fancy layouts
             might require heavy JS!</div>
 
           <div v-if="clicks >= 1">
@@ -46,7 +49,7 @@ items.forEach(item => {
               class="text-left px-5"
               language="js"
               :code="masonryJs"
-              size="tiny"
+              size="small"
             />
           </div>
         </div>

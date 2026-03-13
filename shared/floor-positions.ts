@@ -11,6 +11,9 @@ interface FloorPosition {
 
 interface FloorPositions {
   choice: FloorPosition;
+  /** Override choice positions when a derived option resolves to a specific source.
+   *  Key format: "option:sourceMetric:sourceOption" e.g. "a:fcp:a" */
+  choiceVariants?: Record<string, Record<string, string>>;
   vote: FloorPosition;
   building: FloorPosition;
   mobile: FloorPosition;
@@ -72,6 +75,23 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
     choice: {
       a: { top: "68%", left: "18%", transform: "rotate(-13deg)", width: "15%" },
       b: { top: "58%", right: "14%", transform: "rotate(14deg)", width: "20%" },
+    },
+    // LCP option A is derived from FCP loser — position differs by title length
+    choiceVariants: {
+      // FCP:a = "TTFB" (short title) → floor can sit higher
+      "a:fcp:a": {
+        top: "52%",
+        left: "13%",
+        transform: "rotate(-13deg)",
+        width: "23%",
+      },
+      // FCP:b = "The critical rendering path" (long title) → keep default lower position
+      "a:fcp:b": {
+        top: "66%",
+        left: "17%",
+        transform: "rotate(-13deg)",
+        width: "17%",
+      },
     },
     vote: {
       a: { top: "6%", left: "1.5%", transform: "rotate(-23deg)", width: "9%" },

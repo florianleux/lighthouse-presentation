@@ -8,14 +8,36 @@ const props = defineProps<{
   metricIndex: number
 }>()
 
-const { getResolvedChoiceProps } = useResolvedMetric()
+const { getResolvedChoiceProps, resolveSlideSource } = useResolvedMetric()
 const choiceProps = computed(() => getResolvedChoiceProps(props.metricIndex))
 
 const metricName = computed(() => getMetricByIndex(props.metricIndex)?.name.toLowerCase() ?? '')
 const floorA = computed(() => `/floors/floor-${metricName.value}-a.webp`)
 const floorB = computed(() => `/floors/floor-${metricName.value}-b.webp`)
-const posA = computed(() => FLOOR_POSITIONS[metricName.value]?.choice.a ?? {})
-const posB = computed(() => FLOOR_POSITIONS[metricName.value]?.choice.b ?? {})
+
+const posA = computed(() => {
+  const positions = FLOOR_POSITIONS[metricName.value]
+  if (!positions) return {}
+  const variants = positions.choiceVariants
+  if (variants) {
+    const resolved = resolveSlideSource(metricName.value as any, 'a')
+    const variantKey = `a:${resolved.metricName}:${resolved.option}`
+    if (variants[variantKey]) return variants[variantKey]
+  }
+  return positions.choice.a
+})
+
+const posB = computed(() => {
+  const positions = FLOOR_POSITIONS[metricName.value]
+  if (!positions) return {}
+  const variants = positions.choiceVariants
+  if (variants) {
+    const resolved = resolveSlideSource(metricName.value as any, 'b')
+    const variantKey = `b:${resolved.metricName}:${resolved.option}`
+    if (variants[variantKey]) return variants[variantKey]
+  }
+  return positions.choice.b
+})
 </script>
 
 <template>

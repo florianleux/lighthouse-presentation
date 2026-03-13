@@ -43,18 +43,17 @@ const imgFallback = `<img
       metric="si"
       option="b"
     >
-      <div class="text-4xl text-center mb-20">Stop sending
-        desktop images to mobile screens</div>
+      <div class="text-5xl text-center mb-10">Tailor your images to the browser!</div>
 
       <div
         v-click="1"
-        class="grid w-[105%] -ml-2 grid-cols-7 -gap-5 items-start"
+        class="grid w-[105%] -ml-5 grid-cols-7 items-start"
       >
         <CodeSnippet
           class="text-left px-2"
           language="html"
           :code="pictureWrapper"
-          size="tiny"
+          size="small"
         />
 
         <CodeSnippet
@@ -62,7 +61,7 @@ const imgFallback = `<img
           class="text-left px-2 col-span-2"
           language="html"
           :code="sourceAvif"
-          size="tiny"
+          size="small"
         />
 
         <CodeSnippet
@@ -70,15 +69,15 @@ const imgFallback = `<img
           class="text-left px-2 col-span-2"
           language="html"
           :code="sourceWebp"
-          size="tiny"
+          size="small"
         />
 
         <CodeSnippet
           v-click="4"
-          class="text-left px-2 col-span-2"
+          class="text-left col-span-2"
           language="html"
           :code="imgFallback"
-          size="tiny"
+          size="small"
         />
       </div>
     </DetailSlide>

@@ -77,7 +77,7 @@ const subsetCode = `
 
           <div
             v-click="6"
-            class="text-xl text-center mt-2"
+            class="text-3xl text-white text-bold text-center mt-2 absolute bottom-[10%] -right-[1%] -translate-x-1/2 -translate-y-1/2"
           >~2-3 KB</div>
         </div>
       </div>

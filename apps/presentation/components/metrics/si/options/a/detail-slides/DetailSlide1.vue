@@ -8,7 +8,7 @@
       metric="si"
       option="a"
     >
-      <div class="text-4xl text-center mb-20">Compress your text files!</div>
+      <div class="text-5xl text-center mb-20">Compress your text files!</div>
 
 
       <div

@@ -13,28 +13,28 @@ const stickyPositionCodeExample = `.banner-container {
       metric="cls"
       option="b"
     >
-      <div class="text-4xl text-center mb-20">
-        CLS happens mostly in the flow.
+      <div class="text-5xl text-center mb-20">
+        CLS happens mostly<br> in the flow.
       </div>
 
       <img
         src="/images/cls-banner-before.gif"
-        class="absolute left-[27%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
+        class="absolute left-[20%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
         alt="Banner CLS before fix"
       />
       <img
         v-click="1"
         src="/images/cls-banner-after.gif"
-        class="absolute right-[10%] top-[62%] -translate-1/2 rounded shadow-lg h-[47%]"
+        class="absolute right-[0%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
         alt="Banner CLS after fix"
       />
 
       <CodeSnippet
         v-click="1"
-        class="absolute top-[72%] left-[52%] -translate-1/2"
+        class="absolute top-[65%] left-[52%] -translate-1/2"
         language="css"
         :code="stickyPositionCodeExample"
-        size="small"
+        size="large"
       />
     </DetailSlide>
   </DetailSlideLayered>
