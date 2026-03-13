@@ -17,59 +17,68 @@ const noLodashCode = `
       metric="fcp"
       option="b"
     >
-      <div class=" mr-13 ml-11 grid grid-cols-3  text-center items-top gap-7">
+      <div class=" mr-11 ml-5 grid grid-cols-3  text-center items-top gap-3">
         <div class="flex flex-col items-top gap-5">
-          <div class="text-xl font-bold">Not always relevant anymore</div>
           <div class="text-4xl font-bold">Use native methods!</div>
 
           <div class="text-left">
             <CodeSnippet
               language="js"
               :code="lodashCode"
-              size="tiny"
+              size="medium"
             />
             <CodeSnippet
-              class="mt-3"
+              class="mt-10"
               language="js"
               :code="noLodashCode"
-              size="tiny"
+              size="medium"
             />
           </div>
 
         </div>
-        <div v-click="1" class="flex flex-col col-span-2 items-center gap-5">
-          <div class="text-xl font-bold">Probably doesn't need to be blocking</div>
+        <div
+          v-click="1"
+          class="flex flex-col col-span-2 items-center gap-5"
+        >
           <div class="text-4xl font-bold">Defer or async it!</div>
           <div class="text-left w-full">
             <!-- JavaScript (defer) -->
-            <div v-click="2" class="mb-2">
-              <div class="text-lg font-bold mb-2">defer <span class="font-normal italic text-sm opacity-70">(analytics, tracking)</span></div>
-              <div class="grid grid-cols-4 gap-0.5">
+            <div
+              v-click="2"
+              class="mb-2"
+            >
+              <div class="text-3xl font-bold mb-2">defer <span class="font-normal italic text-xl opacity-70">(analytics,
+                  tracking)</span></div>
+              <div class="grid grid-cols-4 gap-0.5 text-center">
                 <!-- Row 1: HTML parsing continues -->
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
                 <div />
                 <!-- Row 2: Script loading + execution after -->
                 <div class="col" />
-                <div class="col bg-orange-400 text-white text-xs px-2 py-2 rounded">Script loading</div>
+                <div class="col bg-orange-400 text-white text-xl px-2 py-2 rounded">JS Loading</div>
                 <div></div>
-                <div class="bg-orange-600  text-white text-xs px-2 py-2 rounded">Script execution</div>
+                <div class="bg-orange-600  text-white text-xl px-2 py-2 rounded">JS Execution</div>
               </div>
             </div>
             <!-- JavaScript (async) -->
-            <div v-click="3">
-              <div class="text-lg font-bold mb-2">async <span class="font-normal italic text-sm opacity-70">(chat widget, ads)</span></div>
+            <div
+              v-click="3"
+              class="mt-2"
+            >
+              <div class="text-3xl font-bold mb-2">async <span class="font-normal italic text-xl opacity-70">(chat
+                  widget, ads)</span></div>
               <div class="grid grid-cols-4 gap-0.5">
                 <!-- Row 1: HTML parsing interrupted -->
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
                 <div></div>
-                <div class="bg-green-500 text-white text-xs px-2 py-2 rounded">Parsing</div>
+                <div class="bg-green-500 text-white text-xl px-2 py-2 rounded">Parsing</div>
                 <!-- Row 2: Script loading + immediate execution -->
                 <div></div>
-                <div class="bg-orange-400 text-white text-xs px-2 py-2 rounded">Script loading</div>
-                <div class="bg-orange-600 text-white text-xs px-2 py-2 rounded">Script execution</div>
+                <div class="bg-orange-400 text-white text-xl px-2 py-2 rounded">JS Loading</div>
+                <div class="bg-orange-600 text-white text-xl px-2 py-2 rounded">JS Execution</div>
                 <div></div>
               </div>
             </div>

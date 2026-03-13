@@ -38,12 +38,12 @@ const baselineLabel = computed(() => {
       <div>
         <div class="flex justify-between items-baseline">
           <div>
-            <span class="!m-0 text-6xl font-bold font-title">{{ metricData.name }}</span>
-            <span class="ml-4 text-lg italic">{{ metricData.fullName }}</span>
+            <span class="!m-0 text-7xl font-bold font-title">{{ metricData.name }}</span>
+            <span class="ml-4 text-3xl italic">{{ metricData.fullName }}</span>
           </div>
           <div
             v-click="1"
-            class="text-orange-black font-bold text-5xl"
+            class="text-orange-black font-bold text-6xl"
           >{{ metricData.weight }}%</div>
         </div>
 
@@ -58,22 +58,22 @@ const baselineLabel = computed(() => {
         >
           <div class="flex rounded overflow-hidden h-8 mt-8">
             <div
-              class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 text-bold flex-1 flex items-center justify-center text-md"
+              class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 text-bold flex-1 flex items-center justify-center text-2xl"
             >Good</div>
             <div
-              class="bg-orange-500 border-y-1 border-orange-800 text-orange-900 font-bold flex-1 flex items-center justify-center text-md"
+              class="bg-orange-500 border-y-1 border-orange-800 text-orange-900 font-bold flex-1 flex items-center justify-center text-2xl"
             >Average</div>
             <div
-              class="bg-red-500 border-1 border-l-0 border-red-800 text-red-900 font-bold flex-1 flex items-center justify-center text-md"
+              class="bg-red-500 border-1 border-l-0 border-red-800 text-red-900 font-bold flex-1 flex items-center justify-center text-2xl"
             >Poor</div>
           </div>
           <span
-            class="absolute text-black text-shadow- font-title font-bold text-xl"
-            style="left: 33%; top: 150%; transform: translate(-50%, -50%)"
+            class="absolute text-black text-shadow- font-title font-bold text-3xl"
+            style="left: 33%; top: 180%; transform: translate(-50%, -50%)"
           >{{ metricData.thresholds[0] }}</span>
           <span
-            class="absolute text-black font-title font-bold text-xl"
-            style="left: 66%; top: 150%; transform: translate(-50%, -50%)"
+            class="absolute text-black font-title font-bold text-3xl"
+            style="left: 66%; top: 180%; transform: translate(-50%, -50%)"
           >{{ metricData.thresholds[1] }}</span>
 
           <!-- Baseline logo marker -->
@@ -83,12 +83,12 @@ const baselineLabel = computed(() => {
             class="absolute flex flex-col items-center"
             :style="{
               left: baselinePosition + '%',
-              top: '-5%',
+              top: '-20%',
               transform: 'translate(-50%, -50%)',
             }"
           >
 
-            <span class="text-xl font-bold font-title mt-2 whitespace-nowrap">{{ baselineLabel }}</span>
+            <span class="text-3xl font-bold font-title mt-2 whitespace-nowrap">{{ baselineLabel }}</span>
             <img
               src="/images/bm-logo.png"
               alt="BM"

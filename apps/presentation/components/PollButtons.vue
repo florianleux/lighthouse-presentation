@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted, inject } from 'vue'
 import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
 const props = defineProps<{
   pollId: string
 }>()
+
+const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
+const clicks = computed(() => clicksContext?.value?.current ?? 0)
+const lastHandledClick = ref(0)
 
 // Is this poll currently active?
 const isPollActive = computed(() =>
@@ -66,6 +70,28 @@ watch(() => sessionStore.pollPhase, (phase) => {
 watch(totalPollVotes, (total) => {
   if (isPollActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
     console.log('[PollButtons] All crew voted, auto-stopping poll')
+    stopPollSession()
+  }
+})
+
+// Slidev clicker control: click 1 => Start, click 2 => Stop (if still active)
+watch(clicks, (currentClick) => {
+  if (currentClick < lastHandledClick.value) {
+    lastHandledClick.value = currentClick
+    return
+  }
+
+  if (currentClick === lastHandledClick.value)
+    return
+
+  lastHandledClick.value = currentClick
+
+  if (currentClick === 1 && !isPollActive.value && sessionStore.pollPhase !== 'ended') {
+    startPollSession()
+    return
+  }
+
+  if (currentClick === 2 && isPollActive.value) {
     stopPollSession()
   }
 })
@@ -143,6 +169,10 @@ function stopPollSession() {
 
 <template>
   <div>
+    <!-- Create two Slidev click steps for clicker-only control -->
+    <span v-click="1" class="hidden" />
+    <span v-click="2" class="hidden" />
+
     <div class="absolute top-[88%] left-[21%] p-1 px-2 text-center -translate-x-1/2">
       <div class="text-4xl font-bold font-title">{{ results.newbie.length }}</div>
     </div>
@@ -169,7 +199,7 @@ function stopPollSession() {
     </div>
 
     <button
-      v-if="sessionStore.pollPhase !== 'ended'"
+      v-if="sessionStore.pollPhase !== 'ended' && (sessionStore.manualMode || isPollActive)"
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
       @click="isPollActive ? stopPollSession() : startPollSession()"
     >

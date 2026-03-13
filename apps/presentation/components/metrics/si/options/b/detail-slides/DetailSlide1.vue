@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
-const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
-const clicks = computed(() => clicksContext?.value?.current ?? 0)
 </script>
 
 <template>
@@ -11,11 +8,9 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
       metric="si"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Same image, different formats.</div>
+      <div class="text-4xl text-center mb-20">Same image, different formats.</div>
 
-      <div v-click="1" class="text-4xl text-center font-bold mt-2 mb-10">Pick the right one.</div>
-
-      <div v-click="2" class="grid grid-cols-4 gap-x-2 items-start">
+      <div v-click="1" class="grid grid-cols-4 gap-x-2 items-start">
         <!-- Column 1: JPG -->
         <div class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">1992</div>
@@ -25,7 +20,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
         </div>
 
         <!-- Column 2: PNG -->
-        <div v-click="3" class="flex flex-col items-center gap-0">
+        <div v-click="2" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">1996</div>
           <div class="text-3xl text-center font-bold">PNG</div>
           <div class="text-sm text-center opacity-70">Lossless</div>
@@ -33,7 +28,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
         </div>
 
         <!-- Column 3: WebP -->
-        <div v-click="4" class="flex flex-col items-center gap-0">
+        <div v-click="3" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">2010</div>
           <div class="text-3xl text-center font-bold">WebP</div>
           <div class="text-sm text-center opacity-70">Lossy / Lossless</div>
@@ -41,7 +36,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
         </div>
 
         <!-- Column 4: AVIF -->
-        <div v-click="5" class="flex flex-col items-center gap-0">
+        <div v-click="4" class="flex flex-col items-center gap-0">
           <div class="text-base text-center opacity-70">2019</div>
           <div class="text-3xl text-center font-bold">AVIF</div>
           <div class="text-sm text-center opacity-70">Lossy / Lossless</div>

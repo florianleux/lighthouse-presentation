@@ -242,20 +242,20 @@ async function stopVoteSession() {
 
       <!-- Option A -->
       <div
-        class="absolute text-center right-[85%] left-[2%] top-[18.5%] cursor-pointer hover:text-option-a"
+        class="absolute text-center right-[85%] left-[2%] top-[18.5%]  cursor-pointer hover:text-option-a"
         style="transform: rotate(-24deg)"
         @click="manualVote('A')"
       >
-        <div class="font-bold text-sm font-title">{{ titleA }}</div>
+        <div class="font-bold text-sm font-title leading-4">{{ titleA }}</div>
       </div>
 
       <!-- Option B -->
       <div
-        class="absolute right-[3%] top-[17%] text-center left-[82.5%] cursor-pointer hover:text-option-b"
+        class="absolute right-[3%] top-[17%] text-center left-[82.5%]  cursor-pointer hover:text-option-b"
         @click="manualVote('B')"
         style="transform: rotate(25deg)"
       >
-        <div class="font-bold text-sm font-title">{{ titleB }}</div>
+        <div class="font-bold text-sm font-title leading-4">{{ titleB }}</div>
       </div>
 
       <!-- Manual vote control (start/stop button, only in manual mode) -->

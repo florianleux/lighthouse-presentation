@@ -48,7 +48,7 @@ const cssVars = computed(() => ({
   overflow-x: auto;
   font-size: var(--code-font-size);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  background-color: rgba(62, 48, 17, 0.5) !important;
+  background-color: rgba(62, 48, 17, 0.65) !important;
 }
 
 .code-snippet code {

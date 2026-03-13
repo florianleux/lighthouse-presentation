@@ -26,10 +26,7 @@ items.forEach(item => {
       metric="tbt"
       option="b"
     >
-      <!-- Click 0: Screenshot gauche + Phrase 1 grande droite -->
-      <!-- Click 1: Phrase 2 apparait, Phrase 1 rétrécit -->
-      <!-- Click 2: Code snippet apparait sous les phrases -->
-      <span v-click="2" class="hidden" />
+      <span v-click="1" class="hidden" />
 
       <div class="grid grid-cols-[1fr_2fr] gap-6">
         <div class="flex items-start justify-center">
@@ -41,15 +38,10 @@ items.forEach(item => {
         </div>
 
         <div class="flex flex-col">
-          <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Fancy layouts
+          <div class="text-4xl text-center mb-20">Fancy layouts
             might require heavy JS!</div>
 
-          <div
-            v-click="1"
-            class="text-4xl text-center font-bold my-7"
-          >Synchronous layout calculations block the main thread</div>
-
-          <div v-if="clicks >= 2">
+          <div v-if="clicks >= 1">
             <CodeSnippet
               class="text-left px-5"
               language="js"

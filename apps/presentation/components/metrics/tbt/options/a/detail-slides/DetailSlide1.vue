@@ -1,26 +1,23 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
-const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
-const clicks = computed(() => clicksContext?.value?.current ?? 0)
-
 const badFetch = `
 // GET /api/products → 1000 items
 [
-  { "id": 1, "name": "Rusty Hook", ... },
-  { "id": 2, "name": "Skull Bandana", ... },
-  { "id": 3, "name": "Compass", ... },
+  { "id": 1, "name": "Hook",...},
+  { "id": 2, "name": "Bandana",...},
+  { "id": 3, "name": "Compass",...},
   ...
-  { "id": 1000, "name": "Parrot Perch", ... }
+  { "id": 999, "name": "Parrot",...}
 ]
 `
 
 const goodFetch = `
-// GET /api/products?limit=20 → 20 items
+// GET /api/products?limit=20
 [
-  { "id": 1, "name": "Rusty Hook", ... },
-  { "id": 2, "name": "Skull Bandana", ... },
+  { "id": 1, "name": "Hook",...},
+  { "id": 2, "name": "Bandana",...},
   ...
-  { "id": 20, "name": "Treasure Map", ... }
+  { "id": 11, "name": "Parrot",...}
+  { "id": 12, "name": "Map",...}
 ]
 `
 </script>
@@ -32,26 +29,24 @@ const goodFetch = `
       metric="tbt"
       option="a"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Every JSON you receive will be parsed</div>
+      <div class="text-5xl text-center mb-15 mt-5">Paginate and filter on the backend</div>
 
-      <div v-click="1" class="text-4xl text-center font-bold my-7">Paginate in the backend!</div>
-
-      <div class="text-left grid grid-cols-2 text-center gap-10">
-        <div v-click="2">
+      <div class="w-[104%] -ml-5 text-left grid grid-cols-2 text-center">
+        <div v-click="1">
           <CodeSnippet
             class="text-left px-5"
             language="json"
             :code="badFetch"
-            size="tiny"
+            size="medium"
           />
         </div>
 
-        <div v-click="3">
+        <div v-click="2">
           <CodeSnippet
             class="text-left px-5"
             language="json"
             :code="goodFetch"
-            size="tiny"
+            size="medium"
           />
         </div>
       </div>

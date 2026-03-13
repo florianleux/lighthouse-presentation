@@ -1,8 +1,4 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
-const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
-const clicks = computed(() => clicksContext?.value?.current ?? 0)
-
 const pictureWrapper = `<picture>
   ...
 </picture>`
@@ -47,16 +43,11 @@ const imgFallback = `<img
       metric="si"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Stop sending
+      <div class="text-4xl text-center mb-20">Stop sending
         desktop images to mobile screens</div>
 
       <div
         v-click="1"
-        class="text-4xl text-center font-bold my-6"
-      >Serve tailored images!</div>
-
-      <div
-        v-click="2"
         class="grid w-[105%] -ml-2 grid-cols-7 -gap-5 items-start"
       >
         <CodeSnippet
@@ -67,7 +58,7 @@ const imgFallback = `<img
         />
 
         <CodeSnippet
-          v-click="3"
+          v-click="2"
           class="text-left px-2 col-span-2"
           language="html"
           :code="sourceAvif"
@@ -75,7 +66,7 @@ const imgFallback = `<img
         />
 
         <CodeSnippet
-          v-click="4"
+          v-click="3"
           class="text-left px-2 col-span-2"
           language="html"
           :code="sourceWebp"
@@ -83,7 +74,7 @@ const imgFallback = `<img
         />
 
         <CodeSnippet
-          v-click="5"
+          v-click="4"
           class="text-left px-2 col-span-2"
           language="html"
           :code="imgFallback"

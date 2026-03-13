@@ -43,7 +43,7 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
   fcp: {
     choice: {
       a: { top: "62%", left: "13%", transform: "rotate(-14deg)", width: "24%" },
-      b: { top: "65%", right: "11%", transform: "rotate(14deg)", width: "26%" },
+      b: { top: "70%", right: "10%", transform: "rotate(14deg)", width: "26%" },
     },
     vote: {
       a: {
@@ -70,8 +70,8 @@ export const FLOOR_POSITIONS: Record<string, FloorPositions> = {
   },
   lcp: {
     choice: {
-      a: { top: "62%", left: "16%", transform: "rotate(-13deg)", width: "17%" },
-      b: { top: "55%", right: "14%", transform: "rotate(14deg)", width: "20%" },
+      a: { top: "68%", left: "18%", transform: "rotate(-13deg)", width: "15%" },
+      b: { top: "58%", right: "14%", transform: "rotate(14deg)", width: "20%" },
     },
     vote: {
       a: { top: "6%", left: "1.5%", transform: "rotate(-23deg)", width: "9%" },

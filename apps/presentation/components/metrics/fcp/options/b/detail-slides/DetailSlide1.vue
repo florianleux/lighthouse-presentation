@@ -10,18 +10,18 @@ const jsCodeExample = `document.write()`
       metric="fcp"
       option="b"
     >
-      <div class="absolute text-xl top-[25%] left-[18%]">
-        <span class="i-ph-check-bold inline-block w-6 h-6 -mb-1" />
+      <div class="absolute text-4xl top-[22%] left-[15%]">
+        <span class="i-ph-check-bold inline-block w-8 h-8 -mb-1" />
         HTML
       </div>
 
-      <div class="absolute text-xl top-[25%] left-[82%]">
-        <span class="i-svg-spinners-bars-fade inline-block w- h-6 align-middle mb-1" /> CSS
+      <div class="absolute text-4xl top-[22%] left-[80%]">
+        <span class="i-svg-spinners-bars-fade inline-block w-8 h-8 align-middle mb-1" /> CSS
       </div>
 
 
 
-      <div v-click="3">
+      <div v-click="2">
         <CodeSnippet
           class="absolute w-35  top-[35%] left-[4%]"
           language="js"
@@ -43,71 +43,49 @@ const jsCodeExample = `document.write()`
       </div>
 
 
-      <div v-click="4">
-        <div
-          class="absolute text-[#FF2626] font-bold top-[58%] left-[4%] underline text-sm w-[15%] leading-none text-center"
-        >
-          Parser-blocking resource
-        </div>
-        <div class="border border-2 border-[#FF2626] w-[15%] h-[19%] absolute top-[48%] left-[4%] " />
+      <div v-click="3">
+
+        <div class="border border-5 border-[#FF2626] w-[10%] h-[15%] absolute top-[46%] left-[6%] " />
       </div>
 
-      <div v-click="6">
+      <div v-click="5">
 
-        <div
-          class="absolute text-[#FF2626] font-bold top-[17%] left-[79.5%] underline text-sm w-[15%] leading-none text-center"
-        >
-          Render-blocking resource
-        </div>
-
-        <div class="border border-2 border-[#FF2626] w-[15%] h-[19%] absolute top-[14%] left-[79.5%] " />
+        <div class="border border-5 border-[#FF2626] w-[15%] h-[12%] absolute top-[19%] left-[78%] " />
 
       </div>
 
-      <div class="absolute text-xl top-[50%] left-[7%]">
-        <span class="i-svg-spinners-bars-fade inline-block w- h-6 align-middle " /> JS
+      <div class="absolute text-4xl top-[50%] left-[7%]">
+        <span class="i-svg-spinners-bars-fade inline-block w-8 h-8 align-middle " /> JS
       </div>
 
-      <div class="absolute text-center text-4xl top-[85%] left-[50%]">
-        FCP <div class="text-lg"> (interactive pixels)</div>
+      <div class="absolute text-center text-5xl top-[85%] left-[47%]">
+        FCP <div class="text-2xl -mt-3"> (interactive pixels)</div>
       </div>
 
 
       <!-- Parsing HTML -->
       <div
-        v-click="2"
+        v-click="1"
         class="absolute italic text-xl top-[36%] left-[30%]"
       >
         Parsing
       </div>
       <!-- Ligne HTML - DOM -->
       <div
-        v-click="2"
+        v-click="1"
         class="absolute top-[31%] left-[24%] w-30 h-0.5 bg-black origin-left"
         style="transform: rotate(51deg)"
       ></div>
 
 
 
-      <div v-click="[1, 2]">
-        <!-- Ligne HTML - CSS -->
-        <div class="absolute top-[28%] left-[30%] w-118 h-0.5 bg-black origin-left"></div>
-        <!-- Ligne HTML - CSS - FCP-->
-        <div
-          class="absolute top-[28%] left-[57%] w-69 h-0.5 bg-black origin-left"
-          style="transform: rotate(90deg);"
-        ></div>
-        <div class="absolute italic text-xl top-[49%] left-[59%]">
-          Rendering
-        </div>
-      </div>
 
-      <div v-click="5">
+      <div v-click="4">
         <!-- Parsing CSS -->
-        <div class="absolute italic text-xl top-[36%] left-[73%]">
+        <div class="absolute italic text-2xl top-[36%] left-[73%]">
           Parsing
         </div>
-        <div class="absolute border border-2 border-black p-2 font-bold text-3xl top-[50%] left-[75%]">
+        <div class="absolute border border-2 border-black p-2 font-bold text-5xl top-[50%] left-[75%]">
           CSSOM
         </div>
 
@@ -118,7 +96,7 @@ const jsCodeExample = `document.write()`
         ></div>
       </div>
 
-      <div v-click="6">
+      <div v-click="5">
         <div class="absolute top-[55.5%] left-[39.5%] w-81.5 h-0.5 bg-black origin-left"></div>
 
 
@@ -127,7 +105,7 @@ const jsCodeExample = `document.write()`
           class="absolute top-[55.5%] left-[57%] w-34 h-0.5 bg-black origin-left"
           style="transform: rotate(90deg);"
         ></div>
-        <div class="absolute italic text-xl top-[65%] left-[59%]">
+        <div class="absolute italic text-2xl top-[65%] left-[59%]">
           Rendering
         </div>
 
@@ -135,8 +113,8 @@ const jsCodeExample = `document.write()`
 
 
       <div
-        v-click="2"
-        class="absolute border border-2 border-black p-2 font-bold text-3xl top-[50%] left-[30%]"
+        v-click="1"
+        class="absolute border border-2 border-black p-2 font-bold text-5xl top-[50%] left-[30%]"
       >
         DOM
       </div>

@@ -78,46 +78,82 @@ function thresholdColor(key: string, value: number): string {
     </div>
 
     <!-- CLS -->
-    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 15%; top: 15%">
-      <div class="font-title text-6xl text-white">CLS</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue('CLS', baseline.CLS) }}</div>
-      <div v-click="1" v-if="optimized" :class="[thresholdColor('CLS', optimized.CLS), 'font-bold font-body text-2xl']">
+    <div
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      style="left: 9%; top: 20%"
+    >
+      <div class="font-title text-7xl text-white">CLS</div>
+      <div class="text-red-400 font-body text-3xl">{{ formatValue('CLS', baseline.CLS) }}</div>
+      <div
+        v-click="1"
+        v-if="optimized"
+        :class="[thresholdColor('CLS', optimized.CLS), 'font-bold font-body text-3xl']"
+      >
         {{ formatValue('CLS', optimized.CLS) }}
       </div>
     </div>
 
     <!-- FCP -->
-    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 26%; top: 15%">
-      <div class="font-title text-6xl text-white">FCP</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue('FCP', baseline.FCP) }}</div>
-      <div v-click="2" v-if="optimized" :class="[thresholdColor('FCP', optimized.FCP), 'font-bold font-body text-2xl']">
+    <div
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      style="left: 27%; top: 20%"
+    >
+      <div class="font-title text-7xl text-white text-shadow-md text-shadow-black">FCP</div>
+      <div class="text-red-400 font-body text-3xl text-shadow-md text-shadow-black">{{ formatValue('FCP', baseline.FCP)
+        }}</div>
+      <div
+        v-click="2"
+        v-if="optimized"
+        :class="[thresholdColor('FCP', optimized.FCP), 'font-bold font-body text-3xl text-shadow-md text-shadow-black']"
+      >
         {{ formatValue('FCP', optimized.FCP) }}
       </div>
     </div>
 
     <!-- LCP -->
-    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 37%; top: 15%">
-      <div class="font-title text-6xl text-white">LCP</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue('LCP', baseline.LCP) }}</div>
-      <div v-click="3" v-if="optimized" :class="[thresholdColor('LCP', optimized.LCP), 'font-bold font-body text-2xl']">
+    <div
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      style="left: 44%; top: 20%"
+    >
+      <div class="font-title text-7xl text-white text-shadow-md text-shadow-black">LCP</div>
+      <div class="text-red-400 font-body text-3xl">{{ formatValue('LCP', baseline.LCP) }}</div>
+      <div
+        v-click="3"
+        v-if="optimized"
+        :class="[thresholdColor('LCP', optimized.LCP), 'font-bold font-body text-3xl']"
+      >
         {{ formatValue('LCP', optimized.LCP) }}
       </div>
     </div>
 
     <!-- TBT -->
-    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 20%; top: 45%">
-      <div class="font-title text-6xl text-white">TBT</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue('TBT', baseline.TBT) }}</div>
-      <div v-click="4" v-if="optimized" :class="[thresholdColor('TBT', optimized.TBT), 'font-bold font-body text-2xl']">
+    <div
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      style="left: 20%; top: 50%"
+    >
+      <div class="font-title text-7xl text-white">TBT</div>
+      <div class="text-red-400 font-body text-3xl">{{ formatValue('TBT', baseline.TBT) }}</div>
+      <div
+        v-click="4"
+        v-if="optimized"
+        :class="[thresholdColor('TBT', optimized.TBT), 'font-bold font-body text-3xl']"
+      >
         {{ formatValue('TBT', optimized.TBT) }}
       </div>
     </div>
 
     <!-- SI -->
-    <div class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2" style="left: 32%; top: 45%">
-      <div class="font-title text-6xl text-white">SI</div>
-      <div class="text-red-400 font-body text-2xl">{{ formatValue('SI', baseline.SI) }}</div>
-      <div v-click="5" v-if="optimized" :class="[thresholdColor('SI', optimized.SI), 'font-bold font-body text-2xl']">
+    <div
+      class="absolute flex flex-col items-center text-center w-[15%] -translate-x-1/2"
+      style="left: 32%; top: 50%"
+    >
+      <div class="font-title text-7xl text-white">SI</div>
+      <div class="text-red-400 font-body text-3xl">{{ formatValue('SI', baseline.SI) }}</div>
+      <div
+        v-click="5"
+        v-if="optimized"
+        :class="[thresholdColor('SI', optimized.SI), 'font-bold font-body text-3xl']"
+      >
         {{ formatValue('SI', optimized.SI) }}
       </div>
     </div>

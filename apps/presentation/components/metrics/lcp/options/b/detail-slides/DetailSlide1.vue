@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
-const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
-const clicks = computed(() => clicksContext?.value?.current ?? 0)
 </script>
 
 <template>
@@ -11,14 +8,10 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
       metric="lcp"
       option="b"
     >
-      <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">LCP changes with
+      <div class="text-4xl text-center mb-20">LCP changes with
         screen size</div>
-      <div
-        v-click="1"
-        class="text-4xl text-center font-bold "
-      >Google judges mobile, users experience both</div>
 
-      <div v-click="2">
+      <div v-click="1">
         <img
           src="/images/lcp-desktop.webp"
           alt="LCP Desktop"
@@ -27,7 +20,7 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
         <div class="absolute left-[21%] bottom-[22%] w-[30%] h-[15%] bg-[#39FF14]/40 border-2 border-[#39FF14]" />
       </div>
 
-      <div v-click="3">
+      <div v-click="2">
         <img
           src="/images/lcp-mobile.webp"
           alt="LCP Mobile"

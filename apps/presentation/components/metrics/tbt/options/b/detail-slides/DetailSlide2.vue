@@ -23,7 +23,7 @@ const masonryCss = `
       option="b"
     >
       <span
-        v-click="2"
+        v-click="1"
         class="hidden"
       />
 
@@ -37,15 +37,10 @@ const masonryCss = `
         </div>
 
         <div class="flex flex-col">
-          <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800']">Is the design
+          <div class="text-4xl text-center mb-20">Is the design
             worth the cost?</div>
 
-          <div
-            v-click="1"
-            class="text-4xl text-center font-bold my-7"
-          >There might be an alternative!</div>
-
-          <div v-if="clicks >= 2">
+          <div v-if="clicks >= 1">
             <CodeSnippet
               class="text-left px-5"
               language="css"
