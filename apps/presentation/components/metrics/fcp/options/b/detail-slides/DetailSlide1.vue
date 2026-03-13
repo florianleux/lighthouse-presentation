@@ -97,7 +97,7 @@ const jsCodeExample = `document.write()`
       </div>
 
       <div v-click="5">
-        <div class="absolute top-[55.5%] left-[39.5%] w-81.5 h-0.5 bg-black origin-left"></div>
+        <div class="absolute top-[55.5%] left-[45.5%] w-60 h-0.5 bg-black origin-left"></div>
 
 
         <!-- Ligne DOM - CSSOM - FCP-->
