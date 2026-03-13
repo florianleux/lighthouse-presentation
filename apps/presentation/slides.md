@@ -28,7 +28,7 @@ css: unocss
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-right.webp')">
+<div class="slide-bg" style="background-image: url('/backgrounds/poll-br.webp')">
   <PollButtons poll-id="knowledge-level" />
 </div>
 

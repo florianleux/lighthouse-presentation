@@ -378,6 +378,11 @@ onMounted(async () => {
         alt=""
         class="absolute inset-0 w-full h-full object-cover z-0"
       />
+      <img
+        src="/vote/shadow.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-999 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
+      />
       <PollScreen
         class="z-3"
         @poll="handlePoll"
@@ -385,7 +390,7 @@ onMounted(async () => {
       <img
         src="/vote/light.webp"
         alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-9999 pointer-events-none"
       />
     </div>
 
