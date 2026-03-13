@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { inject, computed } from 'vue'
-const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
-const clicks = computed(() => clicksContext?.value?.current ?? 0)
 </script>
 
 <template>
@@ -11,8 +8,10 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
       metric="fcp"
       option="a"
     >
-      <div class=" flex flex-col items-center ">
-        <div class=" w-[70%] relative ">
+      <div class="flex flex-col items-center">
+        <div class="text-center text-4xl transition-all duration-800 mt-5">The starting point for all other metrics.</div>
+
+        <div v-click="1" class="w-[70%] relative mt-15">
           <div class="flex rounded mx-auto overflow-hidden h-8">
             <div
               class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 flex-1 flex items-center justify-center text-md"
@@ -32,21 +31,30 @@ const clicks = computed(() => clicksContext?.value?.current ?? 0)
             class="absolute text-black font-title font-bold text-xl"
             style="left: 66%; top: 150%; transform: translate(-50%, -50%)"
           >1800ms</span>
+
+          <!-- BlackMarket baseline marker at 1200ms (Average zone: 53%) -->
+          <div
+            v-click="2"
+            class="absolute flex flex-col items-center"
+            style="left: 53%; top: -5%; transform: translate(-50%, -50%)"
+          >
+            <span class="text-xl font-bold font-title mt-2 whitespace-nowrap">1.2 s</span>
+            <img
+              src="/images/bm-logo.png"
+              alt="BM"
+              class="h-7 w-7 drop-shadow-md"
+            >
+          </div>
         </div>
 
-        <div :class="[clicks >= 1 ? 'text-xl' : 'text-4xl', 'text-center transition-all duration-800 mt-15']">The starting point for all other metrics. </div>
-
-        <div v-click="1" class="mt-20 w-[90%]">
+        <div v-click="3" class="mt-20 w-[90%]">
           <div class="grid grid-cols-7 gap-0.5">
-            <div class="bg-yellow-300 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">Redirect
-            </div>
-            <div class="bg-yellow-400 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">HTTP Cache
-            </div>
+            <div class="bg-yellow-300 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">Redirect</div>
+            <div class="bg-yellow-400 text-yellow-900 text-xs px-2 py-2 rounded text-center font-semibold">HTTP Cache</div>
             <div class="bg-amber-400 text-amber-900 text-xs px-2 py-2 rounded text-center font-semibold">DNS</div>
             <div class="bg-amber-500 text-white text-xs px-2 py-2 rounded text-center font-semibold">TCP + TLS</div>
             <div class="bg-orange-400 text-white text-xs px-2 py-2 rounded text-center font-semibold">Request</div>
-            <div class="bg-orange-500 text-white text-xs px-2 py-2 rounded text-center font-semibold">Server Processing
-            </div>
+            <div class="bg-orange-500 text-white text-xs px-2 py-2 rounded text-center font-semibold">Server Processing</div>
             <div class="bg-orange-600 text-white text-xs px-2 py-2 rounded text-center font-semibold">Response</div>
           </div>
         </div>

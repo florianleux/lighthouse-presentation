@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSlots, computed } from 'vue'
+import { computed } from 'vue'
 import { METRICS, type MetricName } from '../../../shared/metrics-data'
 
 const props = defineProps<{
@@ -8,14 +8,9 @@ const props = defineProps<{
 
 const metricData = computed(() => METRICS[props.metric])
 
-const slots = useSlots()
-const hasRightSlot = computed(() => !!slots.right)
-
-// Offset click numbers when right slot adds an extra step (click 3)
 const formulaClick = 2
-const tagsClick = computed(() => hasRightSlot.value ? 4 : 3)
-const thresholdClick = computed(() => hasRightSlot.value ? 5 : 4)
-const baselineClick = computed(() => thresholdClick.value + 1)
+const thresholdClick = 3
+const baselineClick = 4
 
 // Baseline logo position on the threshold bar (%)
 // Bar: 0–33% = Good, 33–66% = Average, 66–100% = Poor
@@ -39,7 +34,7 @@ const baselineLabel = computed(() => {
 
 <template :key="metricData.name">
   <div class="grid grid-cols-3 gap-8 h-full pt-6 pl-10 pr-5 pb-6">
-    <div :class="[hasRightSlot ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
+    <div :class="[$slots.right ? 'col-span-2' : 'col-span-3', 'flex flex-col justify-between']">
       <div>
         <div class="flex justify-between items-baseline">
           <div>
@@ -52,10 +47,14 @@ const baselineLabel = computed(() => {
           >{{ metricData.weight }}%</div>
         </div>
 
+        <div
+          v-click="formulaClick"
+          class="mt-25 text-5xl font-bold text-center"
+        >{{ metricData.formula }}</div>
 
         <div
           v-click="thresholdClick"
-          class="relative mt-12"
+          class="relative mt-25"
         >
           <div class="flex rounded overflow-hidden h-8 mt-8">
             <div
@@ -98,36 +97,15 @@ const baselineLabel = computed(() => {
           </div>
         </div>
 
-        <div
-          v-click="formulaClick"
-          class="mt-15 text-5xl font-bold text-center"
-        >{{ metricData.formula }}</div>
-        <div
-          v-click="tagsClick"
-          class="grid grid-cols-2 gap-10 mt-10 text-2xl text-center"
-        >
-          <span v-if="metricData.tags[0]">{{ metricData.tags[0] }}</span>
-          <span v-if="metricData.tags[1]">{{ metricData.tags[1] }}</span>
-          <span
-            v-if="metricData.tags[2]"
-            :class="[metricData.tags[3] ? 'col-span-1' : 'col-span-2']"
-          >{{ metricData.tags[2] }}</span>
-          <span v-if="metricData.tags[3]">{{ metricData.tags[3] }}</span>
-        </div>
 
-        <!-- Named slot for content under keywords -->
-        <slot
-          class="mt-10"
-          name="bottom"
-        />
       </div>
 
 
     </div>
 
     <div
-      v-if="hasRightSlot"
-      v-click="3"
+      v-if="$slots.right"
+      v-click="2"
       class="col-span-1 flex items-center justify-center"
     >
       <slot name="right" />
