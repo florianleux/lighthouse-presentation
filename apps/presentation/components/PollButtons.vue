@@ -12,7 +12,7 @@ const isPollActive = computed(() =>
   sessionStore.pollPhase === 'polling' && sessionStore.activePollId === props.pollId
 )
 
-// Poll results for this poll (defensive: handle old localStorage data with renamed keys)
+// Poll results for this poll
 const results = computed(() => {
   const raw = sessionStore.pollResults[props.pollId]
   return {
@@ -22,29 +22,27 @@ const results = computed(() => {
   }
 })
 
+// Total poll votes (for X/X display and auto-stop)
+const totalPollVotes = computed(() => {
+  const r = results.value
+  return r.newbie.length + r.captain.length + r.admiral.length
+})
+
 // Timer (internal to presentation only)
 const POLL_DURATION = POLL_CONFIG.DURATION_SECONDS
-const GRACE_PERIOD = POLL_CONFIG.GRACE_PERIOD_SECONDS
 const timeRemaining = ref(0)
-const isInGracePeriod = ref(false)
 let timerInterval: ReturnType<typeof setInterval> | null = null
-let graceTimeout: ReturnType<typeof setTimeout> | null = null
 
 function startTimer() {
   clearTimer()
   timeRemaining.value = POLL_DURATION
-  isInGracePeriod.value = false
   timerInterval = setInterval(() => {
     timeRemaining.value--
     if (timeRemaining.value <= 0) {
       clearInterval(timerInterval!)
       timerInterval = null
-      isInGracePeriod.value = true
-      console.log('[PollButtons] Timer ended, grace period started')
-      graceTimeout = setTimeout(() => {
-        isInGracePeriod.value = false
-        stopPollSession()
-      }, GRACE_PERIOD * 1000)
+      console.log('[PollButtons] Timer ended, auto-stopping poll')
+      stopPollSession()
     }
   }, 1000)
 }
@@ -54,11 +52,6 @@ function clearTimer() {
     clearInterval(timerInterval)
     timerInterval = null
   }
-  if (graceTimeout) {
-    clearTimeout(graceTimeout)
-    graceTimeout = null
-  }
-  isInGracePeriod.value = false
 }
 
 // Reset timer when poll phase resets (e.g. after session reset)
@@ -66,6 +59,14 @@ watch(() => sessionStore.pollPhase, (phase) => {
   if (phase === 'waiting') {
     clearTimer()
     timeRemaining.value = 0
+  }
+})
+
+// Auto-stop when all crew members have voted
+watch(totalPollVotes, (total) => {
+  if (isPollActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
+    console.log('[PollButtons] All crew voted, auto-stopping poll')
+    stopPollSession()
   }
 })
 
@@ -112,6 +113,9 @@ function startPollSession() {
 }
 
 function stopPollSession() {
+  // Guard: prevent double-stop (timer + all-voted watcher can race)
+  if (sessionStore.pollPhase !== 'polling') return
+
   clearTimer()
   sessionStore.pollPhase = 'ended'
   firestore.stopListeningToPollResponses()
@@ -143,7 +147,7 @@ function stopPollSession() {
       <div class="text-4xl font-bold font-title">{{ results.newbie.length }}</div>
     </div>
     <div class="absolute top-[88%] left-[54%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title ">{{ results.captain.length }}</div>
+      <div class="text-4xl font-bold font-title">{{ results.captain.length }}</div>
     </div>
     <div class="absolute top-[87.6%] left-[86.4%] p-1 px-2 text-center -translate-x-1/2">
       <div class="text-4xl font-bold font-title">{{ results.admiral.length }}</div>
@@ -155,11 +159,13 @@ function stopPollSession() {
     >
       {{ timeRemaining }}
     </div>
+
+    <!-- Participation counter -->
     <div
-      v-else-if="isInGracePeriod"
-      class="absolute top-[83%] left-1/2 -translate-x-1/2 text-2xl font-bold text-red-500 font-title"
+      v-if="isPollActive"
+      class="absolute -bottom-[3%] -right-[3%] -translate-1/2 text-xl font-bold font-title text-center text-white"
     >
-      Closing...
+      {{ totalPollVotes }}/{{ sessionStore.crew.length }}<br>answered
     </div>
 
     <button

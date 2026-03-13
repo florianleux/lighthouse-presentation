@@ -368,6 +368,27 @@ onMounted(async () => {
       />
     </div>
 
+    <!-- PollScreen: full-screen with decorative layers -->
+    <div
+      v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound"
+      class="relative w-screen h-dvh overflow-hidden"
+    >
+      <img
+        src="/vote/Bg.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-0"
+      />
+      <PollScreen
+        class="z-3"
+        @poll="handlePoll"
+      />
+      <img
+        src="/vote/light.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+      />
+    </div>
+
     <!-- WaitingScreen: full-screen with decorative layers -->
     <div
       v-else-if="status === 'joined' && !(phase === 'voting' && !hasVotedThisRound) && !(phase === 'polling' && !hasPolledThisRound)"
@@ -414,12 +435,6 @@ onMounted(async () => {
       <StatusScreen
         v-else-if="status === 'error'"
         variant="error"
-      />
-
-      <!-- Poll voting -->
-      <PollScreen
-        v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound"
-        @poll="handlePoll"
       />
 
     </div>

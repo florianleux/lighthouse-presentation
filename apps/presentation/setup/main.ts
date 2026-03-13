@@ -132,6 +132,7 @@ export const sessionStore = reactive({
   // Internal poll state (for PollButtons timer)
   activePollId: null as string | null,
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
+  startedPollIds: new Set<string>(),
 
   // Manual mode (presenter picks directly)
   manualMode: false,
@@ -210,6 +211,7 @@ export const sessionStore = reactive({
     }
     this.activePollId = null
     this.pollPhase = 'waiting'
+    this.startedPollIds = new Set<string>()
     this.manualMode = false
     voteStore.reset()
     currentPhase.value = 'lobby'

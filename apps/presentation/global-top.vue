@@ -10,8 +10,8 @@ const { currentSlideNo } = useNav()
 // Track slide changes and publish state to Firestore
 watch(currentSlideNo, (slide) => {
   if (sessionStore.keynoteId && slide) {
-    // Transition from lobby to idle once presenter navigates beyond slide 1
-    if (currentPhase.value === 'lobby' && slide > 1) {
+    // Transition from lobby to idle once presenter starts navigating
+    if (currentPhase.value === 'lobby' && slide >= 1) {
       currentPhase.value = 'idle'
     }
     sessionStore.updateLastSlide(slide)
