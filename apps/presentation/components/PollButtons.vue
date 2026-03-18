@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, inject } from 'vue'
+import { useNav } from '@slidev/client'
 import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
 
@@ -7,6 +8,7 @@ const props = defineProps<{
   pollId: string
 }>()
 
+const { currentSlideNo } = useNav()
 const clicksContext = inject<{ value: { current: number } }>('$$slidev-clicks-context')
 const clicks = computed(() => clicksContext?.value?.current ?? 0)
 const lastHandledClick = ref(0)
@@ -74,7 +76,7 @@ watch(totalPollVotes, (total) => {
   }
 })
 
-// Slidev clicker control: click 1 => Start, click 2 => Stop (if still active)
+// Slidev clicker control: click 1 => Start
 watch(clicks, (currentClick) => {
   if (currentClick < lastHandledClick.value) {
     lastHandledClick.value = currentClick
@@ -89,10 +91,6 @@ watch(clicks, (currentClick) => {
   if (currentClick === 1 && !isPollActive.value && sessionStore.pollPhase !== 'ended') {
     startPollSession()
     return
-  }
-
-  if (currentClick === 2 && isPollActive.value) {
-    stopPollSession()
   }
 })
 
@@ -112,7 +110,33 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
+// Auto-start poll when arriving on this slide
+// All PollButtons instances are mounted by Slidev, so check DOM visibility to only start the right one
+const slideEl = ref<HTMLElement | null>(null)
+
+function isSlideVisible(): boolean {
+  if (!slideEl.value) return false
+  // PollButtons' root div has no intrinsic dimensions (all children are absolute),
+  // so check the parent slide container which has proper dimensions via slide-bg class
+  const el = slideEl.value.parentElement ?? slideEl.value
+  const rect = el.getBoundingClientRect()
+  return rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.bottom > 0
+}
+
+// A poll can only be started once per session — prevents re-triggering on back/forward navigation
+const hasBeenStarted = computed(() => sessionStore.startedPollIds.has(props.pollId))
+watch(currentSlideNo, () => {
+  if (sessionStore.manualMode || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
+  if (currentPhase.value === 'lobby') return
+  setTimeout(() => {
+    if (isSlideVisible() && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activePollId === null && sessionStore.pollPhase === 'waiting') {
+      startPollSession()
+    }
+  }, 200)
+})
+
 function startPollSession() {
+  sessionStore.startedPollIds.add(props.pollId)
   sessionStore.activePollId = props.pollId
   sessionStore.pollPhase = 'polling'
   startTimer()
@@ -168,10 +192,9 @@ function stopPollSession() {
 </script>
 
 <template>
-  <div>
-    <!-- Create two Slidev click steps for clicker-only control -->
+  <div ref="slideEl">
+    <!-- Create a Slidev click step for clicker-only control -->
     <span v-click="1" class="hidden" />
-    <span v-click="2" class="hidden" />
 
     <div class="absolute top-[88%] left-[21%] p-1 px-2 text-center -translate-x-1/2">
       <div class="text-4xl font-bold font-title">{{ results.newbie.length }}</div>
