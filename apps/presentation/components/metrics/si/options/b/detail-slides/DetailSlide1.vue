@@ -24,7 +24,7 @@
 
         <!-- Column 2: PNG -->
         <div
-          v-click="2"
+          v-click="1"
           class="flex flex-col items-center gap-0"
         >
           <div class="text-2xl text-center opacity-70">1996</div>
@@ -35,7 +35,7 @@
 
         <!-- Column 3: WebP -->
         <div
-          v-click="3"
+          v-click="2"
           class="flex flex-col items-center gap-0"
         >
           <div class="text-2xl text-center opacity-70">2010</div>
@@ -46,7 +46,7 @@
 
         <!-- Column 4: AVIF -->
         <div
-          v-click="4"
+          v-click="2"
           class="flex flex-col items-center gap-0"
         >
           <div class="text-2xl text-center opacity-70">2019</div>

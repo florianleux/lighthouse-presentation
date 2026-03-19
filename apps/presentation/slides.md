@@ -172,16 +172,10 @@ transition: slide-up
 <DetailSlideLoader metric="fcp" :slide-index="1" />
 
 ---
-transition: slide-left
----
-
-<DetailSlideLoader metric="fcp" :slide-index="2" />
-
----
 transition: fade
 ---
 
-<DetailSlideLoader metric="fcp" :slide-index="3" />
+<DetailSlideLoader metric="fcp" :slide-index="2" />
 
 ---
 transition: fade
@@ -220,16 +214,10 @@ transition: slide-up
 <DetailSlideLoader metric="lcp" :slide-index="1" />
 
 ---
-transition: slide-left
----
-
-<DetailSlideLoader metric="lcp" :slide-index="2" />
-
----
 transition: fade
 ---
 
-<DetailSlideLoader metric="lcp" :slide-index="3" />
+<DetailSlideLoader metric="lcp" :slide-index="2" />
 
 ---
 transition: fade

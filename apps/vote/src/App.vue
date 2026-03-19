@@ -96,6 +96,10 @@ const hasPolledThisRound = computed(() => {
   return poll ? polledIds.value.includes(poll.id) : false
 })
 
+const missedCurrentVote = computed(() =>
+  phase.value === 'vote-results' && !hasVotedThisRound.value
+)
+
 const currentMetric = computed(() => {
   const vote = sessionState.value?.vote
   if (!vote) return null
@@ -414,6 +418,7 @@ onMounted(async () => {
         :avatar="selectedAvatar"
         :name="joinedName"
         :has-voted-once="votedRounds.length > 0"
+        :missed-current-vote="missedCurrentVote"
       />
       <img
         src="/vote/light.webp"

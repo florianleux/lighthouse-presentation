@@ -5,6 +5,7 @@ const props = defineProps<{
   avatar: string | null
   name: string
   hasVotedOnce: boolean
+  missedCurrentVote: boolean
 }>()
 </script>
 
@@ -33,8 +34,8 @@ const props = defineProps<{
 
   <p
     class="absolute w-[90%] bottom-[7%] left-[50%] -translate-x-1/2 z-1000 text-[250%] leading-tight font-title text-shadow-md text-shadow-black text-white text-center">
-    <template v-if="hasVotedOnce">
-      Thanks for your vote!<br> The captain will let you know about the next vote!
+    <template v-if="hasVotedOnce || missedCurrentVote">
+      {{ missedCurrentVote ? 'Oooops you missed the vote !' : 'Thanks for your vote!' }}<br> The captain will let you know about the next vote!
     </template>
     <template v-else>
       Get ready for your next adventure!

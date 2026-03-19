@@ -65,7 +65,7 @@ const imgFallback = `<img
         />
 
         <CodeSnippet
-          v-click="3"
+          v-click="2"
           class="text-left px-2 col-span-2"
           language="html"
           :code="sourceWebp"
@@ -73,7 +73,7 @@ const imgFallback = `<img
         />
 
         <CodeSnippet
-          v-click="4"
+          v-click="2"
           class="text-left col-span-2"
           language="html"
           :code="imgFallback"

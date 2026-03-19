@@ -1,4 +1,12 @@
 <script setup lang="ts">
+const lodashCode = `
+_.drop([1, 2, 3]);
+// => [2, 3]
+`
+const noLodashCode = `
+[1, 2, 3].slice(1);
+// => [2, 3]
+`
 const purgeHtmlCode = `
 <div class="text-red-500 p-4">
   BlackMarket
@@ -18,11 +26,6 @@ const minifyCodeBefore = `
 const minifyCodeAfter = `
 .button{background-color:blue;padding:10px}
 `
-const preloadCode = `
-<link rel="preload"
-      href="/css/critical.css"
-      as="style" />
-`
 
 </script>
 
@@ -33,41 +36,60 @@ const preloadCode = `
       metric="fcp"
       option="b"
     >
-      <div class=" grid grid-cols-2 -ml-10 mt-6  text-center items-top gap-10">
-        <div class="flex flex-col items-top gap-8">
-          <div class="text-4xl font-bold">Purge it!</div>
+      <div class="grid grid-cols-3 -ml-10 mt-6 text-center items-top gap-6">
+        <div class="flex flex-col items-top gap-5">
+          <div class="text-4xl font-bold">Question it!</div>
 
-          <div class="text-left px-10">
+          <div class="text-left px-4">
             <CodeSnippet
-              language="html"
-              :code="purgeHtmlCode"
-              size="medium"
+              language="js"
+              :code="lodashCode"
+              size="tiny"
             />
             <CodeSnippet
-              class="mt-5 "
-              language="css"
-              :code="purgeCssCode"
-              size="medium"
+              class="mt-5"
+              language="js"
+              :code="noLodashCode"
+              size="tiny"
             />
           </div>
-
         </div>
         <div
           v-click="1"
-          class="flex flex-col items-center gap-8"
+          class="flex flex-col items-top gap-5"
+        >
+          <div class="text-4xl font-bold">Purge it!</div>
+
+          <div class="text-left px-4">
+            <CodeSnippet
+              language="html"
+              :code="purgeHtmlCode"
+              size="tiny"
+            />
+            <CodeSnippet
+              class="mt-5"
+              language="css"
+              :code="purgeCssCode"
+              size="tiny"
+            />
+          </div>
+        </div>
+        <div
+          v-click="2"
+          class="flex flex-col items-center gap-5"
         >
           <div class="text-4xl font-bold">Minify it!</div>
           <div class="text-left">
             <CodeSnippet
               language="css"
               :code="minifyCodeBefore"
-              size="medium"
+              size="tiny"
             />
             <CodeSnippet
               class="mt-5"
               language="css"
               :code="minifyCodeAfter"
-              size="medium"
+              size="tiny"
             />
           </div>
         </div>

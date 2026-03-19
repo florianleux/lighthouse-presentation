@@ -1,25 +1,11 @@
 <script setup lang="ts">
-const cssImage = `
-.banner {
-  background-image: url('promo-banner.jpg');
+const heroCSS = `.hero {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('hero.jpg');
+  background-size: cover;
+  background-position: center;
 }`
-
-const htmlImage = `
-<img
-  src="promo-banner.jpg"
-  alt="Promo Banner"
-/>`
-
-const highPriority = `<img
-  src="promo-banner.jpg"
-  fetchpriority="high"
-/>`
-
-const lazyLoading = `<img
-  src="red-parrot.jpg"
-  loading="lazy"
->`
-
 </script>
 
 <template>
@@ -29,51 +15,37 @@ const lazyLoading = `<img
       metric="lcp"
       option="b"
     >
-      <div class="text-5xl -mt-2 text-center mb-5">Can't avoid an image as LCP?</div>
+      <div class="grid grid-cols-2 items-start h-full">
+        <!-- Left column: text + snippet -->
+        <div class="flex flex-col gap-4">
+          <div class="text-5xl text-center mb-3">What if we
+            could<br> have the best of<br> both worlds?</div>
 
-      <div class="grid grid-cols-2 gap-x-6 items-start">
-        <!-- Column 1: Prioritize it -->
-        <div
-          v-click="1"
-          class="flex flex-col items-center gap-2"
-        >
-          <div class="text-3xl text-center font-bold">Prioritize it!</div>
-
-          <CodeSnippet
-            class="text-left px-4"
-            language="html"
-            :code="highPriority"
-            size="small"
-          />
-
-          <CodeSnippet
-            class="text-left px-4"
-            language="html"
-            :code="lazyLoading"
-            size="small"
-          />
+          <div v-click="1">
+            <CodeSnippet
+              class="text-left px-4"
+              language="css"
+              :code="heroCSS"
+              size="small"
+            />
+          </div>
         </div>
 
-        <!-- Column 2: Make it discoverable -->
-        <div
-          v-click="2"
-          class="flex flex-col items-center gap-2"
-        >
-          <div class="text-3xl text-center font-bold">Make it discoverable</div>
-
-          <CodeSnippet
-            class="text-left px-4"
-            language="css"
-            :code="cssImage"
-            size="small"
+        <!-- Right column: splash gifs -->
+        <div class="-mt-15 grid grid-cols-2 gap-10 pr-10">
+          <img
+            v-click="1"
+            src="/lcp/splash-before.gif"
+            alt=""
+            class="rounded-lg "
+          />
+          <img
+            v-click="2"
+            src="/lcp/splash-after.gif"
+            alt=""
+            class="rounded-lg "
           />
 
-          <CodeSnippet
-            class="text-left px-4"
-            language="html"
-            :code="htmlImage"
-            size="small"
-          />
         </div>
       </div>
     </DetailSlide>
