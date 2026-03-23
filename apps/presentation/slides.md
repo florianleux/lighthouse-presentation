@@ -311,7 +311,12 @@ transition: slide-left
 ---
 transition: slide-down
 ---
-<OutroIframe />
+
+<script setup>
+import { sessionStore } from './setup/main'
+</script>
+
+<OutroIframe :key="sessionStore.keynoteId" />
 
 ---
 

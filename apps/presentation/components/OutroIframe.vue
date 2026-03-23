@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { voteStore, sessionStore } from '../setup/main'
+import { voteStore } from '../setup/main'
 import BlackMarketIframe from './BlackMarketIframe.vue'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
@@ -66,7 +66,6 @@ function thresholdColor(key: string, value: number): string {
 
 <template>
   <div
-    :key="sessionStore.keynoteId ?? undefined"
     class="slide-bg"
     style="background-image: url('/backgrounds/end-bottom-right.webp')"
   >
