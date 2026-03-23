@@ -6,6 +6,7 @@ import type {
   FirestoreParticipant,
   FirestoreBallot,
   FirestorePollResponse,
+  FirestoreFeedback,
   FirestoreConfig,
   SessionStateMessage,
   PollChoice,
@@ -13,6 +14,7 @@ import type {
 import {
   doc,
   setDoc,
+  addDoc,
   collection,
   onSnapshot,
   type Unsubscribe,
@@ -193,6 +195,29 @@ async function submitPoll(pollId: string, participantId: string, choice: PollCho
   }
 }
 
+// ---- Feedback ----
+
+async function submitFeedback(participantId: string, name: string, feedback: string): Promise<boolean> {
+  if (!db || !presentationId) return false
+
+  try {
+    const feedbacksRef = collection(db, FIRESTORE_COLLECTIONS.FEEDBACKS)
+    const data: FirestoreFeedback = {
+      presentationId,
+      participantId,
+      name,
+      feedback,
+      createdAt: Date.now(),
+    }
+    await addDoc(feedbacksRef, data)
+    console.log('[Firestore] Feedback submitted')
+    return true
+  } catch (err) {
+    console.error('[Firestore] Failed to submit feedback:', err)
+    return false
+  }
+}
+
 // ---- Export ----
 
 export function useFirestore() {
@@ -204,5 +229,6 @@ export function useFirestore() {
     registerParticipant,
     submitVote,
     submitPoll,
+    submitFeedback,
   }
 }

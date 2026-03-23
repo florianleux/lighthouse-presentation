@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, watchEffect } from 'vue'
 import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import { getMetricByIndex } from '../../../shared/metrics-data'
@@ -10,8 +10,10 @@ import NameForm from './components/NameForm.vue'
 import PollScreen from './components/PollScreen.vue'
 import StatusScreen from './components/StatusScreen.vue'
 import VoteScreen from './components/VoteScreen.vue'
+import EndScreen from './components/EndScreen.vue'
+import FeedbackScreen from './components/FeedbackScreen.vue'
 
-const { isConnected: firestoreConnected, connect, onSessionState, registerParticipant, submitVote, submitPoll } = useFirestore()
+const { isConnected: firestoreConnected, connect, onSessionState, registerParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
 
 // ===========================================
 // Persistence helpers
@@ -79,6 +81,7 @@ const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
 const nameFormReady = ref(false)
+const endSubScreen = ref<'end' | 'feedback'>('end')
 
 // ===========================================
 // Computed
@@ -183,6 +186,24 @@ function handleNext() {
 function handleBack() {
   currentStep.value = 'name'
 }
+
+function handleShowFeedback() {
+  endSubScreen.value = 'feedback'
+}
+
+function handleFeedbackCancel() {
+  endSubScreen.value = 'end'
+}
+
+async function handleFeedbackSend(feedback: string) {
+  await submitFeedback(participantId.value, joinedName.value, feedback)
+}
+
+watchEffect(() => {
+  if (phase.value !== 'finished') {
+    endSubScreen.value = 'end'
+  }
+})
 
 // ===========================================
 // Join crew (local only — Firestore write will be added in Phase 3)
@@ -395,6 +416,41 @@ onMounted(async () => {
         src="/vote/light.webp"
         alt=""
         class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-9999 pointer-events-none"
+      />
+    </div>
+
+    <!-- EndScreen / FeedbackScreen: full-screen with decorative layers -->
+    <div
+      v-else-if="status === 'joined' && phase === 'finished'"
+      class="relative w-screen h-dvh overflow-hidden"
+    >
+      <img
+        src="/vote/Bg.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-0"
+      />
+      <img
+        src="/vote/shadow.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
+      />
+      <EndScreen
+        v-if="endSubScreen === 'end'"
+        class="z-3"
+        :avatar="selectedAvatar"
+        :name="joinedName"
+        @show-feedback="handleShowFeedback"
+      />
+      <FeedbackScreen
+        v-else
+        class="z-3"
+        @cancel="handleFeedbackCancel"
+        @send="handleFeedbackSend"
+      />
+      <img
+        src="/vote/light.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
       />
     </div>
 

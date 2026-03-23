@@ -11,8 +11,6 @@ const props = defineProps<{
 
 <template>
 
-
-
   <div class="absolute top-[30%] -rotate-6 left-[50%] -translate-x-1/2 -translate-y-1/2">
     <img
       src="/vote/A.webp"

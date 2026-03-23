@@ -39,7 +39,7 @@ export interface CrewMember {
 // Session state (presentation → vote apps)
 // ===========================================
 
-export type SessionPhase = 'lobby' | 'idle' | 'voting' | 'vote-results' | 'polling' | 'poll-results'
+export type SessionPhase = 'lobby' | 'idle' | 'voting' | 'vote-results' | 'polling' | 'poll-results' | 'finished'
 
 export interface SessionStateMessage {
   type: 'session-state'
@@ -120,6 +120,14 @@ export interface FirestorePoll {
 export interface FirestorePollResponse {
   choice: PollChoice
   respondedAt: number
+}
+
+export interface FirestoreFeedback {
+  presentationId: string
+  participantId: string
+  name: string
+  feedback: string
+  createdAt: number
 }
 
 // ===========================================

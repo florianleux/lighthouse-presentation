@@ -1,14 +1,35 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { sessionStore } from '../setup/main'
+import { computed, ref, watch } from 'vue'
+import { useNav } from '@slidev/client'
+import { sessionStore, currentPhase, publishSessionState } from '../setup/main'
+
+const { currentSlideNo } = useNav()
 
 const crewNames = computed(() =>
   sessionStore.crew.map(m => m.name)
 )
+
+const slideEl = ref<HTMLElement | null>(null)
+
+function isSlideVisible(): boolean {
+  if (!slideEl.value) return false
+  const rect = slideEl.value.getBoundingClientRect()
+  return rect.width > 0 && rect.height > 0 && rect.top < window.innerHeight && rect.bottom > 0
+}
+
+watch(currentSlideNo, () => {
+  setTimeout(() => {
+    if (isSlideVisible() && currentPhase.value !== 'finished') {
+      currentPhase.value = 'finished'
+      publishSessionState()
+    }
+  }, 200)
+})
 </script>
 
 <template>
   <div
+    ref="slideEl"
     class="relative slide-bg text-shadow-md overflow-hidden"
     style="background-image: url('/backgrounds/end-top-right.webp')"
   >

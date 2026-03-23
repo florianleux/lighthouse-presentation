@@ -12,6 +12,7 @@ export const FIRESTORE_COLLECTIONS = {
   BALLOTS: "ballots",
   POLLS: "polls",
   RESPONSES: "responses",
+  FEEDBACKS: "feedbacks",
 } as const;
 
 // Vote configuration

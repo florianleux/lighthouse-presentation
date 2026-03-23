@@ -8,6 +8,13 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Feedbacks: top-level collection, never deleted on session reset
+    match /feedbacks/{feedbackId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
     // Presentations: readable/writable by all (presentation creates/updates)
     match /presentations/{presentationId} {
       allow read, write: if true;
