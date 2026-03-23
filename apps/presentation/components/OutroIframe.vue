@@ -84,11 +84,8 @@ function thresholdColor(key: string, value: number): string {
     >
       <div class="font-title text-7xl text-white">CLS</div>
       <div class="text-red-400 font-body text-3xl">{{ formatValue('CLS', baseline.CLS) }}</div>
-      <div
-        v-click="1"
-        :class="[optimized ? thresholdColor('CLS', optimized.CLS) : '', 'font-bold font-body text-3xl']"
-      >
-        {{ optimized ? formatValue('CLS', optimized.CLS) : '' }}
+      <div v-click="1" class="font-bold font-body text-3xl">
+        <span :class="optimized ? thresholdColor('CLS', optimized.CLS) : ''">{{ optimized ? formatValue('CLS', optimized.CLS) : '' }}</span>
       </div>
     </div>
 
@@ -100,11 +97,8 @@ function thresholdColor(key: string, value: number): string {
       <div class="font-title text-7xl text-white text-shadow-md text-shadow-black">FCP</div>
       <div class="text-red-400 font-body text-3xl text-shadow-md text-shadow-black">{{ formatValue('FCP', baseline.FCP)
         }}</div>
-      <div
-        v-click="2"
-        :class="[optimized ? thresholdColor('FCP', optimized.FCP) : '', 'font-bold font-body text-3xl text-shadow-md text-shadow-black']"
-      >
-        {{ optimized ? formatValue('FCP', optimized.FCP) : '' }}
+      <div v-click="2" class="font-bold font-body text-3xl text-shadow-md text-shadow-black">
+        <span :class="optimized ? thresholdColor('FCP', optimized.FCP) : ''">{{ optimized ? formatValue('FCP', optimized.FCP) : '' }}</span>
       </div>
     </div>
 
@@ -115,11 +109,8 @@ function thresholdColor(key: string, value: number): string {
     >
       <div class="font-title text-7xl text-white text-shadow-md text-shadow-black">LCP</div>
       <div class="text-red-400 font-body text-3xl">{{ formatValue('LCP', baseline.LCP) }}</div>
-      <div
-        v-click="3"
-        :class="[optimized ? thresholdColor('LCP', optimized.LCP) : '', 'font-bold font-body text-3xl']"
-      >
-        {{ optimized ? formatValue('LCP', optimized.LCP) : '' }}
+      <div v-click="3" class="font-bold font-body text-3xl">
+        <span :class="optimized ? thresholdColor('LCP', optimized.LCP) : ''">{{ optimized ? formatValue('LCP', optimized.LCP) : '' }}</span>
       </div>
     </div>
 
@@ -130,11 +121,8 @@ function thresholdColor(key: string, value: number): string {
     >
       <div class="font-title text-7xl text-white">TBT</div>
       <div class="text-red-400 font-body text-3xl">{{ formatValue('TBT', baseline.TBT) }}</div>
-      <div
-        v-click="4"
-        :class="[optimized ? thresholdColor('TBT', optimized.TBT) : '', 'font-bold font-body text-3xl']"
-      >
-        {{ optimized ? formatValue('TBT', optimized.TBT) : '' }}
+      <div v-click="4" class="font-bold font-body text-3xl">
+        <span :class="optimized ? thresholdColor('TBT', optimized.TBT) : ''">{{ optimized ? formatValue('TBT', optimized.TBT) : '' }}</span>
       </div>
     </div>
 
@@ -145,11 +133,8 @@ function thresholdColor(key: string, value: number): string {
     >
       <div class="font-title text-7xl text-white">SI</div>
       <div class="text-red-400 font-body text-3xl">{{ formatValue('SI', baseline.SI) }}</div>
-      <div
-        v-click="5"
-        :class="[optimized ? thresholdColor('SI', optimized.SI) : '', 'font-bold font-body text-3xl']"
-      >
-        {{ optimized ? formatValue('SI', optimized.SI) : '' }}
+      <div v-click="5" class="font-bold font-body text-3xl">
+        <span :class="optimized ? thresholdColor('SI', optimized.SI) : ''">{{ optimized ? formatValue('SI', optimized.SI) : '' }}</span>
       </div>
     </div>
 
