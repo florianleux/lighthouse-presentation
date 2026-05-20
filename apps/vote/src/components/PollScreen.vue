@@ -21,12 +21,12 @@ const emit = defineEmits<{
       <img
         src="
         /poll/newbie.webp"
-        alt="Newbie"
+        alt="Mousse"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Newbie</div>
+      >Mousse</div>
     </div>
 
 
@@ -40,12 +40,12 @@ const emit = defineEmits<{
       />
       <img
         src="/poll/captain.webp"
-        alt="Captain"
+        alt="Capitaine"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Captain</div>
+      >Capitaine</div>
     </div>
 
     <div
@@ -58,12 +58,12 @@ const emit = defineEmits<{
       />
       <img
         src="/poll/admiral.webp"
-        alt="Admiral"
+        alt="Amiral"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Admiral</div>
+      >Amiral</div>
     </div>
   </div>
 </template>

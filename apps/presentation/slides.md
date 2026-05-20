@@ -1,10 +1,10 @@
 ---
 theme: default
-title: Let's build a lighthouse!
+title: Construisons un phare !
 info: |
-  ## Let's build a lighthouse!
-  An interactive presentation where the audience votes to optimize Lighthouse Performance score.
-  Together, we'll transform a struggling website into a high-performance beacon.
+  ## Construisons un phare !
+  Présentation interactive où l'audience vote pour optimiser le score Performance Lighthouse.
+  Ensemble, transformons un site en difficulté en phare haute performance.
 drawings:
   persist: false
 aspectRatio: '1960/1104'
@@ -37,12 +37,12 @@ transition: slide-right
 ---
 
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-right.webp')">
-<div class="text-4xl text-white font-title text-shadow-md">The Lighthouse score(s)</div>
-<div class="text-left text-white text-lg text-shadow-md">Google's open-source tool for auditing web page quality</div>
+<div class="text-4xl text-white font-title text-shadow-md">Les scores Lighthouse</div>
+<div class="text-left text-white text-lg text-shadow-md">L'outil open-source de Google pour auditer la qualité des pages web</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-lg text-shadow-black">
     <div v-click="4"  class="absolute font-bold left-[19%] text-white top-[24%] text-5xl">Performance</div>
-    <div v-click="3"  class="absolute font-bold text-4xl left-[44%] text-white top-[41%] ">Accessibility</div>
-    <div v-click="2"  class="absolute font-bold text-4xl left-[65%] text-white top-[28%] ">Best<br>Practices</div>
+    <div v-click="3"  class="absolute font-bold text-4xl left-[44%] text-white top-[41%] ">Accessibilité</div>
+    <div v-click="2"  class="absolute font-bold text-4xl left-[65%] text-white top-[28%] ">Bonnes<br>pratiques</div>
     <div v-click="1" class="absolute text-4xl left-[89%] text-[#2a384c] top-[40%] font-bold">SEO</div>
 </div>
 </div>
@@ -53,12 +53,12 @@ transition: slide-up
 
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-left.webp')">
 <div class="text-shadow-md text-white">
-<div class="text-4xl text-white font-title">Why does performance matter?</div>
+<div class="text-4xl text-white font-title">Pourquoi la performance compte-t-elle ?</div>
 
 
 <div class="text-center">
     <div v-click class="text-9xl mt-20 text-white text-center font-bold">24%</div>
-    <div v-click class="text-4xl">less <span class="font-bold">abandonment</span><br> on pages that meet<br> Google's performance standards</div>
+    <div v-click class="text-4xl">d'<span class="font-bold">abandon</span> en moins<br> sur les pages respectant<br> les standards de performance de Google</div>
 </div>
 </div>
 

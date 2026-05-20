@@ -20,8 +20,8 @@ const subsetCode = `
       metric="si"
       option="a"
     >
-      <div class="text-5xl text-center mb-15">Fonts are
-        everywhere, compress them!</div>
+      <div class="text-5xl text-center mb-15">Polices partout :
+        à compresser !</div>
 
       <div :class="[clicks >= 4 ? 'grid grid-cols-2 gap-x-0' : '', 'transition-all duration-800 items-start']">
         <!-- Fonts formats (full width → left column) -->
@@ -33,7 +33,7 @@ const subsetCode = `
           >
             <div class="text-2xl text-center opacity-70">1991</div>
             <div class="text-5xl text-center font-bold">TTF</div>
-            <div class="text-xl text-center opacity-70">No compression</div>
+            <div class="text-xl text-center opacity-70">Aucune compression</div>
             <div class="text-3xl text-center mt-5">~90 KB</div>
           </div>
 

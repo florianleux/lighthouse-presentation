@@ -1,6 +1,6 @@
 // ===========================================
-// Centralized Metrics Data for Lighthouse Pirates
-// Single source of truth for all 5 performance metrics
+// Données centralisées des métriques pour Lighthouse Pirates
+// Source unique de vérité pour les 5 métriques de performance
 // ===========================================
 
 // ===========================================
@@ -74,16 +74,16 @@ export const METRICS: MetricsData = {
     thresholds: [0.1, 0.25],
     thresholdsMs: [0.1, 0.25],
     baseline: 0.35,
-    formula: "Unexpected movement during loading",
-    tags: ["Trust killer", "Will impact SEO!"],
+    formula: "Mouvement inattendu pendant le chargement",
+    tags: ["Tueur de confiance", "Impacte le SEO !"],
     options: {
       a: {
-        title: "Content",
-        subtitle: "Control what you own",
+        title: "Contenu",
+        subtitle: "Maîtriser le contenu",
       },
       b: {
-        title: "Ads",
-        subtitle: "Tame the injected",
+        title: "Publicités",
+        subtitle: "Dompter les injections",
       },
     },
   },
@@ -96,16 +96,16 @@ export const METRICS: MetricsData = {
     thresholds: ["1.8 sec", "3.0 sec"],
     thresholdsMs: [1800, 3000],
     baseline: 6000,
-    formula: "Text, image, SVG or canvas",
-    tags: ["Is anything happening?", "Low FCP is reassuring"],
+    formula: "Texte, image, SVG ou canvas",
+    tags: ["Quelque chose se passe-t-il ?", "Un FCP bas est rassurant"],
     options: {
       a: {
         title: "TTFB",
-        subtitle: "Reduce the time of delivery",
+        subtitle: "Accélérer la réponse serveur",
       },
       b: {
-        title: "The critical rendering path",
-        subtitle: "Smooth the painting process",
+        title: "Le chemin de rendu critique",
+        subtitle: "Fluidifier l'affichage",
       },
     },
   },
@@ -118,16 +118,16 @@ export const METRICS: MetricsData = {
     thresholds: ["2.5 sec", "4.0 sec"],
     thresholdsMs: [2500, 4000],
     baseline: 15000,
-    formula: "Time to render largest element",
-    tags: ["Core Web Vital: Impacts SEO!", "Measures perceived load speed"],
+    formula: "Temps de rendu du plus grand élément",
+    tags: ["Core Web Vital : impacte le SEO !", "Mesure la vitesse de chargement perçue"],
     options: {
       a: {
         title: "[PLACEHOLDER Option A]",
-        subtitle: "[PLACEHOLDER subtitle]",
+        subtitle: "[PLACEHOLDER sous-titre]",
       },
       b: {
-        title: "Focus on LCP",
-        subtitle: "Save effort, target smart",
+        title: "Focus sur le LCP",
+        subtitle: "Économiser l'effort, cibler juste",
       },
     },
   },
@@ -140,16 +140,16 @@ export const METRICS: MetricsData = {
     thresholds: ["200 ms", "600 ms"],
     thresholdsMs: [200, 600],
     baseline: 750,
-    formula: "Sum of blocking time beyond 50ms",
-    tags: ["JSON parsing", "Layout calculations"],
+    formula: "Somme des temps de blocage au-delà de 50 ms",
+    tags: ["Parsing JSON", "Calculs de mise en page"],
     options: {
       a: {
-        title: "Data Parsimony",
-        subtitle: "Don't parse the unnecessary",
+        title: "Parcimonie des données",
+        subtitle: "Ne pas parser l'inutile",
       },
       b: {
-        title: "Design Sobriety",
-        subtitle: "Fanciness has a cost",
+        title: "Sobriété du design",
+        subtitle: "Le superflu a un coût",
       },
     },
   },
@@ -162,19 +162,19 @@ export const METRICS: MetricsData = {
     thresholds: ["3.4 sec", "5.8 sec"],
     thresholdsMs: [3400, 5800],
     baseline: 6500,
-    formula: "How quickly content is visually displayed",
+    formula: "Rapidité de l'affichage visuel du contenu",
     tags: [
-      "Total filling speed, not a moment",
-      "Lab only, not measured in the field",
+      "Vitesse totale de remplissage, pas un instant",
+      "Mesuré en labo uniquement, pas sur le terrain",
     ],
     options: {
       a: {
-        title: "Leaner text",
-        subtitle: "Compress and trim",
+        title: "Texte allégé",
+        subtitle: "Compresser et élaguer",
       },
       b: {
-        title: "Smarter images",
-        subtitle: "Tailored, compressed, intact",
+        title: "Images intelligentes",
+        subtitle: "Sur mesure, compressées, intactes",
       },
     },
   },

@@ -32,7 +32,7 @@ const imgFallback = `<img
     50vw
   "
   src="banner-800.png"
-  alt="Promo Banner"
+  alt="Bannière promo"
 >`
 </script>
 
@@ -43,7 +43,7 @@ const imgFallback = `<img
       metric="si"
       option="b"
     >
-      <div class="text-5xl text-center mb-10">Tailor your images to the browser!</div>
+      <div class="text-5xl text-center mb-10">Adapter les images au navigateur !</div>
 
       <div
         v-click="1"

@@ -20,7 +20,7 @@ const emit = defineEmits<{
     :disabled="isJoining"
   >
     <
-      Back
+      Retour
       </button
     >
       <p class="absolute top-[7.5%] left-[50%] z-1000 text-shadow-md text-shadow-black
@@ -36,7 +36,7 @@ const emit = defineEmits<{
           alt=""
           class=" animate-[spin_3s_linear_infinite] mx-auto mb-4"
         />
-        <p>Boarding...</p>
+        <p>Embarquement...</p>
       </div>
 
 </template>

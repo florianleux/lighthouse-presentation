@@ -33,7 +33,7 @@ const emit = defineEmits<{
 
   <div class="absolute w-[90%] bottom-[5%] left-[50%] -translate-x-1/2 z-1000 text-center flex flex-col gap-4">
     <p class="text-[200%] leading-tight font-title text-shadow-md text-shadow-black text-white m-0">
-      Thank you for building the lighthouse!
+      Merci d'avoir construit le phare !
     </p>
     <a
       href="https://blackmarket.florianleux.fr/"
@@ -41,13 +41,13 @@ const emit = defineEmits<{
       rel="noopener noreferrer"
       class="py-4 px-8 text-xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] font-title no-underline text-center"
     >
-      Take a look at BlackMarket
+      Découvrir BlackMarket
     </a>
     <button
       class="py-4 px-8 text-xl font-semibold text-[#E9BB23] bg-black shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] font-title"
       @click="emit('show-feedback')"
     >
-      Share your thoughts<br>with the captain
+      Partagez votre avis<br>avec le capitaine
     </button>
   </div>
 </template>

@@ -29,7 +29,7 @@ const goodFetch = `
       metric="tbt"
       option="a"
     >
-      <div class="text-5xl text-center mb-15 mt-5">Paginate and filter on the backend</div>
+      <div class="text-5xl text-center mb-15 mt-5">Paginer et filtrer côté backend</div>
 
       <div class="w-[104%] -ml-5 text-left grid grid-cols-2 text-center">
         <div v-click="1">

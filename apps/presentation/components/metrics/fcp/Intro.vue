@@ -7,7 +7,7 @@ import MetricIntro from '../../MetricIntro.vue'
     <template #right>
       <img
         src="/images/fcp.gif"
-        alt="FCP demo"
+        alt="démo FCP"
         class="absolute right-[10%] top-[12%] h-[75%] w-auto rounded shadow-md"
       />
     </template>

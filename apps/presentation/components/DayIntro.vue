@@ -17,7 +17,7 @@ const metricData = computed(() => METRICS[props.metric])
     style="background-image: url('/backgrounds/day-intro.webp')"
   >
     <div class="absolute">
-      <div class="text-4xl text-[#F9A8C2] ">Day {{ day }}/5</div>
+      <div class="text-4xl text-[#F9A8C2] ">Jour {{ day }}/5</div>
       <div class="text-9xl mt-4 text-white font-bold font-title">
         {{ metricData.name }}
       </div>

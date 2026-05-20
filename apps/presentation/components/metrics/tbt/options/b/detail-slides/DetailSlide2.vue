@@ -32,13 +32,13 @@ const masonryCss = `
           <img
             src="/images/grid-screenshot.webp"
             class="w-full ml-10 -mt-5 max-h-[335px] object-contain rounded-sm -rotate-1 shadow-sm"
-            alt="CSS Grid layout"
+            alt="Mise en page CSS Grid"
           />
         </div>
 
         <div class="flex flex-col">
-          <div class="text-5xl text-center mb-6 -mt-2">Is the design
-            worth the cost?</div>
+          <div class="text-5xl text-center mb-6 -mt-2">Le design en
+            vaut-il le coût ?</div>
 
           <div v-if="clicks >= 1">
             <CodeSnippet

@@ -14,19 +14,19 @@ const stickyPositionCodeExample = `.banner-container {
       option="b"
     >
       <div class="text-5xl text-center mb-20">
-        CLS happens mostly<br> in the flow.
+        Le CLS a lieu<br>dans le flux.
       </div>
 
       <img
         src="/images/cls-banner-before.gif"
         class="absolute left-[20%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
-        alt="Banner CLS before fix"
+        alt="CLS bannière avant correction"
       />
       <img
         v-click="1"
         src="/images/cls-banner-after.gif"
         class="absolute right-[0%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
-        alt="Banner CLS after fix"
+        alt="CLS bannière après correction"
       />
 
       <CodeSnippet

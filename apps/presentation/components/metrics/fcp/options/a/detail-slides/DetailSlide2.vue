@@ -172,15 +172,15 @@
         <div
           v-click="6"
           class="text-4xl font-bold"
-        >Avoid redirects</div>
+        >Éviter les redirections</div>
         <div
           v-click="10"
           class="text-4xl font-bold"
-        >Setup a CDN</div>
+        >Utiliser un CDN</div>
         <div
           v-click="10"
           class="text-4xl font-bold"
-        >Cache your assets</div>
+        >Utiliser le cache</div>
       </div>
 
     </DetailSlide>

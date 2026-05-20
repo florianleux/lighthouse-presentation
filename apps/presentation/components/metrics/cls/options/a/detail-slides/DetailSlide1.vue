@@ -4,7 +4,7 @@ const htmlAfterCodeExample = `<img
   width="1200"
   height="630"
   class="w-full h-auto"
-  alt="Banner image"
+  alt="Image bannière"
 >`
 </script>
 
@@ -18,19 +18,19 @@ const htmlAfterCodeExample = `<img
       option="a"
     >
       <div class="text-5xl text-center mb-20">
-        No size specified: no space reserved.
+        Aucune taille spécifiée : aucun espace réservé.
       </div>
 
       <img
         src="/images/cls-before.gif"
         class="absolute left-[20%] top-[68%] -translate-1/2 rounded shadow-lg w-[25%]"
-        alt="CLS before fix"
+        alt="CLS avant correction"
       />
       <img
         v-click="1"
         src="/images/cls-after.gif"
         class="absolute -right-[6%] top-[68%]  -translate-1/2 rounded shadow-lg w-[25%]"
-        alt="CLS after fix"
+        alt="CLS après correction"
       />
 
       <CodeSnippet

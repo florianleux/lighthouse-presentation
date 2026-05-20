@@ -13,9 +13,9 @@ const emit = defineEmits<{
 }>()
 
 const tones: { value: SkinTone; color: string; label: string }[] = [
-  { value: 'light', color: 'rgb(252 215 195)', label: 'Light' },
-  { value: 'mid', color: 'rgb(209 133 89)', label: 'Medium' },
-  { value: 'dark', color: 'rgb(85 63 48)', label: 'Dark' },
+  { value: 'light', color: 'rgb(252 215 195)', label: 'Clair' },
+  { value: 'mid', color: 'rgb(209 133 89)', label: 'Moyen' },
+  { value: 'dark', color: 'rgb(85 63 48)', label: 'Foncé' },
 ]
 
 function handleClick(tone: SkinTone) {

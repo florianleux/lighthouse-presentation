@@ -96,7 +96,7 @@ function handleJoin() {
         :disabled="isSpinning"
         @click="spinAndRandomize()"
       >
-        {{ isSpinning ? 'SPINNING...' : 'RANDOMIZE' }}
+        {{ isSpinning ? 'TIRAGE...' : 'ALÉATOIRE' }}
       </button>
       <button
         class="flex-1 appearance-none py-4 px-4 text-xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed font-title uppercase"
@@ -104,7 +104,7 @@ function handleJoin() {
         :disabled="isSpinning"
         @click="handleJoin"
       >
-        JOIN THE CREW
+        REJOINDRE L'ÉQUIPAGE
       </button>
     </div>
   </div>

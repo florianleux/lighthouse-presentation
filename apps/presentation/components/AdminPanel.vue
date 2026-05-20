@@ -53,7 +53,7 @@ const isFirestoreConnected = computed(() => firestore.isConnected.value)
 const voteNames = METRICS_LIST.map(m => m.name)
 
 async function startNewSession() {
-  if (confirm('Start a new session? This will reset the crew and all votes.')) {
+  if (confirm('Démarrer une nouvelle session ? Cela réinitialisera l\'équipage et tous les votes.')) {
     // Close panel first to avoid reactivity issues
     emit('close')
 
@@ -75,7 +75,7 @@ async function startNewSession() {
       <div v-if="visible" class="side-panel-overlay" @click.self="$emit('close')">
         <div class="side-panel">
           <div class="panel-header">
-            <h2>Admin Panel</h2>
+            <h2>Panneau d'administration</h2>
             <button class="close-btn" @click="$emit('close')">×</button>
           </div>
 
@@ -89,15 +89,15 @@ async function startNewSession() {
                 style="margin-top: 8px"
                 @click="startNewSession"
               >
-                New Session (Reset All)
+                Nouvelle session (tout réinitialiser)
               </button>
             </div>
 
             <!-- Manual Mode Toggle -->
             <div class="section">
-              <label>Vote Mode</label>
+              <label>Mode de vote</label>
               <div class="toggle-row">
-                <span class="toggle-label">Manual Mode</span>
+                <span class="toggle-label">Mode manuel</span>
                 <label class="toggle-switch">
                   <input
                     v-model="sessionStore.manualMode"
@@ -107,27 +107,27 @@ async function startNewSession() {
                 </label>
               </div>
               <p class="toggle-hint">
-                {{ sessionStore.manualMode ? 'Presenter picks A/B directly' : 'Audience votes with timer' }}
+                {{ sessionStore.manualMode ? 'Le présentateur choisit A/B directement' : 'L\'audience vote avec un minuteur' }}
               </p>
             </div>
 
             <!-- Connection Status -->
             <div class="section">
-              <label>Connection</label>
+              <label>Connexion</label>
               <div class="connection-status">
                 <span
                   class="connection-dot"
                   :class="isFirestoreConnected ? 'connected' : 'disconnected'"
                 ></span>
                 <span class="connection-label">
-                  Firestore: {{ isFirestoreConnected ? 'Connected' : 'Offline' }}
+                  Firestore : {{ isFirestoreConnected ? 'Connecté' : 'Hors ligne' }}
                 </span>
               </div>
             </div>
 
             <!-- Crew Section -->
             <div class="section">
-              <label>Crew</label>
+              <label>Équipage</label>
               <div class="stats">
                 <div class="stat">
                   <span class="stat-value">{{ crewCount }}</span>
@@ -135,7 +135,7 @@ async function startNewSession() {
                 </div>
                 <div class="stat">
                   <span class="stat-value">{{ activeCrewCount }}</span>
-                  <span class="stat-label">Active</span>
+                  <span class="stat-label">Actifs</span>
                 </div>
               </div>
               <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
@@ -152,7 +152,7 @@ async function startNewSession() {
                   :disabled="isGenerating || !isFirestoreConnected"
                   @click="generateFakeParticipants"
                 >
-                  {{ isGenerating ? 'Generating...' : 'Generate fake crew' }}
+                  {{ isGenerating ? 'Génération...' : 'Générer un faux équipage' }}
                 </button>
               </div>
             </div>
@@ -163,13 +163,13 @@ async function startNewSession() {
               <div class="vote-results">
                 <!-- Poll row -->
                 <div class="vote-row">
-                  <span class="vote-index">POLL</span>
+                  <span class="vote-index">SONDAGE</span>
                   <span class="vote-counts">{{ totalPollVotes }} votes</span>
                   <span
                     class="vote-status"
                     :class="isPollDone ? 'done' : 'pending'"
                   >
-                    {{ isPollDone ? 'DONE' : 'PENDING' }}
+                    {{ isPollDone ? 'TERMINÉ' : 'EN COURS' }}
                   </span>
                 </div>
                 <!-- Vote rows -->
@@ -187,7 +187,7 @@ async function startNewSession() {
                     class="vote-status"
                     :class="voteStore.path[index] !== null ? 'done' : 'pending'"
                   >
-                    {{ voteStore.path[index] !== null ? 'DONE' : 'PENDING' }}
+                    {{ voteStore.path[index] !== null ? 'TERMINÉ' : 'EN COURS' }}
                   </span>
                 </div>
               </div>
@@ -195,7 +195,7 @@ async function startNewSession() {
           </div>
 
           <div class="panel-footer">
-            Press <kbd>K</kbd> to close
+            Appuyez sur <kbd>K</kbd> pour fermer
           </div>
         </div>
       </div>

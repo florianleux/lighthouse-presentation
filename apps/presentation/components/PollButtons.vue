@@ -218,7 +218,7 @@ function stopPollSession() {
       v-if="isPollActive"
       class="absolute -bottom-[3%] -right-[3%] -translate-1/2 text-xl font-bold font-title text-center text-white"
     >
-      {{ totalPollVotes }}/{{ sessionStore.crew.length }}<br>answered
+      {{ totalPollVotes }}/{{ sessionStore.crew.length }}<br>réponses
     </div>
 
     <button
@@ -226,7 +226,7 @@ function stopPollSession() {
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
       @click="isPollActive ? stopPollSession() : startPollSession()"
     >
-      {{ isPollActive ? 'Stop' : 'Start' }}
+      {{ isPollActive ? 'Arrêter' : 'Démarrer' }}
     </button>
   </div>
 </template>

@@ -8,7 +8,7 @@
       metric="si"
       option="a"
     >
-      <div class="text-5xl text-center mb-20">Compress your text files!</div>
+      <div class="text-5xl text-center mb-20">Compresser les fichiers texte !</div>
 
 
       <div
@@ -17,7 +17,7 @@
       >
         <!-- Column 1: None -->
         <div class="flex flex-col items-center gap-2">
-          <div class="text-5xl text-center font-bold">None</div>
+          <div class="text-5xl text-center font-bold">Aucune</div>
           <div class="text-3xl text-center mt-4">500 KB</div>
         </div>
 
@@ -43,7 +43,7 @@
           <div
             v-click="4"
             class="absolute -top-8 left-1/2 -translate-x-1/2 text-2xl text-red-500 font-bold whitespace-nowrap"
-          >CPU cost</div>
+          >Coût CPU</div>
           <div class="text-5xl text-center font-bold">Brotli</div>
           <img
             src="/images/logo-brotli.png"

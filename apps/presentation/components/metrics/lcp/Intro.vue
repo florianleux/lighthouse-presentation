@@ -7,7 +7,7 @@ import MetricIntro from '../../MetricIntro.vue'
     <template #right>
       <img
         src="/images/lcp.gif"
-        alt="LCP demo"
+        alt="démo LCP"
         class="absolute right-[10%] top-[12%] h-[75%] w-auto rounded shadow-md"
       />
     </template>

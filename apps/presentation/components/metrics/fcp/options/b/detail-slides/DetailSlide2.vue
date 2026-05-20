@@ -38,7 +38,7 @@ const minifyCodeAfter = `
     >
       <div class="grid grid-cols-3 -ml-10 mt-6 text-center items-top gap-6">
         <div class="flex flex-col items-top gap-5">
-          <div class="text-4xl font-bold">Question it!</div>
+          <div class="text-4xl font-bold">Remettre en question !</div>
 
           <div class="text-left px-4">
             <CodeSnippet
@@ -58,7 +58,7 @@ const minifyCodeAfter = `
           v-click="1"
           class="flex flex-col items-top gap-5"
         >
-          <div class="text-4xl font-bold">Purge it!</div>
+          <div class="text-4xl font-bold">Purger !</div>
 
           <div class="text-left px-4">
             <CodeSnippet
@@ -78,7 +78,7 @@ const minifyCodeAfter = `
           v-click="2"
           class="flex flex-col items-center gap-5"
         >
-          <div class="text-4xl font-bold">Minify it!</div>
+          <div class="text-4xl font-bold">Minifier !</div>
           <div class="text-left">
             <CodeSnippet
               language="css"

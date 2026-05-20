@@ -117,8 +117,8 @@ const isValid = computed(() => {
 const validationMessage = computed(() => {
   const trimmed = name.value.trim()
   if (trimmed.length === 0) return ''
-  if (trimmed.length < 2) return 'Minimum 2 characters'
-  if (trimmed.length > 20) return 'Maximum 20 characters'
+  if (trimmed.length < 2) return 'Minimum 2 caractères'
+  if (trimmed.length > 20) return 'Maximum 20 caractères'
   return ''
 })
 

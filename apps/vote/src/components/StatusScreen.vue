@@ -14,17 +14,17 @@ defineProps<{
       alt=""
       class=" animate-[spin_3s_linear_infinite] mx-auto mb-4"
     />
-    <p v-if="variant === 'connecting'">Connecting...</p>
-    <p v-else-if="variant === 'waiting'">Waiting for the captain...</p>
-    <p v-else-if="variant === 'error'">Connection error</p>
+    <p v-if="variant === 'connecting'">Connexion...</p>
+    <p v-else-if="variant === 'waiting'">En attente du capitaine...</p>
+    <p v-else-if="variant === 'error'">Erreur de connexion</p>
     <p
       v-if="variant === 'waiting'"
       class="text-sm opacity-60 mt-2"
-    >The presentation hasn't started yet</p>
+    >La présentation n'a pas encore commencé</p>
     <p
       v-if="variant === 'error'"
       class="text-sm opacity-60 mt-2"
-    >Check your internet connection</p>
+    >Vérifiez votre connexion internet</p>
   </div>
 </template>
 po

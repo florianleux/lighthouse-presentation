@@ -64,10 +64,10 @@ watch(
     class="flex flex-col text-center w-[5%] -rotate-34 items-center absolute right-[11.2%] -translate-1/2 top-[14.1%] text-white text-md font-bold font-title"
   >
     <span class="text-[#36A300] mr-1 text-3xl">{{ sessionStore.crew.length }}</span>
-    <span class="-mt-1 -rotate-6 mr-1.5 uppercase line-height-3 text-[#36A300] text-xs">crew<br>member{{
+    <span class="-mt-1 -rotate-6 mr-1.5 uppercase line-height-3 text-[#36A300] text-xs">membre{{
       sessionStore.crew.length > 1 ?
         's' : ''
-    }}</span>
+    }}<br>d'équipage</span>
   </div>
   <div
     class="absolute top-35 -right-2 z-100 flex flex-col gap-0 pointer-events-none"
@@ -92,7 +92,7 @@ watch(
             />
           </div>
           <span class="font-bold text-[#36A300] text-md">{{ slot.member.name }}</span>
-          <span class="text-[#36A300] text-md">joined!</span>
+          <span class="text-[#36A300] text-md">a rejoint !</span>
         </div>
       </Transition>
     </div>

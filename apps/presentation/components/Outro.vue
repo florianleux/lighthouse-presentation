@@ -8,9 +8,9 @@ import LighthouseBuilding from './LighthouseBuilding.vue'
     style="background-image: url('/backgrounds/end-bottom.webp')"
   >
     <div class="absolute">
-      <div class="text-4xl text-[#F9A8C2]">End of day 5</div>
+      <div class="text-4xl text-[#F9A8C2]">Fin du jour 5</div>
       <div class="text-7xl mt-4 text-white font-bold font-title">
-        Lighthouse <br> complete!
+        Phare <br> terminé !
       </div>
 
     </div>

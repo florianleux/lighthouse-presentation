@@ -13,19 +13,19 @@ const codeExample = `.ad-container {
       option="b"
     >
       <div class="text-5xl text-center mb-20">
-        No placeholder: layout shift at injection.
+        Pas de placeholder : décalage à l'injection.
       </div>
 
       <img
         src="/images/cls-ads-before.gif"
         class="absolute left-[21%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
-        alt="Ads CLS before fix"
+        alt="CLS publicités avant correction"
       />
       <img
         v-click="1"
         src="/images/cls-ads-after.gif"
         class="absolute left-[83%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
-        alt="Ads CLS after fix"
+        alt="CLS publicités après correction"
       />
 
       <CodeSnippet

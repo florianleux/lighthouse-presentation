@@ -13,8 +13,8 @@ const emit = defineEmits<{
 }>()
 
 const genders: { value: Gender; label: string }[] = [
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
+  { value: 'male', label: 'Homme' },
+  { value: 'female', label: 'Femme' },
 ]
 
 function handleClick(gender: Gender) {

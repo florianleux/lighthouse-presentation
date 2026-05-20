@@ -264,7 +264,7 @@ async function stopVoteSession() {
         class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
         @click="isVoteActive ? stopVoteSession() : startVoteSession()"
       >
-        {{ isVoteActive ? 'Stop' : 'Start' }}
+        {{ isVoteActive ? 'Arrêter' : 'Démarrer' }}
       </button>
 
 
@@ -276,7 +276,7 @@ async function stopVoteSession() {
       <div
         class="absolute bottom-[29%] text-[#17443e] text-shadow-md left-1/2 -translate-x-1/2 text-3xl uppercase font-title opacity-80"
       >
-        {{ totalVotes }}/{{ sessionStore.crew.length }} voted
+        {{ totalVotes }}/{{ sessionStore.crew.length }} votes
       </div>
 
       <!-- Vote proportion bar -->

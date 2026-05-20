@@ -17,19 +17,19 @@ const matchingMetricsCodeExample = `@font-face {
       option="a"
     >
       <div class="text-5xl text-center mb-20">
-        Every font has its own footprint.
+        Chaque police a sa propre empreinte.
       </div>
 
       <img
         src="/images/cls-font-before.gif"
         class="absolute left-[20%] top-[60%] -translate-1/2 rounded shadow-lg w-[28%]"
-        alt="Font CLS before fix"
+        alt="CLS police avant correction"
       />
       <img
         v-click="1"
         src="/images/cls-font-after.gif"
         class="absolute -right-[12%] top-[60%] -translate-1/2 rounded shadow-lg w-[28%]"
-        alt="Font CLS after fix"
+        alt="CLS police après correction"
       />
 
       <CodeSnippet

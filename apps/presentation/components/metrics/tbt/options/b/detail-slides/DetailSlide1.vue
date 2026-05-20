@@ -36,13 +36,13 @@ items.forEach(item => {
           <img
             src="/images/masonry-screenshot.webp"
             class="w-full ml-20 max-h-[375px] object-contain rounded-sm -rotate-1 shadow-sm"
-            alt="Masonry layout"
+            alt="Mise en page Masonry"
           />
         </div>
 
         <div class="flex flex-col">
-          <div class="text-5xl text-center mb-2 -mt-2">Fancy layouts
-            might require heavy JS!</div>
+          <div class="text-5xl text-center mb-2 -mt-2">Layouts sophistiqués
+            = JS lourd !</div>
 
           <div v-if="clicks >= 1">
             <CodeSnippet

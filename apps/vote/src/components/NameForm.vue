@@ -19,7 +19,7 @@ const emit = defineEmits<{
       :value="modelValue"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       type="text"
-      placeholder="Your Name"
+      placeholder="Votre nom"
       maxlength="20"
       :disabled="disabled"
       @keyup.enter="emit('submit')"
@@ -31,7 +31,7 @@ const emit = defineEmits<{
       :disabled="!canSubmit"
       class="appearance-none mt-3 py-6 px-8 text-3xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed w-full font-title"
     >
-      JOIN THE CREW
+      REJOINDRE L'ÉQUIPAGE
     </button>
   </div>
 </template>

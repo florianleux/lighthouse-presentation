@@ -31,7 +31,7 @@ const goodObject = `
       metric="tbt"
       option="a"
     >
-      <div class="text-5xl text-center mb-10">Trim down the unused fields!</div>
+      <div class="text-5xl text-center mb-10">Élaguer les champs inutiles !</div>
 
       <div class="w-[108%] -ml-10 text-left grid grid-cols-2 text-center gap-0">
         <div v-click="1">
