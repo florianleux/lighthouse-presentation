@@ -33,10 +33,11 @@ const props = defineProps<{
   <p
     class="absolute w-[90%] bottom-[7%] left-[50%] -translate-x-1/2 z-1000 text-[250%] leading-tight font-title text-shadow-md text-shadow-black text-white text-center">
     <template v-if="hasVotedOnce || missedCurrentVote">
-      {{ missedCurrentVote ? 'Oups, vous avez raté le vote !' : 'Merci pour votre vote !' }}<br> Le capitaine vous préviendra du prochain vote !
+      {{ missedCurrentVote ? 'Oups, vous avez raté le vote !' : 'Merci pour votre vote !' }}<br> Le capitaine vous
+      préviendra du prochain vote !
     </template>
     <template v-else>
-      Préparez-vous pour votre prochaine aventure !
+      Tenez-vous prêt pour votre prochaine aventure !
     </template>
   </p>
 

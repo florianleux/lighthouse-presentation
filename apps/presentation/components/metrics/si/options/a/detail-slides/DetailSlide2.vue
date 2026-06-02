@@ -20,8 +20,10 @@ const subsetCode = `
       metric="si"
       option="a"
     >
-      <div class="text-5xl text-center mb-15">Polices partout :
-        à compresser !</div>
+      <div class="text-5xl text-center mb-15">Les polices sont partout,
+        <br>il faut les compresser !
+      </div>
+
 
       <div :class="[clicks >= 4 ? 'grid grid-cols-2 gap-x-0' : '', 'transition-all duration-800 items-start']">
         <!-- Fonts formats (full width → left column) -->

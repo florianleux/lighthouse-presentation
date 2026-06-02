@@ -69,9 +69,7 @@ watch(
         's' : ''
     }}<br>d'équipage</span>
   </div>
-  <div
-    class="absolute top-35 -right-2 z-100 flex flex-col gap-0 pointer-events-none"
-  >
+  <div class="absolute top-35 -right-2 z-100 flex flex-col gap-0 pointer-events-none">
     <div
       v-for="(slot, i) in slots"
       :key="i"
@@ -92,7 +90,7 @@ watch(
             />
           </div>
           <span class="font-bold text-[#36A300] text-md">{{ slot.member.name }}</span>
-          <span class="text-[#36A300] text-md">a rejoint !</span>
+          <span class="text-[#36A300] text-md">est à bord !</span>
         </div>
       </Transition>
     </div>

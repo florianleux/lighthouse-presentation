@@ -68,7 +68,7 @@ const jsCodeExample = `document.write()`
         v-click="1"
         class="absolute italic text-2xl top-[36%] left-[30%]"
       >
-        Analyse
+        Parsing
       </div>
       <!-- Ligne HTML - DOM -->
       <div
@@ -83,7 +83,7 @@ const jsCodeExample = `document.write()`
       <div v-click="4">
         <!-- Parsing CSS -->
         <div class="absolute italic text-2xl top-[36%] left-[73%]">
-          Analyse
+          Parsing
         </div>
         <div class="absolute border border-2 border-black p-2 font-bold text-5xl top-[50%] left-[75%]">
           CSSOM

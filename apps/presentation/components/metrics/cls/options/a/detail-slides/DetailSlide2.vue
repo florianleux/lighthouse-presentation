@@ -16,7 +16,7 @@ const matchingMetricsCodeExample = `@font-face {
       metric="cls"
       option="a"
     >
-      <div class="text-5xl text-center mb-20">
+      <div class="text-4xl text-center mb-20">
         Chaque police a sa propre empreinte.
       </div>
 

@@ -1,0 +1,1 @@
+Présentation interactive où le public vote et optimise en direct les scores Lighthouse d'un site pirate, avec impact sur chaque slide.

@@ -41,7 +41,7 @@ watch(currentSlideNo, () => {
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
 
       <div class="credits-scroll absolute flex flex-col items-center gap-3 text-white text-xl w-[50%]">
-        <span class="text-5xl text-white font-title">Remerciements très spéciaux à</span>
+        <span class="text-5xl text-white font-title">Un grand merci à</span>
         <div class="text-2xl grid grid-cols-3 gap-x-12 gap-y-2 text-center my-4">
           <span>Guigz</span>
           <span>Tom</span>

@@ -1,8 +1,8 @@
 ---
 theme: default
-title: Construisons un phare !
+title: À l'abordage de Lighthouse !
 info: |
-  ## Construisons un phare !
+  ## À l'abordage de Lighthouse !
   Présentation interactive où l'audience vote pour optimiser le score Performance Lighthouse.
   Ensemble, transformons un site en difficulté en phare haute performance.
 drawings:

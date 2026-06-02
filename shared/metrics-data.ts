@@ -74,15 +74,15 @@ export const METRICS: MetricsData = {
     thresholds: [0.1, 0.25],
     thresholdsMs: [0.1, 0.25],
     baseline: 0.35,
-    formula: "Mouvement inattendu pendant le chargement",
+    formula: "Instabilité du contenu pendant le chargement",
     tags: ["Tueur de confiance", "Impacte le SEO !"],
     options: {
       a: {
         title: "Contenu",
-        subtitle: "Maîtriser le contenu",
+        subtitle: "Maîtriser ce que l'on publie",
       },
       b: {
-        title: "Publicités",
+        title: "Ads",
         subtitle: "Dompter les injections",
       },
     },
@@ -101,7 +101,7 @@ export const METRICS: MetricsData = {
     options: {
       a: {
         title: "TTFB",
-        subtitle: "Accélérer la réponse serveur",
+        subtitle: "Livrer le premier octet au plus vite",
       },
       b: {
         title: "Le chemin de rendu critique",
@@ -119,7 +119,10 @@ export const METRICS: MetricsData = {
     thresholdsMs: [2500, 4000],
     baseline: 15000,
     formula: "Temps de rendu du plus grand élément",
-    tags: ["Core Web Vital : impacte le SEO !", "Mesure la vitesse de chargement perçue"],
+    tags: [
+      "Core Web Vital : impacte le SEO !",
+      "Mesure la vitesse de chargement perçue",
+    ],
     options: {
       a: {
         title: "[PLACEHOLDER Option A]",
@@ -127,7 +130,7 @@ export const METRICS: MetricsData = {
       },
       b: {
         title: "Focus sur le LCP",
-        subtitle: "Économiser l'effort, cibler juste",
+        subtitle: "Jouer avec la zone grise...",
       },
     },
   },
@@ -144,12 +147,12 @@ export const METRICS: MetricsData = {
     tags: ["Parsing JSON", "Calculs de mise en page"],
     options: {
       a: {
-        title: "Parcimonie des données",
-        subtitle: "Ne pas parser l'inutile",
+        title: "Diète des données",
+        subtitle: "Envoyer le strict nécessaire",
       },
       b: {
         title: "Sobriété du design",
-        subtitle: "Le superflu a un coût",
+        subtitle: "La fantaisie a un coût",
       },
     },
   },
@@ -162,19 +165,19 @@ export const METRICS: MetricsData = {
     thresholds: ["3.4 sec", "5.8 sec"],
     thresholdsMs: [3400, 5800],
     baseline: 6500,
-    formula: "Rapidité de l'affichage visuel du contenu",
+    formula: "Rapidité moyenne de l'affichage du contenu",
     tags: [
       "Vitesse totale de remplissage, pas un instant",
       "Mesuré en labo uniquement, pas sur le terrain",
     ],
     options: {
       a: {
-        title: "Texte allégé",
-        subtitle: "Compresser et élaguer",
+        title: "Texte",
+        subtitle: "Polices et fichiers textes",
       },
       b: {
-        title: "Images intelligentes",
-        subtitle: "Sur mesure, compressées, intactes",
+        title: "Images",
+        subtitle: "Sur-mesure, compressées, intactes",
       },
     },
   },

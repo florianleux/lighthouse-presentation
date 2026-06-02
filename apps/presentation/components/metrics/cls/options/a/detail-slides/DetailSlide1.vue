@@ -17,8 +17,8 @@ const htmlAfterCodeExample = `<img
       metric="cls"
       option="a"
     >
-      <div class="text-5xl text-center mb-20">
-        Aucune taille spécifiée : aucun espace réservé.
+      <div class="text-4xl text-center mb-20">
+        Aucune dimension spécifiée : aucun espace réservé.
       </div>
 
       <img

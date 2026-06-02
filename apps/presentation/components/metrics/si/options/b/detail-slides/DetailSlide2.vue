@@ -43,7 +43,7 @@ const imgFallback = `<img
       metric="si"
       option="b"
     >
-      <div class="text-5xl text-center mb-10">Adapter les images au navigateur !</div>
+      <div class="text-5xl text-center mb-10">Des images sur-mesure !</div>
 
       <div
         v-click="1"
