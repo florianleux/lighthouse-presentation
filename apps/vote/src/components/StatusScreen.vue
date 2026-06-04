@@ -2,6 +2,10 @@
 defineProps<{
   variant: 'connecting' | 'waiting' | 'error'
 }>()
+
+defineEmits<{
+  retry: []
+}>()
 </script>
 
 <template>
@@ -24,7 +28,12 @@ defineProps<{
     <p
       v-if="variant === 'error'"
       class="text-sm opacity-60 mt-2"
-    >Vérifiez votre connexion internet</p>
+    >Vérifiez votre connexion internet ou désactivez votre bloqueur de pubs</p>
+    <button
+      v-if="variant === 'error'"
+      type="button"
+      class="mt-6 px-6 py-3 text-2xl rounded-xl bg-white/15 hover:bg-white/25 transition-colors"
+      @click="$emit('retry')"
+    >Réessayer</button>
   </div>
 </template>
-po

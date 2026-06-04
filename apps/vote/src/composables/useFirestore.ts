@@ -23,9 +23,19 @@ import {
 
 // Module-level state (singleton)
 const isConnected = ref(false)
+// true dès qu'un listener remonte une erreur de transport (réseau coupé,
+// streaming bloqué par Brave/adblock). Branché sur l'écran d'erreur + retry.
+const hasConnectionError = ref(false)
+// true dès qu'un snapshot quelconque est reçu = transport prouvé vivant.
+// Permet de distinguer « bloqué » (aucun snapshot) de « présentation pas
+// encore démarrée » (snapshot reçu mais pas d'état de session).
+const hasReceivedSnapshot = ref(false)
 let db: Firestore | null = null
 let presentationId: string | null = null
 let presentationUnsubscribe: Unsubscribe | null = null
+let configUnsubscribe: Unsubscribe | null = null
+// Callback de session conservé pour pouvoir se ré-abonner lors d'un reconnect.
+let sessionCallback: ((msg: SessionStateMessage) => void) | null = null
 
 // ---- Connection ----
 
@@ -47,9 +57,34 @@ function disconnect() {
     presentationUnsubscribe()
     presentationUnsubscribe = null
   }
+  if (configUnsubscribe) {
+    configUnsubscribe()
+    configUnsubscribe = null
+  }
   isConnected.value = false
   db = null
   presentationId = null
+}
+
+// Réinitialise les listeners. Utilisé par le bouton « réessayer » quand la
+// connexion a échoué (ex. bloqueur désactivé après coup, réseau revenu).
+function reconnect(): boolean {
+  if (presentationUnsubscribe) {
+    presentationUnsubscribe()
+    presentationUnsubscribe = null
+  }
+  if (configUnsubscribe) {
+    configUnsubscribe()
+    configUnsubscribe = null
+  }
+  hasConnectionError.value = false
+  hasReceivedSnapshot.value = false
+  presentationId = null
+  const ok = connect()
+  if (ok && sessionCallback) {
+    onSessionState(sessionCallback)
+  }
+  return ok
 }
 
 // ---- Listen to session state ----
@@ -57,10 +92,16 @@ function disconnect() {
 function onSessionState(callback: (msg: SessionStateMessage) => void) {
   if (!db) return
 
+  sessionCallback = callback
+
   // Listen to config/current for presentation changes
   const configRef = doc(db, FIRESTORE_COLLECTIONS.CONFIG, 'current')
 
-  onSnapshot(configRef, (configSnap) => {
+  configUnsubscribe = onSnapshot(configRef, (configSnap) => {
+    // Un snapshot reçu = transport opérationnel.
+    isConnected.value = true
+    hasConnectionError.value = false
+    hasReceivedSnapshot.value = true
     if (!configSnap.exists()) return
     const config = configSnap.data() as FirestoreConfig
     const newPresentationId = config.activePresentationId
@@ -73,6 +114,8 @@ function onSessionState(callback: (msg: SessionStateMessage) => void) {
     }
   }, (err) => {
     console.error('[Firestore] Config listener error:', err)
+    isConnected.value = false
+    hasConnectionError.value = true
   })
 
   // Also subscribe immediately if we already have a presentation
@@ -91,6 +134,9 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
 
   const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
   presentationUnsubscribe = onSnapshot(presRef, (snap) => {
+    isConnected.value = true
+    hasConnectionError.value = false
+    hasReceivedSnapshot.value = true
     if (!snap.exists()) return
     const data = snap.data() as FirestorePresentation
 
@@ -112,6 +158,8 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
     callback(msg)
   }, (err) => {
     console.error('[Firestore] Presentation listener error:', err)
+    isConnected.value = false
+    hasConnectionError.value = true
   })
 }
 
@@ -223,7 +271,10 @@ async function submitFeedback(participantId: string, name: string, feedback: str
 export function useFirestore() {
   return {
     isConnected,
+    hasConnectionError,
+    hasReceivedSnapshot,
     connect,
+    reconnect,
     disconnect,
     onSessionState,
     registerParticipant,

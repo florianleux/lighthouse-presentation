@@ -21,12 +21,12 @@ const emit = defineEmits<{
       <img
         src="
         /poll/newbie.webp"
-        alt="Mousse"
+        alt="Matelot"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Mousse</div>
+      >Matelot</div>
     </div>
 
 

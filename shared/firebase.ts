@@ -1,5 +1,5 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
-import { getFirestore, type Firestore } from 'firebase/firestore'
+import { initializeFirestore, type Firestore } from 'firebase/firestore'
 
 let app: FirebaseApp | null = null
 let db: Firestore | null = null
@@ -22,7 +22,12 @@ export function initFirebase(): Firestore | null {
   }
 
   app = initializeApp(config)
-  db = getFirestore(app)
+  // experimentalAutoDetectLongPolling: tente WebChannel puis bascule en
+  // long-polling si bloqué (Brave Shields, bloqueurs de pubs, proxies mobiles
+  // cassent le streaming WebChannel par défaut vers firestore.googleapis.com).
+  db = initializeFirestore(app, {
+    experimentalAutoDetectLongPolling: true,
+  })
   console.log('[Firebase] Initialized for project:', config.projectId)
   return db
 }

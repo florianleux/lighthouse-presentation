@@ -13,7 +13,7 @@ import VoteScreen from './components/VoteScreen.vue'
 import EndScreen from './components/EndScreen.vue'
 import FeedbackScreen from './components/FeedbackScreen.vue'
 
-const { isConnected: firestoreConnected, connect, onSessionState, registerParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
+const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connect, reconnect, onSessionState, registerParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
 
 // ===========================================
 // Persistence helpers
@@ -288,6 +288,58 @@ function preloadNameFormImages(): Promise<void> {
 // Lifecycle
 // ===========================================
 
+// ===========================================
+// Connection error / retry
+// ===========================================
+
+// Filet de sécurité : si aucun état de session n'arrive (transport bloqué par
+// Brave/adblock sans erreur immédiate), on bascule sur l'écran d'erreur au lieu
+// de laisser le spinner tourner indéfiniment.
+const CONNECT_TIMEOUT_MS = 8000
+let connectTimeout: ReturnType<typeof setTimeout> | null = null
+
+function armConnectTimeout() {
+  if (connectTimeout) clearTimeout(connectTimeout)
+  connectTimeout = setTimeout(() => {
+    // Aucun snapshot reçu = transport bloqué (≠ présentation pas démarrée).
+    if (!hasReceivedSnapshot.value && status.value === 'connecting') {
+      status.value = 'error'
+    }
+  }, CONNECT_TIMEOUT_MS)
+}
+
+// Premier snapshot reçu mais pas encore d'état de session = connexion OK,
+// présentation pas encore démarrée → « En attente du capitaine ».
+watch(hasReceivedSnapshot, (received) => {
+  if (received && status.value === 'connecting') {
+    status.value = 'waiting'
+  }
+})
+
+// Un listener a remonté une erreur de transport avant que l'utilisateur ait
+// rejoint : on montre l'écran d'erreur. Une fois « joined », le SDK Firestore
+// gère seul la reconnexion (long-polling) entre les votes.
+watch(hasConnectionError, (err) => {
+  if (err && (status.value === 'connecting' || status.value === 'waiting')) {
+    status.value = 'error'
+  }
+})
+
+// Un état de session reçu = connexion vivante, on désarme le timeout.
+watch(sessionState, (s) => {
+  if (s && connectTimeout) {
+    clearTimeout(connectTimeout)
+    connectTimeout = null
+  }
+})
+
+function handleRetry() {
+  status.value = 'connecting'
+  armConnectTimeout()
+  const ok = reconnect()
+  if (!ok) status.value = 'error'
+}
+
 onMounted(async () => {
   preloadNameFormImages().then(() => { nameFormReady.value = true })
 
@@ -311,8 +363,9 @@ onMounted(async () => {
   const connected = connect()
   if (connected) {
     onSessionState(handleSessionState)
+    armConnectTimeout()
   } else {
-    status.value = 'waiting'
+    status.value = 'error'
   }
 })
 </script>
@@ -501,6 +554,7 @@ onMounted(async () => {
       <StatusScreen
         v-else-if="status === 'error'"
         variant="error"
+        @retry="handleRetry"
       />
 
     </div>
