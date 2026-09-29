@@ -304,12 +304,13 @@ function listenToBallots(voteIndex: number, callback: (participantId: string, ch
     FIRESTORE_COLLECTIONS.BALLOTS
   )
 
+  // Chaque snapshot porte l'état serveur complet : on le parcourt en entier
+  // (recordVote ignore les doublons) pour que le décompte ne dépende pas de
+  // l'accumulation des seuls ajouts.
   ballotsUnsubscribe = onSnapshot(ballotsRef, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === 'added') {
-        const data = change.doc.data() as FirestoreBallot
-        callback(change.doc.id, data.choice)
-      }
+    snapshot.docs.forEach((d) => {
+      const data = d.data() as FirestoreBallot
+      callback(d.id, data.choice)
     })
   }, (err) => {
     console.error('[Firestore] Ballots listener error:', err)
@@ -385,12 +386,11 @@ function listenToPollResponses(pollId: string, callback: (participantId: string,
     FIRESTORE_COLLECTIONS.RESPONSES
   )
 
+  // État complet à chaque snapshot, comme listenToBallots.
   pollResponsesUnsubscribe = onSnapshot(responsesRef, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      if (change.type === 'added') {
-        const data = change.doc.data() as FirestorePollResponse
-        callback(change.doc.id, data.choice)
-      }
+    snapshot.docs.forEach((d) => {
+      const data = d.data() as FirestorePollResponse
+      callback(d.id, data.choice)
     })
   }, (err) => {
     console.error('[Firestore] Poll responses listener error:', err)

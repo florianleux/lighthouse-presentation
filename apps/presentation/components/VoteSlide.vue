@@ -4,6 +4,7 @@ import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, currentPhase, phaseData, firestore, publishSessionState, getFakeCrewIds } from '../setup/main'
 import { VOTE_CONFIG } from '../../../shared/constants'
 import { useResolvedMetric } from '../composables/useResolvedMetric'
+import { useGraceClose } from '../composables/useGraceClose'
 import { getMetricByIndex } from '../../../shared/metrics-data'
 import { FLOOR_POSITIONS } from '../../../shared/floor-positions'
 
@@ -92,6 +93,7 @@ const isVoteDone = computed(() =>
 
 // Timer (internal to presentation only - no sync to vote apps)
 const VOTE_DURATION = VOTE_CONFIG.DURATION_SECONDS
+const { isClosing, waitForStragglers } = useGraceClose(VOTE_CONFIG.GRACE_PERIOD_SECONDS)
 const timeRemaining = ref(VOTE_DURATION)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 
@@ -189,9 +191,18 @@ function startVoteSession() {
 
 async function stopVoteSession() {
   // Guard: prevent double-stop (timer + all-voted watcher can race)
-  if (sessionStore.votePhase !== 'voting') return
+  if (!isVoteActive.value || isClosing.value) return
 
   clearTimer()
+
+  // Tout l'équipage a voté : aucun bulletin à attendre.
+  if (totalVotes.value < sessionStore.crew.length) {
+    await waitForStragglers()
+    // Vote forcé à la main ou session réinitialisée pendant le dépouillement
+    // (un autre vote a même pu démarrer depuis).
+    if (!isVoteActive.value) return
+  }
+
   sessionStore.votePhase = 'ended'
   firestore.stopListeningToBallots()
 
@@ -269,7 +280,11 @@ async function stopVoteSession() {
 
 
       <div class="absolute text-7xl font-bold font-title -translate-x-1/2 left-[50.5%] top-[3.5%] text-center ">
-        {{ timeRemaining }}
+        <span
+          v-if="isClosing"
+          class="text-3xl"
+        >Dépouillement...</span>
+        <template v-else>{{ timeRemaining }}</template>
       </div>
 
       <!-- Participation counter -->

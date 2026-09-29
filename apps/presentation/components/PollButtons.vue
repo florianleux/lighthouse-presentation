@@ -3,6 +3,7 @@ import { computed, ref, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
+import { useGraceClose } from '../composables/useGraceClose'
 
 const props = defineProps<{
   pollId: string
@@ -36,6 +37,7 @@ const totalPollVotes = computed(() => {
 
 // Timer (internal to presentation only)
 const POLL_DURATION = POLL_CONFIG.DURATION_SECONDS
+const { isClosing, waitForStragglers } = useGraceClose(POLL_CONFIG.GRACE_PERIOD_SECONDS)
 const timeRemaining = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 
@@ -162,11 +164,19 @@ function startPollSession() {
   console.log('[PollButtons] Poll session started for', props.pollId)
 }
 
-function stopPollSession() {
+async function stopPollSession() {
   // Guard: prevent double-stop (timer + all-voted watcher can race)
-  if (sessionStore.pollPhase !== 'polling') return
+  if (!isPollActive.value || isClosing.value) return
 
   clearTimer()
+
+  // Délai de grâce, comme pour les votes (VoteSlide), sauf si tout le monde a répondu.
+  if (totalPollVotes.value < sessionStore.crew.length) {
+    await waitForStragglers()
+    // Session réinitialisée pendant le dépouillement.
+    if (!isPollActive.value) return
+  }
+
   sessionStore.pollPhase = 'ended'
   firestore.stopListeningToPollResponses()
 
@@ -207,10 +217,14 @@ function stopPollSession() {
     </div>
 
     <div
-      v-if="isPollActive && timeRemaining > 0"
+      v-if="isPollActive && (isClosing || timeRemaining > 0)"
       class="absolute top-[82%] left-[7.5%] -translate-x-1/2 text-3xl font-bold font-title text-white"
     >
-      {{ timeRemaining }}
+      <span
+        v-if="isClosing"
+        class="text-base"
+      >Dépouillement...</span>
+      <template v-else>{{ timeRemaining }}</template>
     </div>
 
     <!-- Participation counter -->

@@ -24,6 +24,7 @@ export const VOTE_CONFIG = {
 // Poll configuration
 export const POLL_CONFIG = {
   DURATION_SECONDS: 25,
+  GRACE_PERIOD_SECONDS: 3,
   KNOWLEDGE_POLL_ID: "knowledge-level",
   CHOICES: ["newbie", "captain", "admiral"] as const,
 } as const;
