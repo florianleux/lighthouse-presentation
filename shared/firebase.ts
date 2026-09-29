@@ -1,10 +1,10 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app'
-import { initializeFirestore, type Firestore } from 'firebase/firestore'
+import { initializeFirestore, terminate, type Firestore } from 'firebase/firestore'
 
 let app: FirebaseApp | null = null
 let db: Firestore | null = null
 
-export function initFirebase(): Firestore | null {
+export function initFirebase(forceLongPolling = false): Firestore | null {
   if (db) return db
 
   const config = {
@@ -21,15 +21,28 @@ export function initFirebase(): Firestore | null {
     return null
   }
 
-  app = initializeApp(config)
+  app ??= initializeApp(config)
   // experimentalAutoDetectLongPolling: tente WebChannel puis bascule en
   // long-polling si bloqué (Brave Shields, bloqueurs de pubs, proxies mobiles
   // cassent le streaming WebChannel par défaut vers firestore.googleapis.com).
-  db = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true,
-  })
-  console.log('[Firebase] Initialized for project:', config.projectId)
+  // experimentalForceLongPolling: long-polling d'emblée, sans tentative.
+  db = initializeFirestore(app, forceLongPolling
+    ? { experimentalForceLongPolling: true }
+    : { experimentalAutoDetectLongPolling: true })
+  console.log('[Firebase] Initialized for project:', config.projectId, forceLongPolling ? '(long-polling)' : '')
   return db
+}
+
+// Abandonne l'instance Firestore. Son transport est négocié une seule fois,
+// à la création, et le SDK ne le renégocie jamais : après un blocage levé
+// (bloqueur désactivé, réseau revenu), seule une nouvelle instance s'en remet.
+// terminate() la désenregistre immédiatement, le prochain initFirebase() en
+// crée donc une neuve sur la même FirebaseApp. Ses listeners sont morts :
+// à ré-abonner par l'appelant.
+export function resetFirebase() {
+  if (!db) return
+  terminate(db).catch(err => console.warn('[Firebase] terminate failed:', err))
+  db = null
 }
 
 export function getDb(): Firestore | null {

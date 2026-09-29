@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { initFirebase } from '../../../../shared/firebase'
+import { initFirebase, resetFirebase } from '../../../../shared/firebase'
 import { FIRESTORE_COLLECTIONS } from '../../../../shared/constants'
 import type {
   FirestorePresentation,
@@ -41,7 +41,11 @@ let sessionCallback: ((msg: SessionStateMessage) => void) | null = null
 // ---- Connection ----
 
 function connect(): boolean {
-  db = initFirebase()
+  // Long-polling forcé : public 100 % mobile sur réseau hostile (wifi de salle,
+  // 4G saturée, Brave/bloqueurs qui cassent le streaming WebChannel). Quelques
+  // centaines de ms de latence en plus, invisibles sur des votes de 20 s. La
+  // présentation, sur un réseau maîtrisé, garde l'auto-détection.
+  db = initFirebase(true)
   if (!db) {
     isConnected.value = false
     console.warn('[Firestore] Not connected — offline mode')
@@ -67,20 +71,14 @@ function disconnect() {
   presentationId = null
 }
 
-// Réinitialise les listeners. Utilisé par le bouton « réessayer » quand la
-// connexion a échoué (ex. bloqueur désactivé après coup, réseau revenu).
+// Recrée l'instance Firestore et ses listeners. Utilisé par le bouton
+// « réessayer » quand la connexion a échoué : re-souscrire sur l'ancienne
+// instance ne suffit pas (cf. resetFirebase).
 function reconnect(): boolean {
-  if (presentationUnsubscribe) {
-    presentationUnsubscribe()
-    presentationUnsubscribe = null
-  }
-  if (configUnsubscribe) {
-    configUnsubscribe()
-    configUnsubscribe = null
-  }
+  disconnect()
   hasConnectionError.value = false
   hasReceivedSnapshot.value = false
-  presentationId = null
+  resetFirebase()
   const ok = connect()
   if (ok && sessionCallback) {
     onSessionState(sessionCallback)
