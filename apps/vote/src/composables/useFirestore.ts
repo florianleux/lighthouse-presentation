@@ -18,6 +18,10 @@ import {
   addDoc,
   collection,
   onSnapshot,
+  disableNetwork,
+  enableNetwork,
+  FirestoreError,
+  type DocumentReference,
   type Unsubscribe,
   type Firestore,
 } from 'firebase/firestore'
@@ -37,6 +41,9 @@ let presentationUnsubscribe: Unsubscribe | null = null
 let configUnsubscribe: Unsubscribe | null = null
 // Callback de session conservé pour pouvoir se ré-abonner lors d'un reconnect.
 let sessionCallback: ((msg: SessionStateMessage) => void) | null = null
+// true tant que l'état de la présentation n'est servi que depuis le cache
+// (serveur injoignable) : l'UI affiche « Reconnexion… ».
+const connectionLost = ref(false)
 
 // ---- Connection ----
 
@@ -132,7 +139,10 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
   }
 
   const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
-  presentationUnsubscribe = onSnapshot(presRef, (snap) => {
+  // includeMetadataChanges : on est aussi prévenu quand le SDK perd ou
+  // retrouve le serveur (fromCache), pas seulement quand les données changent.
+  presentationUnsubscribe = onSnapshot(presRef, { includeMetadataChanges: true }, (snap) => {
+    connectionLost.value = snap.metadata.fromCache
     isConnected.value = true
     hasConnectionError.value = false
     hasReceivedSnapshot.value = true
@@ -162,10 +172,62 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
   })
 }
 
+// ---- Connection watchdog ----
+// Un onglet suspendu par l'OS (téléphone en veille) revient avec un stream
+// mort que le SDK peut mettre des dizaines de secondes à rétablir : le votant
+// verrait « Tenez-vous prêt » pendant que le vote se déroule sans lui. Au
+// retour au premier plan après une vraie absence, et au retour du réseau, on
+// relance donc les streams. disableNetwork/enableNetwork garde les listeners
+// et les écritures en file, contrairement à reconnect() (terminate).
+
+// En deçà, simple changement d'app : le stream a toutes les chances d'être vivant.
+const HIDDEN_KICK_MS = 10_000
+let hiddenAt = 0
+let kicking = false
+
+async function kickNetwork() {
+  if (!db || kicking) return
+  kicking = true
+  try {
+    await disableNetwork(db)
+    await enableNetwork(db)
+  } catch (err) {
+    console.warn('[Firestore] Network restart failed:', err)
+  } finally {
+    kicking = false
+  }
+}
+
+function onVisibilityChange() {
+  if (document.visibilityState === 'hidden') {
+    hiddenAt = Date.now()
+  } else if (hiddenAt && Date.now() - hiddenAt >= HIDDEN_KICK_MS) {
+    kickNetwork()
+  }
+}
+
+function watchConnection() {
+  document.addEventListener('visibilitychange', onVisibilityChange)
+  window.addEventListener('online', kickNetwork)
+}
+
 // ---- Write operations ----
 // Les écritures rejettent en cas de refus serveur. Hors ligne, le SDK les met
 // en file (et rejoue lui-même les erreurs transitoires) : la promesse ne se
 // résout qu'à l'acquittement serveur.
+
+// Les règles n'autorisent que la création. Si l'acquittement d'une écriture
+// s'est perdu (coupure, relance des streams), le SDK la renvoie, ou
+// l'utilisateur retente : la seconde devient un update refusé alors que le
+// doc existe bien. On le vérifie avant d'échouer.
+async function createDoc(ref: DocumentReference, data: object): Promise<void> {
+  try {
+    await setDoc(ref, data)
+  } catch (err) {
+    const alreadyThere = err instanceof FirestoreError && err.code === 'permission-denied' && (await getDoc(ref)).exists()
+    if (!alreadyThere) throw err
+  }
+}
 
 // Doc sous la présentation active. Lance si aucune n'est connue : l'écriture
 // échoue au lieu d'être ignorée en silence.
@@ -180,7 +242,7 @@ async function registerParticipant(participantId: string, name: string, avatar: 
     avatar,
     createdAt: Date.now(),
   }
-  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.PARTICIPANTS, participantId), data)
+  await createDoc(presentationDoc(FIRESTORE_COLLECTIONS.PARTICIPANTS, participantId), data)
   console.log('[Firestore] Participant registered:', participantId)
 }
 
@@ -200,7 +262,7 @@ async function submitVote(voteIndex: number, participantId: string, choice: 'A' 
     choice,
     votedAt: Date.now(),
   }
-  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.VOTES, voteId, FIRESTORE_COLLECTIONS.BALLOTS, participantId), data)
+  await createDoc(presentationDoc(FIRESTORE_COLLECTIONS.VOTES, voteId, FIRESTORE_COLLECTIONS.BALLOTS, participantId), data)
   console.log('[Firestore] Vote submitted:', voteId, choice)
 }
 
@@ -209,7 +271,7 @@ async function submitPoll(pollId: string, participantId: string, choice: PollCho
     choice,
     respondedAt: Date.now(),
   }
-  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.POLLS, pollId, FIRESTORE_COLLECTIONS.RESPONSES, participantId), data)
+  await createDoc(presentationDoc(FIRESTORE_COLLECTIONS.POLLS, pollId, FIRESTORE_COLLECTIONS.RESPONSES, participantId), data)
   console.log('[Firestore] Poll response submitted:', pollId, choice)
 }
 
@@ -243,10 +305,12 @@ export function useFirestore() {
     isConnected,
     hasConnectionError,
     hasReceivedSnapshot,
+    connectionLost,
     connect,
     reconnect,
     disconnect,
     onSessionState,
+    watchConnection,
     registerParticipant,
     ensureParticipant,
     submitVote,

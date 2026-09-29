@@ -13,7 +13,7 @@ import VoteScreen from './components/VoteScreen.vue'
 import EndScreen from './components/EndScreen.vue'
 import FeedbackScreen from './components/FeedbackScreen.vue'
 
-const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connect, reconnect, onSessionState, registerParticipant, ensureParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
+const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connectionLost, connect, reconnect, onSessionState, watchConnection, registerParticipant, ensureParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
 
 // ===========================================
 // Persistence helpers
@@ -161,12 +161,19 @@ function handleSessionState(msg: SessionStateMessage) {
       joinedName.value = savedCrew.name
       selectedAvatar.value = savedCrew.avatar
       status.value = 'joined'
-      ensureParticipant(savedCrew.participantId, savedCrew.name, savedCrew.avatar)
-        .catch(err => console.error('Failed to re-register crew member:', err))
+      ensureCrewRegistered(savedCrew)
     } else {
       status.value = 'idle'
     }
   }
+}
+
+// Pirate embarqué mais peut-être inconnu du serveur (écriture perdue, onglet
+// suspendu, reconnexion) : on recrée son doc participant s'il manque.
+function ensureCrewRegistered(crew = loadCrew()) {
+  if (!crew) return
+  ensureParticipant(crew.participantId, crew.name, crew.avatar)
+    .catch(err => console.error('Failed to re-register crew member:', err))
 }
 
 // When images finish loading, complete any deferred transition
@@ -315,8 +322,8 @@ watch(hasReceivedSnapshot, (received) => {
 })
 
 // Un listener a remonté une erreur de transport avant que l'utilisateur ait
-// rejoint : on montre l'écran d'erreur. Une fois « joined », le SDK Firestore
-// gère seul la reconnexion (long-polling) entre les votes.
+// rejoint : on montre l'écran d'erreur. Une fois « joined », c'est le
+// watchdog de useFirestore qui surveille la connexion (bandeau « Reconnexion »).
 watch(hasConnectionError, (err) => {
   if (err && (status.value === 'connecting' || status.value === 'waiting')) {
     status.value = 'error'
@@ -329,6 +336,11 @@ watch(sessionState, (s) => {
     clearTimeout(connectTimeout)
     connectTimeout = null
   }
+})
+
+// Connexion rétablie après une coupure : le pirate a pu disparaître côté serveur.
+watch(connectionLost, (lost) => {
+  if (!lost && status.value === 'joined') ensureCrewRegistered()
 })
 
 function handleRetry() {
@@ -361,6 +373,7 @@ onMounted(async () => {
   const connected = connect()
   if (connected) {
     onSessionState(handleSessionState)
+    watchConnection()
     armConnectTimeout()
   } else {
     status.value = 'error'
@@ -556,6 +569,13 @@ onMounted(async () => {
       />
 
     </div>
+
+    <!-- Non bloquant : le votant sait que son écran n'est peut-être plus à jour -->
+    <p
+      v-if="status === 'joined' && connectionLost"
+      role="status"
+      class="fixed top-3 left-1/2 -translate-x-1/2 z-[2000] m-0 px-4 py-2 rounded-xl bg-black/70 text-white text-base font-title"
+    >Reconnexion...</p>
 
   </div>
 </template>
