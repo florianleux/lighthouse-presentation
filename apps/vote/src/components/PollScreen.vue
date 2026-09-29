@@ -1,17 +1,34 @@
 <script setup lang="ts">
 import type { PollChoice } from '../../../../shared/types'
+import SubmitStatus from './SubmitStatus.vue'
+import { useSubmission } from '../composables/useSubmission'
 
-const emit = defineEmits<{
-  poll: [choice: PollChoice]
+const props = defineProps<{
+  // Rejette si la réponse est refusée : l'écran reste affiché pour retenter.
+  submit: (choice: PollChoice) => Promise<void>
 }>()
+
+const { state, busy, run } = useSubmission()
+
+function answer(choice: PollChoice) {
+  run(() => props.submit(choice))
+}
 
 </script>
 
 <template>
-  <div class="relative h-full w-full">
+  <div
+    class="relative h-full w-full"
+    :class="{ 'pointer-events-none': busy }"
+  >
+    <SubmitStatus
+      class="top-[1%]"
+      :state="state"
+    />
     <div
       class="absolute w-full left-1/2 -translate-x-1/2 top-[5%] h-[30%] cursor-pointer transition-transform duration-200 active:scale-[0.97] overflow-hidden rounded-2xl"
-      @click="emit('poll', 'newbie')"
+      :class="{ 'opacity-60': busy }"
+      @click="answer('newbie')"
     >
       <img
         src="/vote/A.webp"
@@ -31,7 +48,8 @@ const emit = defineEmits<{
 
     <div
       class="absolute w-full left-1/2 -translate-x-1/2 top-[35%] h-[30%] cursor-pointer transition-transform duration-200 active:scale-[0.97] overflow-hidden rounded-2xl"
-      @click="emit('poll', 'captain')"
+      :class="{ 'opacity-60': busy }"
+      @click="answer('captain')"
     >
       <img
         src="/vote/A.webp"
@@ -49,7 +67,8 @@ const emit = defineEmits<{
 
     <div
       class="absolute w-full left-1/2 -translate-x-1/2 top-[65%] h-[30%] cursor-pointer transition-transform duration-200 active:scale-[0.97] overflow-hidden rounded-2xl"
-      @click="emit('poll', 'admiral')"
+      :class="{ 'opacity-60': busy }"
+      @click="answer('admiral')"
     >
       <img
         src="/vote/A.webp"

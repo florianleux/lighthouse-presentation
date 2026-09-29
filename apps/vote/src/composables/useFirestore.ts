@@ -165,28 +165,24 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
 }
 
 // ---- Write operations ----
+// Les écritures rejettent en cas de refus serveur. Hors ligne, le SDK les met
+// en file (et rejoue lui-même les erreurs transitoires) : la promesse ne se
+// résout qu'à l'acquittement serveur.
 
-function participantRef(participantId: string) {
+// Doc sous la présentation active. Lance si aucune n'est connue : l'écriture
+// échoue au lieu d'être ignorée en silence.
+function presentationDoc(...segments: string[]) {
   if (!db || !presentationId) throw new Error('[Firestore] Pas de présentation active')
-  return doc(
-    db,
-    FIRESTORE_COLLECTIONS.PRESENTATIONS,
-    presentationId,
-    FIRESTORE_COLLECTIONS.PARTICIPANTS,
-    participantId
-  )
+  return doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId, ...segments)
 }
 
-// Rejette si le serveur refuse l'inscription. Hors ligne, le SDK met
-// l'écriture en file (et rejoue lui-même les erreurs transitoires) : la
-// promesse ne se résout qu'à l'acquittement serveur.
 async function registerParticipant(participantId: string, name: string, avatar: string): Promise<void> {
   const data: FirestoreParticipant = {
     name,
     avatar,
     createdAt: Date.now(),
   }
-  await setDoc(participantRef(participantId), data)
+  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.PARTICIPANTS, participantId), data)
   console.log('[Firestore] Participant registered:', participantId)
 }
 
@@ -194,63 +190,29 @@ async function registerParticipant(participantId: string, name: string, avatar: 
 // le localStorage mais inconnu de la présentation). Reste une création : les
 // règles interdisent l'update sur participants.
 async function ensureParticipant(participantId: string, name: string, avatar: string): Promise<void> {
-  const snap = await getDoc(participantRef(participantId))
+  const snap = await getDoc(presentationDoc(FIRESTORE_COLLECTIONS.PARTICIPANTS, participantId))
   if (snap.exists()) return
   console.warn('[Firestore] Participant missing on server, re-registering:', participantId)
   await registerParticipant(participantId, name, avatar)
 }
 
-async function submitVote(voteIndex: number, participantId: string, choice: 'A' | 'B'): Promise<boolean> {
-  if (!db || !presentationId) return false
-
+async function submitVote(voteIndex: number, participantId: string, choice: 'A' | 'B'): Promise<void> {
   const voteId = `vote_${voteIndex}`
-  try {
-    const ballotRef = doc(
-      db,
-      FIRESTORE_COLLECTIONS.PRESENTATIONS,
-      presentationId,
-      FIRESTORE_COLLECTIONS.VOTES,
-      voteId,
-      FIRESTORE_COLLECTIONS.BALLOTS,
-      participantId
-    )
-    const data: FirestoreBallot = {
-      choice,
-      votedAt: Date.now(),
-    }
-    await setDoc(ballotRef, data)
-    console.log('[Firestore] Vote submitted:', voteId, choice)
-    return true
-  } catch (err) {
-    console.error('[Firestore] Failed to submit vote:', err)
-    return false
+  const data: FirestoreBallot = {
+    choice,
+    votedAt: Date.now(),
   }
+  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.VOTES, voteId, FIRESTORE_COLLECTIONS.BALLOTS, participantId), data)
+  console.log('[Firestore] Vote submitted:', voteId, choice)
 }
 
-async function submitPoll(pollId: string, participantId: string, choice: PollChoice): Promise<boolean> {
-  if (!db || !presentationId) return false
-
-  try {
-    const responseRef = doc(
-      db,
-      FIRESTORE_COLLECTIONS.PRESENTATIONS,
-      presentationId,
-      FIRESTORE_COLLECTIONS.POLLS,
-      pollId,
-      FIRESTORE_COLLECTIONS.RESPONSES,
-      participantId
-    )
-    const data: FirestorePollResponse = {
-      choice,
-      respondedAt: Date.now(),
-    }
-    await setDoc(responseRef, data)
-    console.log('[Firestore] Poll response submitted:', pollId, choice)
-    return true
-  } catch (err) {
-    console.error('[Firestore] Failed to submit poll:', err)
-    return false
+async function submitPoll(pollId: string, participantId: string, choice: PollChoice): Promise<void> {
+  const data: FirestorePollResponse = {
+    choice,
+    respondedAt: Date.now(),
   }
+  await setDoc(presentationDoc(FIRESTORE_COLLECTIONS.POLLS, pollId, FIRESTORE_COLLECTIONS.RESPONSES, participantId), data)
+  console.log('[Firestore] Poll response submitted:', pollId, choice)
 }
 
 // ---- Feedback ----

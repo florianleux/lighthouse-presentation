@@ -3,7 +3,6 @@ defineProps<{
   modelValue: string
   validationMessage: string
   canSubmit: boolean
-  disabled: boolean
 }>()
 
 const emit = defineEmits<{
@@ -21,7 +20,6 @@ const emit = defineEmits<{
       type="text"
       placeholder="Votre nom"
       maxlength="20"
-      :disabled="disabled"
       @keyup.enter="emit('submit')"
       class="appearance-none py-6 px-5 text-3xl border-2 border-white rounded-xl bg-white text-black outline-none transition-colors duration-200 focus:border-black placeholder:text-black/40 font-title text-center shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)]"
     />

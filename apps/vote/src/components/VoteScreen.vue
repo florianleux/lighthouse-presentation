@@ -4,15 +4,17 @@ import type { MetricConfig } from '../../../../shared/metrics-data'
 import { getMetricByIndex, resolveDerivedOption } from '../../../../shared/metrics-data'
 import { FLOOR_POSITIONS } from '../../../../shared/floor-positions'
 import VoteOption from './VoteOption.vue'
+import SubmitStatus from './SubmitStatus.vue'
+import { useSubmission } from '../composables/useSubmission'
 
 const props = defineProps<{
   metric: MetricConfig
   voteWinners: Record<number, 'A' | 'B'>
+  // Rejette si le bulletin est refusé : l'écran reste affiché pour retenter.
+  submit: (choice: 'A' | 'B') => Promise<void>
 }>()
 
-const emit = defineEmits<{
-  vote: [choice: 'A' | 'B']
-}>()
+const { state, busy, run } = useSubmission()
 
 function resolveOption(option: 'a' | 'b') {
   const resolved = resolveDerivedOption(
@@ -58,7 +60,7 @@ const options = computed(() => {
 })
 
 function handleVote(choice: 'A' | 'B') {
-  emit('vote', choice)
+  run(() => props.submit(choice))
 }
 </script>
 
@@ -74,13 +76,18 @@ function handleVote(choice: 'A' | 'B') {
     <VoteOption
       v-for="opt in options"
       :key="opt.key"
-      :class="opt.position"
+      :class="[opt.position, { 'opacity-60 pointer-events-none': busy }]"
       :bg="opt.bg"
       :floor="opt.floor"
       :floor-style="opt.floorStyle"
       :title="opt.title"
       :subtitle="opt.subtitle"
       @click="handleVote(opt.key)"
+    />
+
+    <SubmitStatus
+      class="top-1/2 -translate-y-1/2"
+      :state="state"
     />
 
     <img

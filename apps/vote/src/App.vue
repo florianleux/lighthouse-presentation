@@ -66,7 +66,7 @@ function getOrCreateParticipantId(): string {
 const isConnected = firestoreConnected
 const participantId = ref(getOrCreateParticipantId())
 
-const status = ref<'connecting' | 'waiting' | 'error' | 'idle' | 'joining' | 'joined'>('connecting')
+const status = ref<'connecting' | 'waiting' | 'error' | 'idle' | 'joined'>('connecting')
 const currentStep = ref<'name' | 'avatar'>('name')
 const name = ref('')
 const joinedName = ref('')
@@ -82,12 +82,6 @@ const polledIds = ref<string[]>([])
 
 const nameFormReady = ref(false)
 const endSubScreen = ref<'end' | 'feedback'>('end')
-
-// Inscription refusée par le serveur : on reste sur l'écran avatar.
-const joinFailed = ref(false)
-// Pas d'acquittement après JOIN_SLOW_MS : l'écriture attend le réseau.
-const joinSlow = ref(false)
-const JOIN_SLOW_MS = 5000
 
 // ===========================================
 // Computed
@@ -154,7 +148,6 @@ function handleSessionState(msg: SessionStateMessage) {
     selectedAvatar.value = null
     name.value = ''
     currentStep.value = 'name'
-    joinFailed.value = false
     participantId.value = getOrCreateParticipantId()
     status.value = nameFormReady.value ? 'idle' : 'connecting'
     return
@@ -194,7 +187,6 @@ function handleNext() {
 
 function handleBack() {
   currentStep.value = 'name'
-  joinFailed.value = false
 }
 
 function handleShowFeedback() {
@@ -219,74 +211,56 @@ watchEffect(() => {
 // Join crew
 // ===========================================
 
+// Rejette si l'inscription est refusée : AvatarStep affiche l'erreur.
 async function handleJoin(avatar: string) {
-  if (status.value !== 'idle' || !keynoteId.value) return
-  status.value = 'joining'
-  joinFailed.value = false
-  selectedAvatar.value = avatar
-
+  if (status.value !== 'idle') return
   const pid = participantId.value
   const crewName = name.value.trim()
-  const slowTimer = setTimeout(() => { joinSlow.value = true }, JOIN_SLOW_MS)
-  let failed = false
-  try {
-    await registerParticipant(pid, crewName, avatar)
-  } catch (err) {
-    console.error('Failed to join crew:', err)
-    failed = true
-  } finally {
-    clearTimeout(slowTimer)
-    joinSlow.value = false
-  }
+  await registerParticipant(pid, crewName, avatar)
 
   // Nouvelle keynote arrivée pendant l'écriture : l'état a été réinitialisé
-  // (nouveau participantId), et une autre inscription a pu démarrer depuis.
-  if (status.value !== 'joining' || participantId.value !== pid) return
-  if (failed) {
-    joinFailed.value = true
-    status.value = 'idle'
-    return
-  }
+  // avec un nouveau participantId, cette inscription est caduque.
+  if (participantId.value !== pid) return
 
   // Persisté seulement après l'acquittement serveur : sinon un rechargement
   // restaurerait un pirate que la présentation ne connaît pas.
+  selectedAvatar.value = avatar
   joinedName.value = crewName
   saveCrew({ participantId: pid, name: crewName, avatar })
   status.value = 'joined'
 }
 
 // ===========================================
-// Vote (local only — Firestore write will be added in Phase 3)
+// Vote / Poll
 // ===========================================
 
+// Rejettent si l'envoi est refusé : l'écran reste affiché pour retenter.
 async function handleVote(choice: 'A' | 'B') {
   const vote = sessionState.value?.vote
-  if (!vote || hasVotedThisRound.value || !keynoteId.value) return
-
-  try {
-    await submitVote(vote.index, participantId.value, choice)
-    votedRounds.value = [...votedRounds.value, vote.index]
-    saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
-  } catch (err) {
-    console.error('Failed to vote:', err)
-  }
+  if (!vote || hasVotedThisRound.value) return
+  await submitRound(
+    () => submitVote(vote.index, participantId.value, choice),
+    () => { votedRounds.value = [...votedRounds.value, vote.index] },
+  )
 }
-
-// ===========================================
-// Poll (local only — Firestore write will be added in Phase 3)
-// ===========================================
 
 async function handlePoll(choice: PollChoice) {
   const poll = sessionState.value?.poll
-  if (!poll || hasPolledThisRound.value || !keynoteId.value) return
+  if (!poll || hasPolledThisRound.value) return
+  await submitRound(
+    () => submitPoll(poll.id, participantId.value, choice),
+    () => { polledIds.value = [...polledIds.value, poll.id] },
+  )
+}
 
-  try {
-    await submitPoll(poll.id, participantId.value, choice)
-    polledIds.value = [...polledIds.value, poll.id]
-    saveVotesData({ keynoteId: keynoteId.value, votedRounds: votedRounds.value, polledIds: polledIds.value })
-  } catch (err) {
-    console.error('Failed to submit poll:', err)
-  }
+// Le round n'est verrouillé (et persisté) qu'après l'acquittement serveur.
+async function submitRound(write: () => Promise<void>, markDone: () => void) {
+  const keynote = keynoteId.value
+  await write()
+  // Nouvelle keynote pendant l'envoi : les verrous ont été remis à zéro.
+  if (!keynote || keynoteId.value !== keynote) return
+  markDone()
+  saveVotesData({ keynoteId: keynote, votedRounds: votedRounds.value, polledIds: polledIds.value })
 }
 
 // ===========================================
@@ -399,14 +373,15 @@ onMounted(async () => {
     <!-- Immersive vote screen (replaces card when actively voting) -->
     <VoteScreen
       v-if="status === 'joined' && phase === 'voting' && !hasVotedThisRound && currentMetric"
+      :key="currentMetric.index"
       :metric="currentMetric"
       :vote-winners="voteWinners"
-      @vote="handleVote"
+      :submit="handleVote"
     />
 
     <!-- NameForm: full-screen with decorative layers -->
     <div
-      v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'name'"
+      v-else-if="status === 'idle' && currentStep === 'name'"
       class="relative w-screen h-dvh overflow-hidden"
     >
       <img
@@ -430,7 +405,6 @@ onMounted(async () => {
           v-model="name"
           :validation-message="validationMessage"
           :can-submit="canGoNext"
-          :disabled="status === 'joining'"
           @submit="handleNext"
         />
       </div>
@@ -443,7 +417,7 @@ onMounted(async () => {
 
     <!-- AvatarStep: full-screen with decorative layers -->
     <div
-      v-else-if="(status === 'idle' || status === 'joining') && currentStep === 'avatar'"
+      v-else-if="status === 'idle' && currentStep === 'avatar'"
       class="relative w-screen h-dvh overflow-hidden"
     >
       <img
@@ -459,11 +433,8 @@ onMounted(async () => {
       <AvatarStep
         class="z-3"
         :name="name"
-        :is-joining="status === 'joining'"
-        :join-failed="joinFailed"
-        :join-slow="joinSlow"
+        :join="handleJoin"
         @back="handleBack"
-        @join="handleJoin"
       />
       <img
         src="/vote/light.webp"
@@ -488,8 +459,9 @@ onMounted(async () => {
         class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
       />
       <PollScreen
+        :key="sessionState?.poll?.id"
         class="z-3"
-        @poll="handlePoll"
+        :submit="handlePoll"
       />
       <img
         src="/vote/light.webp"
