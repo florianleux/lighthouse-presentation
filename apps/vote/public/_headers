@@ -1,0 +1,23 @@
+# En-têtes Netlify (copié tel quel à la racine du build par Vite).
+# Sans ce fichier, tout est servi en « max-age=0, must-revalidate » : chaque
+# image refait un aller-retour conditionnel (304) à chaque chargement.
+
+# Bundles Vite : le nom contient un hash du contenu, cache permanent.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images de public/ : noms stables, donc un jour de cache seulement (immutable
+# évite les 304 au rechargement pendant ce jour). Une image retouchée pendant
+# les répétitions arrive au plus tard le lendemain. Une fois les assets figés,
+# passer à max-age=31536000 et renommer tout fichier modifié ensuite.
+/avatars/*
+  Cache-Control: public, max-age=86400, immutable
+
+/floors/*
+  Cache-Control: public, max-age=86400, immutable
+
+/poll/*
+  Cache-Control: public, max-age=86400, immutable
+
+/vote/*
+  Cache-Control: public, max-age=86400, immutable
