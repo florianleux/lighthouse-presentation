@@ -13,6 +13,7 @@ import type {
 } from '../../../../shared/types'
 import {
   doc,
+  getDoc,
   setDoc,
   addDoc,
   collection,
@@ -165,29 +166,38 @@ function subscribeToPresentationDoc(callback: (msg: SessionStateMessage) => void
 
 // ---- Write operations ----
 
-async function registerParticipant(participantId: string, name: string, avatar: string): Promise<boolean> {
-  if (!db || !presentationId) return false
+function participantRef(participantId: string) {
+  if (!db || !presentationId) throw new Error('[Firestore] Pas de présentation active')
+  return doc(
+    db,
+    FIRESTORE_COLLECTIONS.PRESENTATIONS,
+    presentationId,
+    FIRESTORE_COLLECTIONS.PARTICIPANTS,
+    participantId
+  )
+}
 
-  try {
-    const participantRef = doc(
-      db,
-      FIRESTORE_COLLECTIONS.PRESENTATIONS,
-      presentationId,
-      FIRESTORE_COLLECTIONS.PARTICIPANTS,
-      participantId
-    )
-    const data: FirestoreParticipant = {
-      name,
-      avatar,
-      createdAt: Date.now(),
-    }
-    await setDoc(participantRef, data)
-    console.log('[Firestore] Participant registered:', participantId)
-    return true
-  } catch (err) {
-    console.error('[Firestore] Failed to register participant:', err)
-    return false
+// Rejette si le serveur refuse l'inscription. Hors ligne, le SDK met
+// l'écriture en file (et rejoue lui-même les erreurs transitoires) : la
+// promesse ne se résout qu'à l'acquittement serveur.
+async function registerParticipant(participantId: string, name: string, avatar: string): Promise<void> {
+  const data: FirestoreParticipant = {
+    name,
+    avatar,
+    createdAt: Date.now(),
   }
+  await setDoc(participantRef(participantId), data)
+  console.log('[Firestore] Participant registered:', participantId)
+}
+
+// Recrée le doc participant s'il manque côté serveur (pirate restauré depuis
+// le localStorage mais inconnu de la présentation). Reste une création : les
+// règles interdisent l'update sur participants.
+async function ensureParticipant(participantId: string, name: string, avatar: string): Promise<void> {
+  const snap = await getDoc(participantRef(participantId))
+  if (snap.exists()) return
+  console.warn('[Firestore] Participant missing on server, re-registering:', participantId)
+  await registerParticipant(participantId, name, avatar)
 }
 
 async function submitVote(voteIndex: number, participantId: string, choice: 'A' | 'B'): Promise<boolean> {
@@ -278,6 +288,7 @@ export function useFirestore() {
     disconnect,
     onSessionState,
     registerParticipant,
+    ensureParticipant,
     submitVote,
     submitPoll,
     submitFeedback,

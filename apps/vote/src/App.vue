@@ -13,7 +13,7 @@ import VoteScreen from './components/VoteScreen.vue'
 import EndScreen from './components/EndScreen.vue'
 import FeedbackScreen from './components/FeedbackScreen.vue'
 
-const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connect, reconnect, onSessionState, registerParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
+const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connect, reconnect, onSessionState, registerParticipant, ensureParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
 
 // ===========================================
 // Persistence helpers
@@ -83,6 +83,12 @@ const polledIds = ref<string[]>([])
 const nameFormReady = ref(false)
 const endSubScreen = ref<'end' | 'feedback'>('end')
 
+// Inscription refusée par le serveur : on reste sur l'écran avatar.
+const joinFailed = ref(false)
+// Pas d'acquittement après JOIN_SLOW_MS : l'écriture attend le réseau.
+const joinSlow = ref(false)
+const JOIN_SLOW_MS = 5000
+
 // ===========================================
 // Computed
 // ===========================================
@@ -148,6 +154,7 @@ function handleSessionState(msg: SessionStateMessage) {
     selectedAvatar.value = null
     name.value = ''
     currentStep.value = 'name'
+    joinFailed.value = false
     participantId.value = getOrCreateParticipantId()
     status.value = nameFormReady.value ? 'idle' : 'connecting'
     return
@@ -161,6 +168,8 @@ function handleSessionState(msg: SessionStateMessage) {
       joinedName.value = savedCrew.name
       selectedAvatar.value = savedCrew.avatar
       status.value = 'joined'
+      ensureParticipant(savedCrew.participantId, savedCrew.name, savedCrew.avatar)
+        .catch(err => console.error('Failed to re-register crew member:', err))
     } else {
       status.value = 'idle'
     }
@@ -185,6 +194,7 @@ function handleNext() {
 
 function handleBack() {
   currentStep.value = 'name'
+  joinFailed.value = false
 }
 
 function handleShowFeedback() {
@@ -206,29 +216,43 @@ watchEffect(() => {
 })
 
 // ===========================================
-// Join crew (local only — Firestore write will be added in Phase 3)
+// Join crew
 // ===========================================
 
 async function handleJoin(avatar: string) {
   if (status.value !== 'idle' || !keynoteId.value) return
   status.value = 'joining'
+  joinFailed.value = false
   selectedAvatar.value = avatar
 
   const pid = participantId.value
-  if (!pid || !keynoteId.value) {
-    status.value = 'error'
+  const crewName = name.value.trim()
+  const slowTimer = setTimeout(() => { joinSlow.value = true }, JOIN_SLOW_MS)
+  let failed = false
+  try {
+    await registerParticipant(pid, crewName, avatar)
+  } catch (err) {
+    console.error('Failed to join crew:', err)
+    failed = true
+  } finally {
+    clearTimeout(slowTimer)
+    joinSlow.value = false
+  }
+
+  // Nouvelle keynote arrivée pendant l'écriture : l'état a été réinitialisé
+  // (nouveau participantId), et une autre inscription a pu démarrer depuis.
+  if (status.value !== 'joining' || participantId.value !== pid) return
+  if (failed) {
+    joinFailed.value = true
+    status.value = 'idle'
     return
   }
 
-  try {
-    await registerParticipant(pid, name.value.trim(), avatar)
-    joinedName.value = name.value.trim()
-    status.value = 'joined'
-    saveCrew({ participantId: pid, name: name.value.trim(), avatar })
-  } catch (err) {
-    console.error('Failed to join crew:', err)
-    status.value = 'error'
-  }
+  // Persisté seulement après l'acquittement serveur : sinon un rechargement
+  // restaurerait un pirate que la présentation ne connaît pas.
+  joinedName.value = crewName
+  saveCrew({ participantId: pid, name: crewName, avatar })
+  status.value = 'joined'
 }
 
 // ===========================================
@@ -436,6 +460,8 @@ onMounted(async () => {
         class="z-3"
         :name="name"
         :is-joining="status === 'joining'"
+        :join-failed="joinFailed"
+        :join-slow="joinSlow"
         @back="handleBack"
         @join="handleJoin"
       />
