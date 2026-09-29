@@ -5,6 +5,7 @@ import { getMetricByIndex, resolveDerivedOption } from '../../../../shared/metri
 import { FLOOR_POSITIONS } from '../../../../shared/floor-positions'
 import VoteOption from './VoteOption.vue'
 import SubmitStatus from './SubmitStatus.vue'
+import FadeInImg from './FadeInImg.vue'
 import { useSubmission } from '../composables/useSubmission'
 
 const props = defineProps<{
@@ -90,10 +91,10 @@ function handleVote(choice: 'A' | 'B') {
       :state="state"
     />
 
-    <img
+    <FadeInImg
       src="/vote/light.webp"
-      alt=""
-      class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
+      :opacity="0.41"
+      class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter z-999 pointer-events-none"
     />
   </div>
 </template>

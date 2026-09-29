@@ -12,6 +12,8 @@ import StatusScreen from './components/StatusScreen.vue'
 import VoteScreen from './components/VoteScreen.vue'
 import EndScreen from './components/EndScreen.vue'
 import FeedbackScreen from './components/FeedbackScreen.vue'
+import DecorScene from './components/DecorScene.vue'
+import FadeInImg from './components/FadeInImg.vue'
 
 const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connectionLost, connect, reconnect, onSessionState, watchConnection, registerParticipant, ensureParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
 
@@ -80,7 +82,6 @@ const sessionState = ref<SessionStateMessage | null>(null)
 const votedRounds = ref<number[]>([])
 const polledIds = ref<string[]>([])
 
-const nameFormReady = ref(false)
 const endSubScreen = ref<'end' | 'feedback'>('end')
 
 // ===========================================
@@ -149,13 +150,12 @@ function handleSessionState(msg: SessionStateMessage) {
     name.value = ''
     currentStep.value = 'name'
     participantId.value = getOrCreateParticipantId()
-    status.value = nameFormReady.value ? 'idle' : 'connecting'
+    status.value = 'idle'
     return
   }
 
-  // First session state: transition from connecting/waiting (only when images are loaded)
+  // First session state: transition from connecting/waiting
   if (status.value === 'connecting' || status.value === 'waiting') {
-    if (!nameFormReady.value) return
     const savedCrew = loadCrew()
     if (savedCrew) {
       joinedName.value = savedCrew.name
@@ -175,13 +175,6 @@ function ensureCrewRegistered(crew = loadCrew()) {
   ensureParticipant(crew.participantId, crew.name, crew.avatar)
     .catch(err => console.error('Failed to re-register crew member:', err))
 }
-
-// When images finish loading, complete any deferred transition
-watch(nameFormReady, (ready) => {
-  if (ready && sessionState.value && (status.value === 'connecting' || status.value === 'waiting')) {
-    handleSessionState(sessionState.value)
-  }
-})
 
 // ===========================================
 // Navigation
@@ -275,21 +268,6 @@ async function submitRound(write: () => Promise<void>, markDone: () => void) {
 // ===========================================
 
 // ===========================================
-// Preload images (progressive per step)
-// ===========================================
-
-function preloadNameFormImages(): Promise<void> {
-  const urls = ['/vote/blueprint.webp', '/vote/shadow.webp', '/vote/light.webp']
-  const promises = urls.map(src => new Promise<void>((resolve) => {
-    const img = new Image()
-    img.onload = () => resolve()
-    img.onerror = () => resolve()
-    img.src = src
-  }))
-  return Promise.all(promises).then(() => { })
-}
-
-// ===========================================
 // Lifecycle
 // ===========================================
 
@@ -351,7 +329,13 @@ function handleRetry() {
 }
 
 onMounted(async () => {
-  preloadNameFormImages().then(() => { nameFormReady.value = true })
+  // Calques d'ambiance : en cache avant le premier écran de décor, sans
+  // concurrencer la connexion Firestore.
+  for (const src of ['/vote/shadow.webp', '/vote/light.webp']) {
+    const img = new Image()
+    img.setAttribute('fetchpriority', 'low')
+    img.src = src
+  }
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()
@@ -392,27 +376,17 @@ onMounted(async () => {
       :submit="handleVote"
     />
 
-    <!-- NameForm: full-screen with decorative layers -->
-    <div
+    <!-- NameForm: affiché sans attendre son décor, qui arrive en fondu -->
+    <DecorScene
       v-else-if="status === 'idle' && currentStep === 'name'"
-      class="relative w-screen h-dvh overflow-hidden"
+      strong-shadow
     >
-      <img
-        src="/vote/Bg.webp"
-        alt=""
-        fetchpriority="high"
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <img
-        src="/vote/blueprint.webp"
-        alt=""
-        class="absolute left-1/2 top-[32%] -translate-x-1/2 -translate-y-1/2 max-h-[70dvh] max-w-[90vw] z-1 pointer-events-none"
-      />
-      <img
-        src="/vote/shadow.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-48 mix-blend-multiply"
-      />
+      <template #backdrop>
+        <FadeInImg
+          src="/vote/blueprint.webp"
+          class="absolute left-1/2 top-[32%] -translate-x-1/2 -translate-y-1/2 max-h-[70dvh] max-w-[90vw] z-1 pointer-events-none"
+        />
+      </template>
       <div class="absolute bottom-[5%] left-1/2 -translate-x-1/2 w-[85vw] max-w-[400px] z-10">
         <NameForm
           v-model="name"
@@ -421,83 +395,26 @@ onMounted(async () => {
           @submit="handleNext"
         />
       </div>
-      <img
-        src="/vote/light.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
-      />
-    </div>
+    </DecorScene>
 
-    <!-- AvatarStep: full-screen with decorative layers -->
-    <div
-      v-else-if="status === 'idle' && currentStep === 'avatar'"
-      class="relative w-screen h-dvh overflow-hidden"
-    >
-      <img
-        src="/vote/Bg.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <img
-        src="/vote/shadow.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
-      />
+    <DecorScene v-else-if="status === 'idle' && currentStep === 'avatar'">
       <AvatarStep
         class="z-3"
         :name="name"
         :join="handleJoin"
         @back="handleBack"
       />
-      <img
-        src="/vote/light.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
-      />
-    </div>
+    </DecorScene>
 
-    <!-- PollScreen: full-screen with decorative layers -->
-    <div
-      v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound"
-      class="relative w-screen h-dvh overflow-hidden"
-    >
-      <img
-        src="/vote/Bg.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <img
-        src="/vote/shadow.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
-      />
+    <DecorScene v-else-if="status === 'joined' && phase === 'polling' && !hasPolledThisRound">
       <PollScreen
         :key="sessionState?.poll?.id"
         class="z-3"
         :submit="handlePoll"
       />
-      <img
-        src="/vote/light.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
-      />
-    </div>
+    </DecorScene>
 
-    <!-- EndScreen / FeedbackScreen: full-screen with decorative layers -->
-    <div
-      v-else-if="status === 'joined' && phase === 'finished'"
-      class="relative w-screen h-dvh overflow-hidden"
-    >
-      <img
-        src="/vote/Bg.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <img
-        src="/vote/shadow.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
-      />
+    <DecorScene v-else-if="status === 'joined' && phase === 'finished'">
       <EndScreen
         v-if="endSubScreen === 'end'"
         class="z-3"
@@ -511,28 +428,9 @@ onMounted(async () => {
         @cancel="handleFeedbackCancel"
         @send="handleFeedbackSend"
       />
-      <img
-        src="/vote/light.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
-      />
-    </div>
+    </DecorScene>
 
-    <!-- WaitingScreen: full-screen with decorative layers -->
-    <div
-      v-else-if="status === 'joined' && !(phase === 'voting' && !hasVotedThisRound) && !(phase === 'polling' && !hasPolledThisRound)"
-      class="relative w-screen h-dvh overflow-hidden"
-    >
-      <img
-        src="/vote/Bg.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-0"
-      />
-      <img
-        src="/vote/shadow.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover z-2 pointer-events-none opacity-34 mix-blend-multiply -scale-x-100"
-      />
+    <DecorScene v-else-if="status === 'joined' && !(phase === 'voting' && !hasVotedThisRound) && !(phase === 'polling' && !hasPolledThisRound)">
       <WaitingScreen
         class="z-3"
         :avatar="selectedAvatar"
@@ -540,12 +438,7 @@ onMounted(async () => {
         :has-voted-once="votedRounds.length > 0"
         :missed-current-vote="missedCurrentVote"
       />
-      <img
-        src="/vote/light.webp"
-        alt=""
-        class="absolute inset-0 w-full h-full object-cover mix-blend-plus-lighter opacity-41 z-999 pointer-events-none"
-      />
-    </div>
+    </DecorScene>
 
     <!-- Standard card layout (all other states) -->
     <div
