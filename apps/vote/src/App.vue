@@ -4,6 +4,8 @@ import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import { getMetricByIndex } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
+import { preloadAvatarPool } from './composables/useAvatar'
+import { preloadImage } from './utils/preloadImage'
 import AvatarStep from './components/AvatarStep.vue'
 import WaitingScreen from './components/WaitingScreen.vue'
 import NameForm from './components/NameForm.vue'
@@ -168,6 +170,12 @@ function handleSessionState(msg: SessionStateMessage) {
   }
 }
 
+// Le pirate passe plusieurs secondes à taper son nom : on en profite pour
+// précharger les calques du spin d'avatar (genre + carnation par défaut).
+watch(status, (s) => {
+  if (s === 'idle') preloadAvatarPool()
+})
+
 // Pirate embarqué mais peut-être inconnu du serveur (écriture perdue, onglet
 // suspendu, reconnexion) : on recrée son doc participant s'il manque.
 function ensureCrewRegistered(crew = loadCrew()) {
@@ -331,11 +339,8 @@ function handleRetry() {
 onMounted(async () => {
   // Calques d'ambiance : en cache avant le premier écran de décor, sans
   // concurrencer la connexion Firestore.
-  for (const src of ['/vote/shadow.webp', '/vote/light.webp']) {
-    const img = new Image()
-    img.setAttribute('fetchpriority', 'low')
-    img.src = src
-  }
+  preloadImage('/vote/shadow.webp')
+  preloadImage('/vote/light.webp')
 
   const savedCrew = loadCrew()
   const savedVotes = loadVotes()

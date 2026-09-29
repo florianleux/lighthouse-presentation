@@ -1,4 +1,5 @@
 import type { Gender, PirateAvatar, SkinTone } from '../../../../shared/types'
+import { AVATAR_CONFIG } from '../../../../shared/constants'
 
 function getBasePath(gender: Gender): string {
   return `/avatars/${gender}`
@@ -34,6 +35,31 @@ export function getHairPath(gender: Gender, option: number, color: number): stri
 
 export function getHatPath(gender: Gender, option: number, color: number): string {
   return `${getBasePath(gender)}/hats/option_${option}/color_${color}.webp`
+}
+
+export function range(count: number): number[] {
+  return Array.from({ length: count }, (_, i) => i + 1)
+}
+
+// L'accessoire 4 n'existe pas pour les avatars féminins.
+export function accessoryCount(gender: Gender): number {
+  return gender === 'female' ? AVATAR_CONFIG.ACCESSORY_COUNT_FEMALE : AVATAR_CONFIG.ACCESSORY_COUNT
+}
+
+// Tous les calques qu'un tirage peut utiliser pour ce genre et cette carnation
+// (un spin d'avatar en touche la quasi-totalité).
+export function getPoolUrls(gender: Gender, skinTone: SkinTone): string[] {
+  return [
+    getFacePath(gender, skinTone),
+    ...range(AVATAR_CONFIG.MOUTH_COUNT).map(o => getMouthPath(gender, skinTone, o)),
+    ...range(AVATAR_CONFIG.EYE_OPTIONS).flatMap(o => range(AVATAR_CONFIG.EYE_COLORS).map(c => getEyesPath(gender, skinTone, o, c))),
+    ...range(AVATAR_CONFIG.NOSE_COUNT).map(o => getNosePath(gender, skinTone, o)),
+    ...range(accessoryCount(gender)).map(o => getAccessoryPath(gender, skinTone, o)),
+    getEyePatchPath(gender, skinTone, 'left'),
+    getEyePatchPath(gender, skinTone, 'right'),
+    ...range(AVATAR_CONFIG.HAIR_OPTIONS).flatMap(o => range(AVATAR_CONFIG.HAIR_COLORS).map(c => getHairPath(gender, o, c))),
+    ...range(AVATAR_CONFIG.HAT_OPTIONS).flatMap(o => range(AVATAR_CONFIG.HAT_COLORS).map(c => getHatPath(gender, o, c))),
+  ]
 }
 
 export interface AvatarLayer {

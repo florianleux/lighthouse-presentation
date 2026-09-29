@@ -1,6 +1,32 @@
 import { ref } from 'vue'
 import type { Gender, PirateAvatar, SkinTone } from '../../../../shared/types'
 import { AVATAR_CONFIG } from '../../../../shared/constants'
+import { accessoryCount, getPoolUrls, range } from '../utils/avatarPaths'
+import { preloadImage } from '../utils/preloadImage'
+
+const DEFAULT_GENDER: Gender = 'male'
+const DEFAULT_SKIN_TONE: SkinTone = 'light'
+// Attente maximale du pool avant un spin : au-delà, on tourne quand même.
+const SPIN_MAX_WAIT_MS = 3000
+
+const preloadedPools = new Map<string, Promise<void>>()
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+// Précharge (une seule fois) tous les calques d'un genre + carnation : un spin
+// tire ~21 avatars en 2 s et, à froid, les visages s'affichent à moitié
+// composés. Sans argument : le pool de l'avatar par défaut.
+export function preloadAvatarPool(gender = DEFAULT_GENDER, skinTone = DEFAULT_SKIN_TONE): Promise<void> {
+  const key = `${gender}/${skinTone}`
+  let pool = preloadedPools.get(key)
+  if (!pool) {
+    pool = Promise.all(getPoolUrls(gender, skinTone).map(preloadImage)).then(() => {})
+    preloadedPools.set(key, pool)
+  }
+  return pool
+}
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -12,10 +38,10 @@ function randomBoolean(probability = 0.5): boolean {
 
 function generateRandomAvatar(gender: Gender, skinTone: SkinTone): PirateAvatar {
   // Random accessories (0-3 for female, 0-4 for male)
-  const maxAccessories = gender === 'female' ? AVATAR_CONFIG.ACCESSORY_COUNT_FEMALE : AVATAR_CONFIG.ACCESSORY_COUNT
+  const maxAccessories = accessoryCount(gender)
   const numAccessories = randomInt(0, maxAccessories)
   const regular: number[] = []
-  const availableAccessories = gender === 'female' ? [1, 2, 3] : [1, 2, 3, 4]
+  const availableAccessories = range(maxAccessories)
   for (let i = 0; i < numAccessories; i++) {
     const idx = randomInt(0, availableAccessories.length - 1)
     regular.push(availableAccessories.splice(idx, 1)[0])
@@ -52,7 +78,7 @@ function generateRandomAvatar(gender: Gender, skinTone: SkinTone): PirateAvatar 
   }
 }
 
-export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinTone = 'light') {
+export function useAvatar(initialGender: Gender = DEFAULT_GENDER, initialSkinTone: SkinTone = DEFAULT_SKIN_TONE) {
   const avatar = ref<PirateAvatar>(generateRandomAvatar(initialGender, initialSkinTone))
   const isSpinning = ref(false)
 
@@ -68,6 +94,7 @@ export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinT
     const currentGender = avatar.value.gender
     const currentSkinTone = avatar.value.skinTone
     const targetAvatar = generateRandomAvatar(currentGender, currentSkinTone)
+    await Promise.race([preloadAvatarPool(currentGender, currentSkinTone), sleep(SPIN_MAX_WAIT_MS)])
 
     // Spin phases: fast → medium → slow → settle
     const phases = [
@@ -80,7 +107,7 @@ export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinT
     for (const phase of phases) {
       for (let i = 0; i < phase.iterations; i++) {
         avatar.value = generateRandomAvatar(currentGender, currentSkinTone)
-        await new Promise(resolve => setTimeout(resolve, phase.delay))
+        await sleep(phase.delay)
       }
     }
 
@@ -95,6 +122,7 @@ export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinT
       ...avatar.value,
       skinTone,
     }
+    preloadAvatarPool(avatar.value.gender, skinTone)
   }
 
   // Change gender while keeping the same combination
@@ -116,6 +144,7 @@ export function useAvatar(initialGender: Gender = 'male', initialSkinTone: SkinT
       gender,
       accessories,
     }
+    preloadAvatarPool(gender, current.skinTone)
   }
 
   function serialize(): string {

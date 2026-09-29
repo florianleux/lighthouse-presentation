@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import AvatarPreview from './AvatarPreview.vue'
 import GenderSelector from './GenderSelector.vue'
 import SkinToneSelector from './SkinToneSelector.vue'
@@ -12,10 +12,14 @@ const emit = defineEmits<{
 
 const { avatar, isSpinning, spinAndRandomize, setSkinTone, setGender, serialize } = useAvatar()
 
-// Initial roll to show the randomize mechanic
+// Initial roll to show the randomize mechanic, une fois le premier rendu
+// peint (le spin attend ensuite que ses calques soient en cache).
+const SPIN_START_DELAY_MS = 300
+let spinTimer: ReturnType<typeof setTimeout> | undefined
 onMounted(() => {
-  spinAndRandomize()
+  spinTimer = setTimeout(spinAndRandomize, SPIN_START_DELAY_MS)
 })
+onUnmounted(() => clearTimeout(spinTimer))
 
 function handleGenderChange(gender: Gender) {
   setGender(gender)

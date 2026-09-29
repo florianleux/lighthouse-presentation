@@ -49,6 +49,7 @@ const layers = computed(() => getAllLayerPaths(parsedAvatar.value))
       :key="layer.name"
       :src="layer.path"
       :alt="layer.name"
+      decoding="async"
       class="avatar-layer absolute top-0 left-0 w-full h-full object-contain"
       :style="{ zIndex: layer.zIndex }"
     />
