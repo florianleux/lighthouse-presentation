@@ -1,5 +1,6 @@
 ---
 theme: default
+colorSchema: light
 title: À l'abordage de Lighthouse !
 info: |
   ## À l'abordage de Lighthouse !
