@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   url: 'https://blackmarket.florianleux.fr',
   scale: 0.6,
-  delay: 3000,
+  delay: 1000,
 })
 
 const shouldLoad = ref(false)
@@ -39,7 +39,10 @@ const scalePercent = 100 / props.scale
 </script>
 
 <template>
-  <div ref="container" class="w-full h-full">
+  <div
+    ref="container"
+    class="w-full h-full"
+  >
     <iframe
       v-if="shouldLoad"
       :src="url"
