@@ -41,17 +41,8 @@ watch(currentSlideNo, () => {
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
 
       <div class="credits-scroll absolute flex flex-col items-center gap-3 text-white text-xl w-[50%]">
-        <span class="text-5xl text-white font-title">Un grand merci à</span>
-        <div class="text-2xl grid grid-cols-3 gap-x-12 gap-y-2 text-center my-4">
-          <span>Guigz</span>
-          <span>Tom</span>
-          <span>Kriyss</span>
-          <span>Gui</span>
-          <span>François</span>
-          <span>Tony</span>
-          <span>Floby</span>
-          <span>Florian L</span>
-        </div>
+        <span class="text-5xl mb-24 text-center w-[70%] text-white font-title">Un grand merci à l'équipe Volcamp
+          !</span>
 
         <template v-if="crewNames.length > 0">
           <span class="text-5xl text-white font-title">L'ÉQUIPAGE</span>
