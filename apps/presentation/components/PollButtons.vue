@@ -138,7 +138,7 @@ watch(currentSlideNo, () => {
     }, 200)
     return
   }
-  if (sessionStore.isManual || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
+  if (sessionStore.handRaiseMode || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return
   setTimeout(() => {
     if (isSlideVisible() && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activePollId === null && sessionStore.pollPhase === 'waiting') {
@@ -310,11 +310,11 @@ const counters: { choice: PollChoice; style: string }[] = [
     </div>
 
     <button
-      v-if="!sessionStore.handRaiseMode && sessionStore.pollPhase !== 'ended' && (sessionStore.manualMode || isPollActive)"
+      v-if="!sessionStore.handRaiseMode && isPollActive"
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
-      @click="isPollActive ? stopPollSession() : startPollSession()"
+      @click="stopPollSession()"
     >
-      {{ isPollActive ? 'Arrêter' : 'Démarrer' }}
+      Arrêter
     </button>
   </div>
 </template>

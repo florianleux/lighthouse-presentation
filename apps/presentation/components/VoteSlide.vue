@@ -211,7 +211,7 @@ function isSlideVisible(): boolean {
 const hasBeenStarted = computed(() => sessionStore.startedVoteIndices.has(voteIndex.value))
 
 watch(currentSlideNo, () => {
-  if (sessionStore.isManual || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
+  if (sessionStore.handRaiseMode || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return // Don't auto-start during reset/lobby
   setTimeout(() => {
     if (isSlideVisible() && !isVoteDone.value && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
@@ -336,15 +336,6 @@ async function stopVoteSession() {
       >
         <div class="font-bold text-sm font-title leading-4">{{ titleB }}</div>
       </div>
-
-      <!-- Manual vote control (start/stop button, only in manual mode) -->
-      <button
-        v-if="sessionStore.manualMode && !sessionStore.handRaiseMode && !isVoteDone"
-        class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
-        @click="isVoteActive ? stopVoteSession() : startVoteSession()"
-      >
-        {{ isVoteActive ? 'Arrêter' : 'Démarrer' }}
-      </button>
 
 
       <div class="absolute text-7xl font-bold font-title -translate-x-1/2 left-[50.5%] top-[3.5%] text-center ">

@@ -183,15 +183,8 @@ export const sessionStore = reactive({
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
   startedPollIds: new Set<string>(),
 
-  // Manual mode (presenter picks directly)
-  manualMode: false,
-
-  // Main levée : le présentateur saisit le nombre de mains levées (implique le mode manuel)
+  // Main levée : le présentateur saisit le nombre de mains levées (sinon mode classique)
   handRaiseMode: loadHandRaiseMode(),
-
-  get isManual(): boolean {
-    return this.manualMode || this.handRaiseMode
-  },
 
   // Actions
   setHandRaiseMode(enabled: boolean) {
@@ -290,7 +283,6 @@ export const sessionStore = reactive({
     this.activePollId = null
     this.pollPhase = 'waiting'
     this.startedPollIds = new Set<string>()
-    this.manualMode = false
     voteStore.reset()
     currentPhase.value = 'lobby'
     phaseData.value = {}
