@@ -41,7 +41,7 @@ watch(currentSlideNo, () => {
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
 
       <div class="credits-scroll absolute flex flex-col items-center gap-3 text-white text-xl w-[50%]">
-        <span class="text-5xl mb-24 text-center w-[70%] text-white font-title">Un grand merci à l'équipe Volcamp
+        <span class="text-5xl mb-24 text-center w-[70%] text-white font-title">Un grand merci à l'équipe BDX I/O
           !</span>
 
         <template v-if="crewNames.length > 0">
