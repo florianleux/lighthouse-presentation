@@ -453,16 +453,34 @@ async function persistVoteWinner(voteIndex: number, winner: 'A' | 'B') {
 
 // ---- Fake participants ----
 
-const PIRATE_NAMES = [
-  'Blackbeard', 'Red Anne', 'Captain Hook', 'Calico Jack', 'Long John',
-  'Davy Jones', 'Silver Beard', 'One-Eye Pete', 'Mad Mary', 'Iron Will',
-  'Sea Dog', 'Storm Rider', 'Barnacle Bill', 'Salty Sam', 'Coral Kate',
-  'Dread Pirate', 'Gold Tooth', 'Skull Face', 'Rum Runner', 'Wave Walker',
-  'Anchor Al', 'Brig Boss', 'Crow Nell', 'Dark Tide', 'Ember Eve',
-  'Fog Horn', 'Gale Force', 'Harbor Hank', 'Isle Ivy', 'Jolly Roger',
-  'Keel Ken', 'Loot Lucy', 'Mast Mike', 'North Star', 'Oyster Oz',
-  'Plank Pat', 'Quay Quinn', 'Reef Rob', 'Shark Sal', 'Timber Tom',
+// Noms de bots : prénom de pirate ou grade × nom tech (35 × 35 = 1225 combinaisons)
+const PIRATE_FIRST_NAMES = [
+  // Grades
+  'Capitaine', 'Amiral', 'Second', 'Timonier', 'Bosco', 'Matelot', 'Moussaillon', 'Vigie',
+  // Pirates (féminins)
+  'Anne', 'Mary', 'Jacquotte', 'Jeanne', 'Grace', 'Margot', 'Morgane', 'Ondine', 'Perle', 'Coralie',
+  'Marine', 'Rosalie', 'Mathurine', 'Isaure',
+  // Pirates (masculins)
+  'Gaspard', 'Barnabé', 'Barthélemy', 'Jacquot', 'Fulbert', 'Ambroise', 'Isidore', 'Séraphin', 'Hector',
+  'Achille', 'Mathurin', 'Yvon', 'Erwan',
 ]
+
+const TECH_LAST_NAMES = [
+  'Lambda', 'Commit', 'Merge', 'Rebase', 'Hotfix', 'Linter', 'Regex', 'Mutex', 'Kernel', 'Proxy',
+  'Docker', 'Cache', 'Async', 'Await', 'Fetch', 'Flexbox', 'Webpack', 'Vite', 'Null', 'Undefined',
+  'Localhost', 'Sudo', 'Bash', 'Json', 'Yaml', 'Cookie', 'Pixel', 'Refacto', 'Backlog', 'Timeout',
+  'Deploy', 'Sprint', 'Debug', 'Pipeline', 'Firewall',
+]
+
+// Tirage sans doublon tant que les combinaisons ne sont pas épuisées
+function pickDevNames(count: number): string[] {
+  const combos = PIRATE_FIRST_NAMES.flatMap(first => TECH_LAST_NAMES.map(last => `${first} ${last}`))
+  for (let i = combos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[combos[i], combos[j]] = [combos[j], combos[i]]
+  }
+  return Array.from({ length: count }, (_, i) => combos[i % combos.length])
+}
 
 function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -502,11 +520,12 @@ async function generateFakeParticipants(count: number, spreadMs: number = 0) {
   const pid = presentationId
 
   const delay = spreadMs > 0 ? spreadMs / count : 0
+  const names = pickDevNames(count)
 
   for (let i = 0; i < count; i++) {
     if (!db || presentationId !== pid) return
     const id = `fake-${crypto.randomUUID()}`
-    const name = PIRATE_NAMES[i % PIRATE_NAMES.length] + (i >= PIRATE_NAMES.length ? ` ${Math.floor(i / PIRATE_NAMES.length) + 1}` : '')
+    const name = names[i]
     const participantRef = doc(
       db,
       FIRESTORE_COLLECTIONS.PRESENTATIONS,
