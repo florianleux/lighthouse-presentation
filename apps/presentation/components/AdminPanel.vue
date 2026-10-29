@@ -93,35 +93,31 @@ async function startNewSession() {
               </button>
             </div>
 
-            <!-- Manual Mode Toggle -->
+            <!-- Vote Mode -->
             <div class="section">
               <label>Mode de vote</label>
-              <div class="toggle-row">
-                <span class="toggle-label">Mode manuel</span>
-                <label class="toggle-switch">
+              <div class="radio-group">
+                <label class="radio-row">
                   <input
-                    v-model="sessionStore.manualMode"
-                    type="checkbox"
+                    type="radio"
+                    name="vote-mode"
+                    :checked="!sessionStore.handRaiseMode"
+                    @change="sessionStore.setHandRaiseMode(false)"
                   />
-                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">Classique</span>
                 </label>
-              </div>
-              <p class="toggle-hint">
-                {{ sessionStore.manualMode ? 'Le présentateur choisit A/B directement' : 'L\'audience vote avec un minuteur' }}
-              </p>
-              <div class="toggle-row">
-                <span class="toggle-label">Main levée</span>
-                <label class="toggle-switch">
+                <label class="radio-row">
                   <input
+                    type="radio"
+                    name="vote-mode"
                     :checked="sessionStore.handRaiseMode"
-                    type="checkbox"
-                    @change="sessionStore.setHandRaiseMode(($event.target as HTMLInputElement).checked)"
+                    @change="sessionStore.setHandRaiseMode(true)"
                   />
-                  <span class="toggle-slider"></span>
+                  <span class="toggle-label">Main levée</span>
                 </label>
               </div>
               <p class="toggle-hint">
-                {{ sessionStore.handRaiseMode ? 'Le présentateur saisit le nombre de mains levées (bots immobiles, pas de minuteur)' : 'Votes depuis l\'app (bots aléatoires)' }}
+                {{ sessionStore.handRaiseMode ? 'Le présentateur saisit le nombre de mains levées (bots immobiles, pas de minuteur)' : 'L\'audience vote depuis l\'app avec un minuteur (bots aléatoires)' }}
               </p>
             </div>
 
@@ -458,62 +454,31 @@ async function startNewSession() {
   text-align: center;
 }
 
-/* Toggle switch styles */
-.toggle-row {
+/* Vote mode radios */
+.radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.section .radio-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
   padding: 8px 0;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.radio-row input {
+  accent-color: #ffd700;
+  cursor: pointer;
 }
 
 .toggle-label {
   color: white;
   font-size: 14px;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 26px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: 0.3s;
-  border-radius: 26px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #ffd700;
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(22px);
 }
 
 .toggle-hint {
