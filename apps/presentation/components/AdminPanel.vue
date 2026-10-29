@@ -109,6 +109,20 @@ async function startNewSession() {
               <p class="toggle-hint">
                 {{ sessionStore.manualMode ? 'Le présentateur choisit A/B directement' : 'L\'audience vote avec un minuteur' }}
               </p>
+              <div class="toggle-row">
+                <span class="toggle-label">Main levée</span>
+                <label class="toggle-switch">
+                  <input
+                    :checked="sessionStore.handRaiseMode"
+                    type="checkbox"
+                    @change="sessionStore.setHandRaiseMode(($event.target as HTMLInputElement).checked)"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <p class="toggle-hint">
+                {{ sessionStore.handRaiseMode ? 'Le présentateur saisit le nombre de mains levées (bots immobiles, pas de minuteur)' : 'Votes depuis l\'app (bots aléatoires)' }}
+              </p>
             </div>
 
             <!-- Connection Status -->

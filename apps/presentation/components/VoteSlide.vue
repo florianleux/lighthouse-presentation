@@ -27,10 +27,39 @@ const posB = computed(() => FLOOR_POSITIONS[metricName.value]?.vote.b ?? {})
 const { next, currentSlideNo } = useNav()
 
 // Block navigation during active vote (capture phase to intercept before Slidev)
+const NAV_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'PageUp', 'PageDown']
+// Touches « suivant » (clavier et télécommande, qui envoie souvent PageDown)
+const FORWARD_KEYS = ['ArrowRight', 'ArrowDown', 'Space', 'PageDown']
+
+// Vrai entre la clôture et le passage à WinnerDisplay (applyVote attend Firestore)
+const isApplyingVote = ref(false)
+
 function blockNavigation(e: KeyboardEvent) {
+  // Saisie main levée : laisser l'input recevoir ses touches (Entrée comprise)
+  if (e.target instanceof HTMLInputElement) return
+  const isNavKey = NAV_KEYS.includes(e.code) || NAV_KEYS.includes(e.key)
+  const isForwardKey = FORWARD_KEYS.includes(e.code) || FORWARD_KEYS.includes(e.key)
+
+  // Clôture en cours : un 2e appui ferait sauter WinnerDisplay (applyVote appelle next())
+  if (isApplyingVote.value) {
+    if (isNavKey) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    return
+  }
+
+  // Main levée : « suivant » clôture le vote avec les chiffres saisis.
+  // Avant toute saisie, il est bloqué pour ne pas passer le vote sans gagnant.
+  if (sessionStore.handRaiseMode && isForwardKey && !isVoteDone.value && isSlideVisible()) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (isVoteActive.value) closeHandRaise()
+    return
+  }
+
   if (!isVoteActive.value) return
-  const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'Enter', 'PageUp', 'PageDown']
-  if (navKeys.includes(e.code) || navKeys.includes(e.key)) {
+  if (isNavKey) {
     e.preventDefault()
     e.stopPropagation()
   }
@@ -55,13 +84,18 @@ async function applyVote(choice: 'A' | 'B') {
   sessionStore.activeVoteIndex = null
   firestore.stopListeningToBallots()
 
-  // Persist winner to Firebase for derived option resolution (even in manual mode)
-  await firestore.persistVoteWinner(voteIndex.value, choice)
+  isApplyingVote.value = true
+  try {
+    // Persist winner to Firebase for derived option resolution (even in manual mode)
+    await firestore.persistVoteWinner(voteIndex.value, choice)
 
-  currentPhase.value = 'idle'
-  phaseData.value = {}
-  publishSessionState()
-  next()
+    currentPhase.value = 'idle'
+    phaseData.value = {}
+    publishSessionState()
+    next()
+  } finally {
+    isApplyingVote.value = false
+  }
 }
 
 // Direct vote from option block clicks (always available, overrides any ongoing/completed vote)
@@ -79,6 +113,23 @@ function manualVote(choice: 'A' | 'B') {
     })
   }
   applyVote(choice)
+}
+
+// Main levée : clôture avec la majorité saisie. Égalité (0-0 compris) : rien, on tranche au clic A/B.
+function closeHandRaise() {
+  if (!isVoteActive.value) return
+  const r = sessionStore.voteResults[voteIndex.value]
+  const countA = r?.A.length ?? 0
+  const countB = r?.B.length ?? 0
+  if (countA === countB) return
+  const winner: 'A' | 'B' = countA > countB ? 'A' : 'B'
+  sessionStore.votePhase = 'ended'
+  firestore.closeVote(voteIndex.value, {
+    winner,
+    counts: { A: countA, B: countB },
+    total: countA + countB,
+  })
+  applyVote(winner)
 }
 
 // --- Audience vote session ---
@@ -126,6 +177,12 @@ watch(() => sessionStore.votePhase, (phase) => {
   }
 })
 
+// Nouvelle session : le minuteur repart de la durée pleine au lieu d'afficher l'ancienne valeur.
+watch(() => sessionStore.sessionId, () => {
+  clearTimer()
+  timeRemaining.value = VOTE_DURATION
+})
+
 // Auto-stop when all crew members have voted
 const totalVotes = computed(() => {
   const r = sessionStore.voteResults[voteIndex.value]
@@ -133,6 +190,7 @@ const totalVotes = computed(() => {
 })
 
 watch(totalVotes, (total) => {
+  if (sessionStore.handRaiseMode) return
   if (isVoteActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
     console.log('[VoteSlide] All crew voted, auto-stopping vote')
     stopVoteSession()
@@ -153,7 +211,7 @@ function isSlideVisible(): boolean {
 const hasBeenStarted = computed(() => sessionStore.startedVoteIndices.has(voteIndex.value))
 
 watch(currentSlideNo, () => {
-  if (sessionStore.manualMode || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
+  if (sessionStore.isManual || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return // Don't auto-start during reset/lobby
   setTimeout(() => {
     if (isSlideVisible() && !isVoteDone.value && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
@@ -166,7 +224,6 @@ function startVoteSession() {
   sessionStore.startedVoteIndices.add(voteIndex.value)
   sessionStore.activeVoteIndex = voteIndex.value
   sessionStore.votePhase = 'voting'
-  startTimer()
 
   // Update session phase
   currentPhase.value = 'voting'
@@ -174,6 +231,14 @@ function startVoteSession() {
 
   // Firestore: open vote and listen for ballots
   firestore.openVote(voteIndex.value, VOTE_DURATION)
+
+  // Main levée : pas de minuteur, pas de bulletins, les bots restent au milieu
+  if (sessionStore.handRaiseMode) {
+    console.log('[VoteSlide] Hand-raise vote session started for vote', voteIndex.value)
+    return
+  }
+
+  startTimer()
   firestore.listenToBallots(voteIndex.value, (participantId, choice) => {
     sessionStore.recordVote(participantId, voteIndex.value, choice)
   })
@@ -218,11 +283,14 @@ async function stopVoteSession() {
 
   // Firestore: close vote with results (writes voteWinners + publishes 'vote-results')
   // Await to ensure voteWinners is persisted before resetting phase
+  const sessionId = sessionStore.sessionId
   await firestore.closeVote(voteIndex.value, {
     winner: w,
     counts: { A: countA, B: countB },
     total: countA + countB,
   })
+  // Session réinitialisée pendant l'écriture : la nouvelle reste en lobby.
+  if (sessionStore.sessionId !== sessionId) return
 
   // Reset vote state so navigation can proceed normally
   sessionStore.votePhase = 'waiting'
@@ -271,7 +339,7 @@ async function stopVoteSession() {
 
       <!-- Manual vote control (start/stop button, only in manual mode) -->
       <button
-        v-if="sessionStore.manualMode && !isVoteDone"
+        v-if="sessionStore.manualMode && !sessionStore.handRaiseMode && !isVoteDone"
         class="absolute top-[65%] left-1/2 -translate-x-1/2 px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
         @click="isVoteActive ? stopVoteSession() : startVoteSession()"
       >
@@ -280,8 +348,10 @@ async function stopVoteSession() {
 
 
       <div class="absolute text-7xl font-bold font-title -translate-x-1/2 left-[50.5%] top-[3.5%] text-center ">
+        <!-- Main levée : pas de minuteur, un tiret pour ne pas laisser le cadran vide -->
+        <template v-if="sessionStore.handRaiseMode">-</template>
         <span
-          v-if="isClosing"
+          v-else-if="isClosing"
           class="text-3xl"
         >Dépouillement...</span>
         <template v-else>{{ timeRemaining }}</template>
@@ -296,10 +366,12 @@ async function stopVoteSession() {
 
       <!-- Vote proportion bar -->
       <VoteProportionBar
-        v-if="isVoteActive || isVoteDone"
+        v-if="isVoteActive || isVoteDone || sessionStore.handRaiseMode"
         :vote-index="voteIndex"
         :label-a="titleA"
         :label-b="titleB"
+        :editable="sessionStore.handRaiseMode && !isVoteDone"
+        @hand-raise-input="!isVoteActive && startVoteSession()"
       />
 
     </div>

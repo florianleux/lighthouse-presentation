@@ -74,6 +74,55 @@ function generateSessionId(): string {
 
 const initialSessionData = loadSessionData()
 
+// Main levée : réglage du présentateur, conservé hors session (survit à « Nouvelle session »)
+function loadHandRaiseMode(): boolean {
+  try {
+    return localStorage.getItem(STORAGE_KEYS.HAND_RAISE_MODE) === 'true'
+  } catch {
+    return false
+  }
+}
+
+function saveHandRaiseMode(enabled: boolean) {
+  try {
+    localStorage.setItem(STORAGE_KEYS.HAND_RAISE_MODE, String(enabled))
+  } catch {
+    // localStorage indisponible : le mode reste en mémoire
+  }
+}
+
+/**
+ * Fixe à `n` le nombre de membres du groupe `key`, avec plafond en cascade :
+ * chaque groupe est plafonné à (équipage - groupes précédents dans `order`),
+ * les groupes suivants sont réduits si besoin. Les membres déjà placés restent
+ * en place ; les nouveaux sont tirés au hasard parmi les neutres.
+ */
+function assignHandRaiseCounts<K extends string>(
+  groups: Record<K, string[]>,
+  order: readonly K[],
+  key: K,
+  n: number,
+): void {
+  let remaining = sessionStore.crew.length
+  let keyTarget = 0
+  for (const k of order) {
+    const target = k === key
+      ? Math.max(0, Math.min(Math.floor(n) || 0, remaining))
+      : Math.min(groups[k].length, remaining)
+    if (k === key) keyTarget = target
+    if (groups[k].length > target) groups[k] = groups[k].slice(0, target)
+    remaining -= target
+  }
+
+  const placed = new Set(order.flatMap(k => groups[k]))
+  const neutral = sessionStore.crew.map(m => m.participantId).filter(id => !placed.has(id))
+  const added: string[] = []
+  while (groups[key].length + added.length < keyTarget && neutral.length > 0) {
+    added.push(...neutral.splice(Math.floor(Math.random() * neutral.length), 1))
+  }
+  if (added.length > 0) groups[key] = [...groups[key], ...added]
+}
+
 // ===========================================
 // Vote store (presenter's chosen path)
 // ===========================================
@@ -137,7 +186,36 @@ export const sessionStore = reactive({
   // Manual mode (presenter picks directly)
   manualMode: false,
 
+  // Main levée : le présentateur saisit le nombre de mains levées (implique le mode manuel)
+  handRaiseMode: loadHandRaiseMode(),
+
+  get isManual(): boolean {
+    return this.manualMode || this.handRaiseMode
+  },
+
   // Actions
+  setHandRaiseMode(enabled: boolean) {
+    this.handRaiseMode = enabled
+    saveHandRaiseMode(enabled)
+  },
+
+  assignHandRaiseVote(voteIndex: number, side: 'A' | 'B', n: number) {
+    const results = this.voteResults[voteIndex]
+    if (!results) return
+    assignHandRaiseCounts(results, ['A', 'B'] as const, side, n)
+    persistSession()
+  },
+
+  assignHandRaisePoll(pollId: string, choice: PollChoice, n: number) {
+    let results = this.pollResults[pollId]
+    if (!results) {
+      results = { newbie: [], captain: [], admiral: [] }
+      this.pollResults[pollId] = results
+    }
+    assignHandRaiseCounts(results, POLL_CONFIG.CHOICES, choice, n)
+    persistSession()
+  },
+
   addCrewMember(member: CrewMember) {
     const existing = this.crew.find((m) => m.participantId === member.participantId)
     if (existing) {

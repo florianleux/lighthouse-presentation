@@ -53,6 +53,17 @@ const avatarPositions = computed(() => {
 
   return positions
 })
+
+// Main levée : un lot d'avatars arrive d'un coup ; on étale les départs
+// pour que tout le monde ait rejoint son côté en 3 s max (2,2 s de délai + 0,8 s de trajet).
+const HAND_RAISE_MAX_DELAY_MS = 2200
+
+function moveDelay(id: string): string {
+  if (!sessionStore.handRaiseMode) return '0ms'
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
+  return `${Math.abs(hash) % HAND_RAISE_MAX_DELAY_MS}ms`
+}
 </script>
 
 <template>
@@ -65,6 +76,7 @@ const avatarPositions = computed(() => {
         :style="{
           ...avatarPositions.get(member.participantId),
           animationDelay: `${(i * 370) % 2000}ms`,
+          transitionDelay: moveDelay(member.participantId),
         }"
       >
         <AvatarPreview

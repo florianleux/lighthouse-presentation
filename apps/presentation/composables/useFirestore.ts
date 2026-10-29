@@ -251,12 +251,13 @@ async function closeVote(
   result: { winner: 'A' | 'B'; counts: { A: number; B: number }; total: number }
 ) {
   if (!db || !presentationId) return
+  const pid = presentationId
 
   const voteId = voteDocId(voteIndex)
   const voteRef = doc(
     db,
     FIRESTORE_COLLECTIONS.PRESENTATIONS,
-    presentationId,
+    pid,
     FIRESTORE_COLLECTIONS.VOTES,
     voteId
   )
@@ -267,8 +268,10 @@ async function closeVote(
       closedAt: Date.now(),
       result,
     })
+    // Nouvelle session lancée pendant l'écriture : ne rien écrire dans la nouvelle.
+    if (presentationId !== pid) return
     // Persist winner + resolved derived options
-    const presRef = doc(db, FIRESTORE_COLLECTIONS.PRESENTATIONS, presentationId)
+    const presRef = doc(db!, FIRESTORE_COLLECTIONS.PRESENTATIONS, pid)
     const winnerUpdate: Record<string, unknown> = {
       [`voteWinners.${voteIndex}`]: result.winner,
     }
@@ -282,6 +285,7 @@ async function closeVote(
       }
     }
     await updateDoc(presRef, winnerUpdate)
+    if (presentationId !== pid) return
     await publishSessionState('vote-results', {
       voteResult: { index: voteIndex, winner: result.winner, countA: result.counts.A, countB: result.counts.B }
     })
@@ -491,12 +495,16 @@ function randomAvatar(): string {
   return JSON.stringify(avatar)
 }
 
+// Les boucles de simulation durent jusqu'à 20 s : elles s'arrêtent dès qu'une
+// nouvelle session est lancée, sinon elles écriraient dans la nouvelle.
 async function generateFakeParticipants(count: number, spreadMs: number = 0) {
   if (!db || !presentationId) return
+  const pid = presentationId
 
   const delay = spreadMs > 0 ? spreadMs / count : 0
 
   for (let i = 0; i < count; i++) {
+    if (!db || presentationId !== pid) return
     const id = `fake-${crypto.randomUUID()}`
     const name = PIRATE_NAMES[i % PIRATE_NAMES.length] + (i >= PIRATE_NAMES.length ? ` ${Math.floor(i / PIRATE_NAMES.length) + 1}` : '')
     const participantRef = doc(
@@ -527,10 +535,12 @@ async function simulateFakeVotes(
   maxDurationMs: number = 20000
 ) {
   if (!db || !presentationId || participants.length === 0) return
+  const pid = presentationId
 
   const delay = maxDurationMs / participants.length
 
   for (let i = 0; i < participants.length; i++) {
+    if (!db || presentationId !== pid) return
     const choice: 'A' | 'B' = Math.random() > 0.5 ? 'A' : 'B'
     const ballotRef = doc(
       db,
@@ -563,10 +573,12 @@ async function simulateFakePollResponses(
 ) {
   if (!db || !presentationId || participants.length === 0) return
 
+  const pid = presentationId
   const choices: PollChoice[] = ['newbie', 'captain', 'admiral']
   const delay = maxDurationMs / participants.length
 
   for (let i = 0; i < participants.length; i++) {
+    if (!db || presentationId !== pid) return
     const choice = choices[Math.floor(Math.random() * choices.length)]
     const responseRef = doc(
       db,

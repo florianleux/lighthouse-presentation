@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted, inject } from 'vue'
+import { computed, nextTick, reactive, ref, watch, onMounted, onUnmounted, inject } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, currentPhase, phaseData, firestore, getFakeCrewIds } from '../setup/main'
 import { POLL_CONFIG } from '../../../shared/constants'
+import type { PollChoice } from '../../../shared/types'
 import { useGraceClose } from '../composables/useGraceClose'
 
 const props = defineProps<{
@@ -72,6 +73,7 @@ watch(() => sessionStore.pollPhase, (phase) => {
 
 // Auto-stop when all crew members have voted
 watch(totalPollVotes, (total) => {
+  if (sessionStore.handRaiseMode) return
   if (isPollActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
     console.log('[PollButtons] All crew voted, auto-stopping poll')
     stopPollSession()
@@ -98,6 +100,7 @@ watch(clicks, (currentClick) => {
 
 // Keyboard shortcut: V to start poll
 function handleKeydown(e: KeyboardEvent) {
+  if (e.target instanceof HTMLInputElement) return
   if (e.key.toLowerCase() === 'v' && !isPollActive.value && sessionStore.pollPhase !== 'ended') {
     startPollSession()
   }
@@ -128,7 +131,14 @@ function isSlideVisible(): boolean {
 // A poll can only be started once per session — prevents re-triggering on back/forward navigation
 const hasBeenStarted = computed(() => sessionStore.startedPollIds.has(props.pollId))
 watch(currentSlideNo, () => {
-  if (sessionStore.manualMode || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
+  // Main levée : en quittant la slide, le poll se clôture avec les chiffres saisis
+  if (sessionStore.handRaiseMode && isPollActive.value) {
+    setTimeout(() => {
+      if (!isSlideVisible() && isPollActive.value) stopPollSession()
+    }, 200)
+    return
+  }
+  if (sessionStore.isManual || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return
   setTimeout(() => {
     if (isSlideVisible() && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activePollId === null && sessionStore.pollPhase === 'waiting') {
@@ -141,7 +151,6 @@ function startPollSession() {
   sessionStore.startedPollIds.add(props.pollId)
   sessionStore.activePollId = props.pollId
   sessionStore.pollPhase = 'polling'
-  startTimer()
 
   // Update session phase
   currentPhase.value = 'polling'
@@ -149,6 +158,14 @@ function startPollSession() {
 
   // Firestore: open poll and listen for responses
   firestore.openPoll(props.pollId, POLL_DURATION)
+
+  // Main levée : pas de minuteur, pas de réponses, le présentateur saisit les comptes
+  if (sessionStore.handRaiseMode) {
+    console.log('[PollButtons] Hand-raise poll session started for', props.pollId)
+    return
+  }
+
+  startTimer()
   firestore.listenToPollResponses(props.pollId, (participantId, choice) => {
     sessionStore.recordPollVote(participantId, props.pollId, choice)
   })
@@ -171,7 +188,7 @@ async function stopPollSession() {
   clearTimer()
 
   // Délai de grâce, comme pour les votes (VoteSlide), sauf si tout le monde a répondu.
-  if (totalPollVotes.value < sessionStore.crew.length) {
+  if (!sessionStore.handRaiseMode && totalPollVotes.value < sessionStore.crew.length) {
     await waitForStragglers()
     // Session réinitialisée pendant le dépouillement.
     if (!isPollActive.value) return
@@ -199,6 +216,49 @@ async function stopPollSession() {
 
   console.log('[PollButtons] Poll ended for', props.pollId)
 }
+
+// --- Saisie main levée ---
+const validated = reactive<Record<PollChoice, boolean>>({ newbie: false, captain: false, admiral: false })
+const inputValues = reactive<Record<PollChoice, string | number>>({ newbie: '', captain: '', admiral: '' })
+const inputEls: Partial<Record<PollChoice, HTMLInputElement | null>> = {}
+
+watch(() => sessionStore.sessionId, () => {
+  validated.newbie = validated.captain = validated.admiral = false
+  inputValues.newbie = inputValues.captain = inputValues.admiral = ''
+})
+
+// Main levée : saisie directe, sans « Démarrer » (le poll s'ouvre à la première saisie)
+const canEdit = computed(() =>
+  sessionStore.handRaiseMode && sessionStore.pollPhase !== 'ended'
+  && (isPollActive.value || sessionStore.activePollId === null)
+)
+
+function showInput(choice: PollChoice) {
+  return canEdit.value && !validated[choice]
+}
+
+function submit(choice: PollChoice, e: KeyboardEvent) {
+  if (!isPollActive.value) startPollSession()
+  sessionStore.assignHandRaisePoll(props.pollId, choice, Number(inputValues[choice]))
+  validated[choice] = true
+  // Rendre le focus à la slide : Slidev ignore ses raccourcis tant qu'un input a le focus
+  ;(e.target as HTMLInputElement).blur()
+}
+
+async function edit(choice: PollChoice) {
+  if (!canEdit.value) return
+  inputValues[choice] = results.value[choice].length
+  validated[choice] = false
+  await nextTick()
+  inputEls[choice]?.focus()
+  inputEls[choice]?.select()
+}
+
+const counters: { choice: PollChoice; style: string }[] = [
+  { choice: 'newbie', style: 'top: 88%; left: 21%' },
+  { choice: 'captain', style: 'top: 88%; left: 54%' },
+  { choice: 'admiral', style: 'top: 87.6%; left: 86.4%' },
+]
 </script>
 
 <template>
@@ -206,14 +266,28 @@ async function stopPollSession() {
     <!-- Create a Slidev click step for clicker-only control -->
     <span v-click="1" class="hidden" />
 
-    <div class="absolute top-[88%] left-[21%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title">{{ results.newbie.length }}</div>
-    </div>
-    <div class="absolute top-[88%] left-[54%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title">{{ results.captain.length }}</div>
-    </div>
-    <div class="absolute top-[87.6%] left-[86.4%] p-1 px-2 text-center -translate-x-1/2">
-      <div class="text-4xl font-bold font-title">{{ results.admiral.length }}</div>
+    <div
+      v-for="{ choice, style } in counters"
+      :key="choice"
+      class="absolute p-1 px-2 text-center -translate-x-1/2"
+      :style="style"
+    >
+      <input
+        v-if="showInput(choice)"
+        :ref="(el) => { inputEls[choice] = el as HTMLInputElement | null }"
+        v-model="inputValues[choice]"
+        type="number"
+        min="0"
+        :max="sessionStore.crew.length"
+        class="hand-raise-input text-4xl font-bold font-title"
+        @keydown.enter.prevent="submit(choice, $event)"
+      />
+      <div
+        v-else
+        class="text-4xl font-bold font-title"
+        :class="{ 'cursor-pointer': canEdit }"
+        @click="edit(choice)"
+      >{{ results[choice].length }}</div>
     </div>
 
     <div
@@ -236,7 +310,7 @@ async function stopPollSession() {
     </div>
 
     <button
-      v-if="sessionStore.pollPhase !== 'ended' && (sessionStore.manualMode || isPollActive)"
+      v-if="!sessionStore.handRaiseMode && sessionStore.pollPhase !== 'ended' && (sessionStore.manualMode || isPollActive)"
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
       @click="isPollActive ? stopPollSession() : startPollSession()"
     >
@@ -244,3 +318,21 @@ async function stopPollSession() {
     </button>
   </div>
 </template>
+
+<style scoped>
+.hand-raise-input {
+  width: 1.8em;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: center;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.hand-raise-input::-webkit-outer-spin-button,
+.hand-raise-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>
