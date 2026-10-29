@@ -51,7 +51,7 @@ function blockNavigation(e: KeyboardEvent) {
 
   // Main levée : « suivant » clôture le vote avec les chiffres saisis.
   // Avant toute saisie, il est bloqué pour ne pas passer le vote sans gagnant.
-  if (sessionStore.handRaiseMode && isForwardKey && !isVoteDone.value && isSlideVisible()) {
+  if (sessionStore.localMode && isForwardKey && !isVoteDone.value && isSlideVisible()) {
     e.preventDefault()
     e.stopPropagation()
     if (isVoteActive.value) closeHandRaise()
@@ -190,7 +190,7 @@ const totalVotes = computed(() => {
 })
 
 watch(totalVotes, (total) => {
-  if (sessionStore.handRaiseMode) return
+  if (sessionStore.localMode) return
   if (isVoteActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
     console.log('[VoteSlide] All crew voted, auto-stopping vote')
     stopVoteSession()
@@ -211,7 +211,7 @@ function isSlideVisible(): boolean {
 const hasBeenStarted = computed(() => sessionStore.startedVoteIndices.has(voteIndex.value))
 
 watch(currentSlideNo, () => {
-  if (sessionStore.handRaiseMode || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
+  if (sessionStore.localMode || isVoteDone.value || isVoteActive.value || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return // Don't auto-start during reset/lobby
   setTimeout(() => {
     if (isSlideVisible() && !isVoteDone.value && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activeVoteIndex === null && sessionStore.votePhase === 'waiting') {
@@ -233,7 +233,7 @@ function startVoteSession() {
   firestore.openVote(voteIndex.value, VOTE_DURATION)
 
   // Main levée : pas de minuteur, pas de bulletins, les bots restent au milieu
-  if (sessionStore.handRaiseMode) {
+  if (sessionStore.localMode) {
     console.log('[VoteSlide] Hand-raise vote session started for vote', voteIndex.value)
     return
   }
@@ -340,7 +340,7 @@ async function stopVoteSession() {
 
       <div class="absolute text-7xl font-bold font-title -translate-x-1/2 left-[50.5%] top-[3.5%] text-center ">
         <!-- Main levée : pas de minuteur, un tiret pour ne pas laisser le cadran vide -->
-        <template v-if="sessionStore.handRaiseMode">-</template>
+        <template v-if="sessionStore.localMode">-</template>
         <span
           v-else-if="isClosing"
           class="text-3xl"
@@ -357,11 +357,11 @@ async function stopVoteSession() {
 
       <!-- Vote proportion bar -->
       <VoteProportionBar
-        v-if="isVoteActive || isVoteDone || sessionStore.handRaiseMode"
+        v-if="isVoteActive || isVoteDone || sessionStore.localMode"
         :vote-index="voteIndex"
         :label-a="titleA"
         :label-b="titleB"
-        :editable="sessionStore.handRaiseMode && !isVoteDone"
+        :editable="sessionStore.localMode && !isVoteDone"
         @hand-raise-input="!isVoteActive && startVoteSession()"
       />
 

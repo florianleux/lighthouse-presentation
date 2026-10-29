@@ -63,7 +63,6 @@ export const AVATAR_CONFIG = {
 export const STORAGE_KEYS = {
   // Presentation app
   SESSION_DATA: "lighthouse-session-data",
-  HAND_RAISE_MODE: "lighthouse-hand-raise-mode",
 
   // Vote app
   CREW_MEMBER: "lighthouse-pirates-crew",

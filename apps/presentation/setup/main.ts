@@ -47,6 +47,7 @@ interface SessionData {
   crew: CrewMember[]
   voteResults: Record<number, VoteResults>
   pollResults: Record<string, PollResults>
+  localMode?: boolean
 }
 
 function loadSessionData(): SessionData | null {
@@ -73,23 +74,6 @@ function generateSessionId(): string {
 }
 
 const initialSessionData = loadSessionData()
-
-// Main levée : réglage du présentateur, conservé hors session (survit à « Nouvelle session »)
-function loadHandRaiseMode(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEYS.HAND_RAISE_MODE) === 'true'
-  } catch {
-    return false
-  }
-}
-
-function saveHandRaiseMode(enabled: boolean) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.HAND_RAISE_MODE, String(enabled))
-  } catch {
-    // localStorage indisponible : le mode reste en mémoire
-  }
-}
 
 /**
  * Fixe à `n` le nombre de membres du groupe `key`, avec plafond en cascade :
@@ -183,15 +167,10 @@ export const sessionStore = reactive({
   pollPhase: 'waiting' as 'waiting' | 'polling' | 'ended',
   startedPollIds: new Set<string>(),
 
-  // Main levée : le présentateur saisit le nombre de mains levées (sinon mode classique)
-  handRaiseMode: loadHandRaiseMode(),
+  // Mode local : main levée, aucun accès réseau (choisi à la création de la session)
+  localMode: initialSessionData?.localMode ?? false,
 
   // Actions
-  setHandRaiseMode(enabled: boolean) {
-    this.handRaiseMode = enabled
-    saveHandRaiseMode(enabled)
-  },
-
   assignHandRaiseVote(voteIndex: number, side: 'A' | 'B', n: number) {
     const results = this.voteResults[voteIndex]
     if (!results) return
@@ -288,7 +267,7 @@ export const sessionStore = reactive({
     phaseData.value = {}
   },
 
-  async startNewSession() {
+  async startNewSession(localMode = false) {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
     }
@@ -297,10 +276,17 @@ export const sessionStore = reactive({
     this.createdAt = Date.now()
     this.lastSlide = 1
     this.resetSession()
+    this.localMode = localMode
     persistSession()
 
-    // Create Firestore presentation document
     firestore.disconnect()
+    // Mode local : aucune connexion Firestore, la session vit dans le localStorage
+    if (localMode) {
+      console.log('[Session] New local session started:', this.keynoteId)
+      return
+    }
+
+    // Create Firestore presentation document
     const connected = firestore.connect()
     if (connected && this.keynoteId) {
       await firestore.createPresentation(this.keynoteId, this.keynoteId)
@@ -340,6 +326,7 @@ function persistSession() {
     crew: sessionStore.crew,
     voteResults: sessionStore.voteResults,
     pollResults: sessionStore.pollResults,
+    localMode: sessionStore.localMode,
   })
 }
 
@@ -354,8 +341,8 @@ export function getFakeCrewIds(): string[] {
 // ===========================================
 
 export default defineAppSetup(({ app }) => {
-  // Connect to Firestore
-  const connected = firestore.connect()
+  // Connect to Firestore — jamais en mode local (toutes ses fonctions font `if (!db) return`)
+  const connected = sessionStore.localMode ? false : firestore.connect()
   sessionStore.isRealtimeConnected = connected
 
   // Sync connection status
@@ -388,6 +375,9 @@ export default defineAppSetup(({ app }) => {
     })
 
     console.log('[Session] Restored session:', sessionStore.keynoteId)
+  } else if (sessionStore.localMode && sessionStore.keynoteId) {
+    currentPhase.value = 'idle'
+    console.log('[Session] Restored local session:', sessionStore.keynoteId)
   }
 
   app.provide('voteStore', voteStore)

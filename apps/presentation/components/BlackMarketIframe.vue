@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { sessionStore } from '../setup/main'
 
 const props = withDefaults(defineProps<{
   url?: string
+  // Mode local (hors ligne) : capture affichée à la place de l'iframe
+  screenshot?: string
   scale?: number
   delay?: number
 }>(), {
   url: 'https://blackmarket.florianleux.fr',
+  screenshot: '/blackmarket/main.png',
   scale: 0.6,
   delay: 1000,
 })
@@ -43,8 +47,14 @@ const scalePercent = 100 / props.scale
     ref="container"
     class="w-full h-full"
   >
+    <img
+      v-if="sessionStore.localMode"
+      :src="screenshot"
+      class="w-full h-full object-cover object-top"
+      alt=""
+    />
     <iframe
-      v-if="shouldLoad"
+      v-else-if="shouldLoad"
       :src="url"
       class="w-full h-full border-0"
       :style="{

@@ -18,6 +18,15 @@ importers:
 
   apps/presentation:
     dependencies:
+      '@fontsource/crimson-text':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/fira-code':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/germania-one':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@slidev/cli':
         specifier: ^51.0.0
         version: 51.8.2(@babel/parser@7.28.6)(@nuxt/kit@3.20.2)(@types/markdown-it@14.1.2)(@types/node@22.19.7)(@vue/compiler-sfc@3.5.27)(lightningcss@1.31.1)(markdown-it-async@2.2.0)(postcss@8.5.6)
@@ -728,6 +737,15 @@ packages:
 
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@fontsource/crimson-text@5.3.0':
+    resolution: {integrity: sha512-W1kLgOlsCD/8DhUNECgYvyx86+t3wAvA0w09juD3XtmwAtV6vuSEwijN4q8fnQ1LgQWV377jQiL8dpSYwLnoAw==}
+
+  '@fontsource/fira-code@5.3.0':
+    resolution: {integrity: sha512-EJL968RJRkakubAj/coU8pSUaeTE5UNoRjtzAr6kGiSZ3jWuN8/AKWHwym/PFUaQL1q7IL/H+EXs4358YhrTBQ==}
+
+  '@fontsource/germania-one@5.3.0':
+    resolution: {integrity: sha512-GLN9hLkFwn4siRGLexERaWILDZgwUIZyEOcAMOFDDPxrlYaeWJKZnSNzea+F1UXkuhHcHHlvxG9BJSgeZdeJDg==}
 
   '@grpc/grpc-js@1.9.15':
     resolution: {integrity: sha512-nqE7Hc0AzI+euzUwDAy0aY5hCp10r734gMGRdU+qOPX0XSceI2ULrcXB5U2xSc5VkWwalCj4M7GzCAygZl2KoQ==}
@@ -4067,6 +4085,12 @@ snapshots:
       '@floating-ui/core': 1.7.3
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@fontsource/crimson-text@5.3.0': {}
+
+  '@fontsource/fira-code@5.3.0': {}
+
+  '@fontsource/germania-one@5.3.0': {}
 
   '@grpc/grpc-js@1.9.15':
     dependencies:

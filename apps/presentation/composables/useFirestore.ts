@@ -515,6 +515,19 @@ function randomAvatar(): string {
 
 // Les boucles de simulation durent jusqu'à 20 s : elles s'arrêtent dès qu'une
 // nouvelle session est lancée, sinon elles écriraient dans la nouvelle.
+// Faux membres d'équipage (bots), sans écriture : le mode local les ajoute directement au store
+export function createFakeCrewMembers(count: number): CrewMember[] {
+  const names = pickDevNames(count)
+  const now = Date.now()
+  return names.map((name, i) => ({
+    participantId: `fake-${crypto.randomUUID()}`,
+    name,
+    avatar: randomAvatar() as unknown as CrewMember['avatar'], // JSON, comme les participants Firestore
+    joinedAt: now + i,
+    isFake: true,
+  }))
+}
+
 async function generateFakeParticipants(count: number, spreadMs: number = 0) {
   if (!db || !presentationId) return
   const pid = presentationId
