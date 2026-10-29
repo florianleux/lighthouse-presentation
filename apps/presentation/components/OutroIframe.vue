@@ -6,11 +6,12 @@ import { METRICS_LIST } from '../../../shared/metrics-data'
 
 // CLS = vote index 0, TBT = vote index 3
 // Visual branches: {cls}-{tbt} → a-a, a-b, b-a, b-b
-const branchUrl = computed(() => {
+const branch = computed(() => {
   const cls = (voteStore.getChoice(0) || 'A').toLowerCase()
   const tbt = (voteStore.getChoice(3) || 'A').toLowerCase()
-  return `https://${cls}-${tbt}--blackmarket-lighthouse.netlify.app`
+  return `${cls}-${tbt}`
 })
+const branchUrl = computed(() => `https://${branch.value}--blackmarket-lighthouse.netlify.app`)
 
 interface ScoreEntry {
   FCP: number
@@ -72,6 +73,7 @@ function thresholdColor(key: string, value: number): string {
     <div class="w-[34%] absolute right-[5%] top-[8.3%] aspect-[1960/1250] -rotate-0.7">
       <BlackMarketIframe
         :url="branchUrl"
+        :screenshot="`/blackmarket/${branch}.png`"
         :delay="500"
         :scale="0.3"
       />

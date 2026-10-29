@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { sessionStore } from '../setup/main'
 import { computeSpiralPositions, applyJitter } from '../utils/spiral-positions'
+import { staggerDelay } from '../utils/stagger'
 
 const props = withDefaults(defineProps<{
   avatarSize?: number
@@ -25,6 +26,7 @@ const spiral = computeSpiralPositions({ top: 0, left: 0, right: 0, bottom: 0 })
         :style="{
           ...applyJitter(spiral[i % 120], member.participantId),
           animationDelay: `${(i * 370) % 2000}ms`,
+          transitionDelay: staggerDelay(member.participantId),
         }"
       >
         <AvatarPreview

@@ -73,7 +73,7 @@ watch(() => sessionStore.pollPhase, (phase) => {
 
 // Auto-stop when all crew members have voted
 watch(totalPollVotes, (total) => {
-  if (sessionStore.handRaiseMode) return
+  if (sessionStore.localMode) return
   if (isPollActive.value && sessionStore.crew.length > 0 && total >= sessionStore.crew.length) {
     console.log('[PollButtons] All crew voted, auto-stopping poll')
     stopPollSession()
@@ -132,13 +132,13 @@ function isSlideVisible(): boolean {
 const hasBeenStarted = computed(() => sessionStore.startedPollIds.has(props.pollId))
 watch(currentSlideNo, () => {
   // Main levée : en quittant la slide, le poll se clôture avec les chiffres saisis
-  if (sessionStore.handRaiseMode && isPollActive.value) {
+  if (sessionStore.localMode && isPollActive.value) {
     setTimeout(() => {
       if (!isSlideVisible() && isPollActive.value) stopPollSession()
     }, 200)
     return
   }
-  if (sessionStore.handRaiseMode || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
+  if (sessionStore.localMode || isPollActive.value || sessionStore.pollPhase === 'ended' || hasBeenStarted.value) return
   if (currentPhase.value === 'lobby') return
   setTimeout(() => {
     if (isSlideVisible() && !hasBeenStarted.value && currentPhase.value !== 'lobby' && sessionStore.activePollId === null && sessionStore.pollPhase === 'waiting') {
@@ -160,7 +160,7 @@ function startPollSession() {
   firestore.openPoll(props.pollId, POLL_DURATION)
 
   // Main levée : pas de minuteur, pas de réponses, le présentateur saisit les comptes
-  if (sessionStore.handRaiseMode) {
+  if (sessionStore.localMode) {
     console.log('[PollButtons] Hand-raise poll session started for', props.pollId)
     return
   }
@@ -188,7 +188,7 @@ async function stopPollSession() {
   clearTimer()
 
   // Délai de grâce, comme pour les votes (VoteSlide), sauf si tout le monde a répondu.
-  if (!sessionStore.handRaiseMode && totalPollVotes.value < sessionStore.crew.length) {
+  if (!sessionStore.localMode && totalPollVotes.value < sessionStore.crew.length) {
     await waitForStragglers()
     // Session réinitialisée pendant le dépouillement.
     if (!isPollActive.value) return
@@ -229,7 +229,7 @@ watch(() => sessionStore.sessionId, () => {
 
 // Main levée : saisie directe, sans « Démarrer » (le poll s'ouvre à la première saisie)
 const canEdit = computed(() =>
-  sessionStore.handRaiseMode && sessionStore.pollPhase !== 'ended'
+  sessionStore.localMode && sessionStore.pollPhase !== 'ended'
   && (isPollActive.value || sessionStore.activePollId === null)
 )
 
@@ -310,7 +310,7 @@ const counters: { choice: PollChoice; style: string }[] = [
     </div>
 
     <button
-      v-if="!sessionStore.handRaiseMode && isPollActive"
+      v-if="!sessionStore.localMode && isPollActive"
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
       @click="stopPollSession()"
     >

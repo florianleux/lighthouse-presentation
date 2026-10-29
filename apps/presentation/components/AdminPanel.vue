@@ -2,6 +2,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { useNav } from '@slidev/client'
 import { sessionStore, voteStore, firestore } from '../setup/main'
+import { createFakeCrewMembers } from '../composables/useFirestore'
 import { METRICS_LIST } from '../../../shared/metrics-data'
 
 const { go } = useNav()
@@ -17,12 +18,18 @@ const emit = defineEmits<{
 const keynoteId = computed(() => sessionStore.keynoteId)
 const crewCount = computed(() => sessionStore.crew.length)
 const isGenerating = ref(false)
+// Mode de la prochaine session : appliqué au clic sur « Nouvelle session »
+const nextLocalMode = ref(sessionStore.localMode)
 const fakeCrewCount = ref(25)
 
 async function generateFakeParticipants() {
   if (isGenerating.value) return
   isGenerating.value = true
   try {
+    if (sessionStore.localMode) {
+      createFakeCrewMembers(fakeCrewCount.value).forEach(m => sessionStore.addCrewMember(m))
+      return
+    }
     await firestore.generateFakeParticipants(fakeCrewCount.value, 5000)
   } catch (err) {
     console.error('[AdminPanel] Failed to generate fake participants:', err)
@@ -61,7 +68,7 @@ async function startNewSession() {
     await nextTick()
 
     // Reset session (await Firestore doc creation before navigating)
-    await sessionStore.startNewSession()
+    await sessionStore.startNewSession(nextLocalMode.value)
 
     // Navigate to slide 1 (this will trigger publishSessionState via the watch in global-top)
     go(1)
@@ -80,6 +87,35 @@ async function startNewSession() {
           </div>
 
           <div class="panel-content">
+            <!-- Vote Mode -->
+            <div class="section">
+              <label>Mode de la session</label>
+              <div class="radio-group">
+                <label class="radio-row">
+                  <input
+                    type="radio"
+                    name="vote-mode"
+                    :checked="!nextLocalMode"
+                    @change="nextLocalMode = false"
+                  />
+                  <span class="toggle-label">Classique</span>
+                </label>
+                <label class="radio-row">
+                  <input
+                    type="radio"
+                    name="vote-mode"
+                    :checked="nextLocalMode"
+                    @change="nextLocalMode = true"
+                  />
+                  <span class="toggle-label">Local</span>
+                </label>
+              </div>
+              <p class="toggle-hint">
+                {{ nextLocalMode ? 'Saisie à main levée, aucun accès réseau' : 'L\'audience vote depuis l\'app avec un minuteur (bots aléatoires)' }}<br>
+                Appliqué à la prochaine « Nouvelle session ».
+              </p>
+            </div>
+
             <!-- Session Info -->
             <div class="section">
               <label>Session</label>
@@ -93,44 +129,16 @@ async function startNewSession() {
               </button>
             </div>
 
-            <!-- Vote Mode -->
-            <div class="section">
-              <label>Mode de vote</label>
-              <div class="radio-group">
-                <label class="radio-row">
-                  <input
-                    type="radio"
-                    name="vote-mode"
-                    :checked="!sessionStore.handRaiseMode"
-                    @change="sessionStore.setHandRaiseMode(false)"
-                  />
-                  <span class="toggle-label">Classique</span>
-                </label>
-                <label class="radio-row">
-                  <input
-                    type="radio"
-                    name="vote-mode"
-                    :checked="sessionStore.handRaiseMode"
-                    @change="sessionStore.setHandRaiseMode(true)"
-                  />
-                  <span class="toggle-label">Main levée</span>
-                </label>
-              </div>
-              <p class="toggle-hint">
-                {{ sessionStore.handRaiseMode ? 'Le présentateur saisit le nombre de mains levées (bots immobiles, pas de minuteur)' : 'L\'audience vote depuis l\'app avec un minuteur (bots aléatoires)' }}
-              </p>
-            </div>
-
             <!-- Connection Status -->
             <div class="section">
               <label>Connexion</label>
               <div class="connection-status">
                 <span
                   class="connection-dot"
-                  :class="isFirestoreConnected ? 'connected' : 'disconnected'"
+                  :class="isFirestoreConnected || sessionStore.localMode ? 'connected' : 'disconnected'"
                 ></span>
                 <span class="connection-label">
-                  Firestore : {{ isFirestoreConnected ? 'Connecté' : 'Hors ligne' }}
+                  {{ sessionStore.localMode ? 'Local (hors ligne)' : `Firestore : ${isFirestoreConnected ? 'Connecté' : 'Hors ligne'}` }}
                 </span>
               </div>
             </div>
@@ -159,7 +167,7 @@ async function startNewSession() {
                 <button
                   class="panel-btn secondary"
                   style="flex: 1"
-                  :disabled="isGenerating || !isFirestoreConnected"
+                  :disabled="isGenerating || (!isFirestoreConnected && !sessionStore.localMode)"
                   @click="generateFakeParticipants"
                 >
                   {{ isGenerating ? 'Génération...' : 'Générer un faux équipage' }}

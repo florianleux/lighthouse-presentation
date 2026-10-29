@@ -8,6 +8,9 @@
     "export": "slidev export"
   },
   "dependencies": {
+    "@fontsource/crimson-text": "^5.3.0",
+    "@fontsource/fira-code": "^5.3.0",
+    "@fontsource/germania-one": "^5.3.0",
     "@slidev/cli": "^51.0.0",
     "@slidev/theme-default": "latest",
     "shiki": "^3.22.0",

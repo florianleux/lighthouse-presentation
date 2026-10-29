@@ -12,12 +12,14 @@ aspectRatio: '1960/1104'
 transition: slide-left
 mdc: true
 fonts:
+  provider: none
   sans: 'Crimson Text'
   serif: 'Germania One'
   mono: 'Fira Code'
 css: unocss
 ---
 
+<style src="./styles/fonts.css"></style>
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
 <div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-left.webp')">
