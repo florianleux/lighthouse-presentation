@@ -8,7 +8,7 @@
       metric="si"
       option="b"
     >
-      <div class="text-5xl text-center mb-20">Même image, formats différents.</div>
+      <div class="text-5xl text-center mb-20">{{ $t('slides.si.b1.title') }}</div>
 
       <div
         v-click="1"
@@ -18,7 +18,7 @@
         <div class="flex flex-col items-center gap-0">
           <div class="text-2xl text-center opacity-70">1992</div>
           <div class="text-5xl text-center font-bold">JPG</div>
-          <div class="text-2xl text-center opacity-70">Avec perte</div>
+          <div class="text-2xl text-center opacity-70">{{ $t('slides.si.b1.lossy') }}</div>
           <div class="text-3xl text-center mt-5">86 KB</div>
         </div>
 
@@ -29,7 +29,7 @@
         >
           <div class="text-2xl text-center opacity-70">1996</div>
           <div class="text-5xl text-center font-bold">PNG</div>
-          <div class="text-2xl text-center opacity-70">Sans perte</div>
+          <div class="text-2xl text-center opacity-70">{{ $t('slides.si.b1.lossless') }}</div>
           <div class="text-3xl text-center mt-5">189 KB</div>
         </div>
 
@@ -40,7 +40,7 @@
         >
           <div class="text-2xl text-center opacity-70">2010</div>
           <div class="text-5xl text-center font-bold">WebP</div>
-          <div class="text-2xl text-center opacity-70">Avec / Sans perte</div>
+          <div class="text-2xl text-center opacity-70">{{ $t('slides.si.b1.lossyLossless') }}</div>
           <div class="text-3xl text-center mt-5">24 KB</div>
         </div>
 
@@ -51,7 +51,7 @@
         >
           <div class="text-2xl text-center opacity-70">2019</div>
           <div class="text-5xl text-center font-bold">AVIF</div>
-          <div class="text-2xl text-center opacity-70">Avec / Sans perte</div>
+          <div class="text-2xl text-center opacity-70">{{ $t('slides.si.b1.lossyLossless') }}</div>
           <div class="text-3xl text-center mt-5">16 KB</div>
         </div>
       </div>

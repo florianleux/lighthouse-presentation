@@ -15,10 +15,10 @@ const optionData = computed(() => metricData.value.options[props.option])
   <div class="h-full flex flex-col gap-8">
     <div>
       <div class="text-4xl font-title">
-        {{ optionData.title }}
+        {{ $t(optionData.title) }}
       </div>
       <div class="text-left text-lg">
-        {{ optionData.subtitle }}
+        {{ $t(optionData.subtitle) }}
       </div>
     </div>
 

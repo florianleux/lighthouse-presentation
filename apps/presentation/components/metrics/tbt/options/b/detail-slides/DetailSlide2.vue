@@ -32,13 +32,12 @@ const masonryCss = `
           <img
             src="/images/grid-screenshot.webp"
             class="w-full ml-10 -mt-5 max-h-[335px] object-contain rounded-sm -rotate-1 shadow-sm"
-            alt="Mise en page CSS Grid"
+            :alt="$t('slides.tbt.b2.alt')"
           />
         </div>
 
         <div class="flex flex-col">
-          <div class="text-5xl text-center mb-6 -mt-2">Le design en
-            vaut-il le coût ?</div>
+          <div class="text-5xl text-center mb-6 -mt-2">{{ $t('slides.tbt.b2.title') }}</div>
 
           <div v-if="clicks >= 1">
             <CodeSnippet

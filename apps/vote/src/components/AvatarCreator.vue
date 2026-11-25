@@ -100,7 +100,7 @@ function handleJoin() {
         :disabled="isSpinning"
         @click="spinAndRandomize()"
       >
-        {{ isSpinning ? 'EN COURS...' : 'GÉNÉRER UN AVATAR' }}
+        {{ isSpinning ? $t('vote.avatar.spinning') : $t('vote.avatar.randomize') }}
       </button>
       <button
         class="flex-1 appearance-none py-4 px-4 text-xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed font-title uppercase"
@@ -108,7 +108,7 @@ function handleJoin() {
         :disabled="isSpinning"
         @click="handleJoin"
       >
-        REJOINDRE L'ÉQUIPAGE
+        {{ $t('vote.joinCrew') }}
       </button>
     </div>
   </div>

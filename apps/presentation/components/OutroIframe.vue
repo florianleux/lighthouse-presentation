@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { voteStore } from '../setup/main'
 import BlackMarketIframe from './BlackMarketIframe.vue'
 import { METRICS_LIST } from '../../../shared/metrics-data'
+import { formatMetric } from '../setup/i18n'
 
 // CLS = vote index 0, TBT = vote index 3
 // Visual branches: {cls}-{tbt} → a-a, a-b, b-a, b-b
@@ -51,9 +52,7 @@ const baseline: ScoreEntry = {
 const optimized = computed(() => scores.value?.[votePath.value] ?? null)
 
 function formatValue(key: string, value: number): string {
-  if (key === 'CLS') return value.toFixed(2)
-  if (value >= 1000) return (value / 1000).toFixed(1) + ' s'
-  return value + ' ms'
+  return formatMetric(key, value)
 }
 function thresholdColor(key: string, value: number): string {
   const metric = METRICS_LIST.find(m => m.name === key)

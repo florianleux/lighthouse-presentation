@@ -8,13 +8,12 @@
       metric="lcp"
       option="b"
     >
-      <div class="text-5xl text-left ml-10 mb-20">Le LCP varie
-        selon le viewport</div>
+      <div class="text-5xl text-left ml-10 mb-20">{{ $t('slides.lcp.b1.title') }}</div>
 
       <div v-click="1">
         <img
           src="/images/lcp-desktop.webp"
-          alt="LCP Bureau"
+          :alt="$t('slides.lcp.b1.altDesktop')"
           class="absolute left-[8%] bottom-[10%] h-[50%] w-auto"
         />
         <div class="absolute left-[18%] bottom-[21%] w-[38%] h-[19%] bg-[#39FF14]/40 border-2 border-[#39FF14]" />
@@ -23,7 +22,7 @@
       <div v-click="2">
         <img
           src="/images/lcp-mobile.webp"
-          alt="LCP Mobile"
+          :alt="$t('slides.lcp.b1.altMobile')"
           class="absolute right-[8%] bottom-[5%] h-[78%] w-auto"
         />
         <div class="absolute right-[8%] bottom-[4%] w-[19%] h-[15%] bg-[#39FF14]/40 border-2 border-[#39FF14]" />

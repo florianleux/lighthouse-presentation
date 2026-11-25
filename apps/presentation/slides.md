@@ -19,10 +19,17 @@ fonts:
 css: unocss
 ---
 
-<style src="./styles/fonts.css"></style>
 <style src="./styles/theme.css"></style>
 <style src="./styles/modals.css"></style>
-<div class="slide-bg" style="background-image: url('/backgrounds/home-bottom-left.webp')">
+<script setup>
+import { sessionStore } from './setup/main'
+</script>
+
+<!-- Mode local : pas d'app de vote, donc fond sans QR code -->
+<div
+  class="slide-bg"
+  :style="{ backgroundImage: localizedBg(`/backgrounds/${sessionStore.localMode ? 'home-bottom-left-local' : 'home-bottom-left'}.webp`) }"
+>
   <CrewJoinToast />
   <CrewScatter class="absolute top-[76%] bottom-[5%] right-[4%] left-[-2%]"/>
 </div>
@@ -31,7 +38,7 @@ css: unocss
 transition: slide-down
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/poll-br.webp')">
+<div class="slide-bg" :style="{ backgroundImage: localizedBg('/backgrounds/poll-br.webp') }">
   <PollButtons poll-id="knowledge-level" />
 </div>
 
@@ -40,12 +47,13 @@ transition: slide-right
 ---
 
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-right.webp')">
-<div class="text-4xl text-white font-title text-shadow-md">Les scores Lighthouse</div>
-<div class="text-left text-white text-lg text-shadow-md">L'outil open-source de Google pour auditer la qualité des pages web</div>
+<div class="text-4xl text-white font-title text-shadow-md">{{ $t('slides.intro.scoresTitle') }}</div>
+<div class="text-left text-white text-lg text-shadow-md">{{ $t('slides.intro.scoresSubtitle') }}</div>
 <div class="grid grid-cols-4 gap-4  text-white pt-8 text-center text-shadow-lg text-shadow-black">
-    <div v-click="4"  class="absolute font-bold left-[19%] text-white top-[24%] text-5xl">Performance</div>
-    <div v-click="3"  class="absolute font-bold text-4xl left-[44%] text-white top-[41%] ">Accessibilité</div>
-    <div v-click="2"  class="absolute font-bold text-4xl left-[65%] text-white top-[28%] ">Bonnes<br>pratiques</div>
+    <div v-click="5"  class="absolute font-bold left-[19%] text-white top-[24%] text-5xl">Performance</div>
+    <div v-click="4"  class="absolute font-bold text-[1.1rem] left-[43%] -translate-x-1/2 text-white top-[51%] " v-html="$t('slides.intro.agenticBrowsing')"></div>
+    <div v-click="3"  class="absolute font-bold text-4xl left-[44%] text-white top-[41%] ">{{ $t('slides.intro.accessibility') }}</div>
+    <div v-click="2"  class="absolute font-bold text-4xl left-[65%] text-white top-[28%] " v-html="$t('slides.intro.bestPractices')"></div>
     <div v-click="1" class="absolute text-4xl left-[89%] text-[#2a384c] top-[40%] font-bold">SEO</div>
 </div>
 </div>
@@ -56,12 +64,12 @@ transition: slide-up
 
 <div class="slide-bg" style="background-image: url('/backgrounds/home-top-left.webp')">
 <div class="text-shadow-md text-white">
-<div class="text-4xl text-white font-title">Pourquoi la performance compte-t-elle ?</div>
+<div class="text-4xl text-white font-title">{{ $t('slides.intro.whyTitle') }}</div>
 
 
 <div class="text-center">
     <div v-click class="text-9xl mt-20 text-white text-center font-bold">24%</div>
-    <div v-click class="text-4xl">d'<span class="font-bold">abandon</span> en moins<br> sur les pages respectant<br> les standards de performance de Google</div>
+    <div v-click class="text-4xl" v-html="$t('slides.intro.whyStat')"></div>
 </div>
 </div>
 
@@ -72,7 +80,7 @@ transition: slide-up
 transition: slide-up
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/blackmarket-middle.webp')"></div>
+<div class="slide-bg" :style="{ backgroundImage: localizedBg('/backgrounds/blackmarket-middle.webp') }"></div>
 
 ---
 transition: slide-up
@@ -94,7 +102,7 @@ transition: slide-left
 transition: fade
 ---
 
-<div class="slide-bg" style="background-image: url('/backgrounds/intro-ter-br.webp');"></div>
+<div class="slide-bg" :style="{ backgroundImage: localizedBg('/backgrounds/intro-ter-br.webp') }"></div>
 
 ---
 transition: fade

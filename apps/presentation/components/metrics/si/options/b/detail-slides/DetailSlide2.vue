@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 const pictureWrapper = `<picture>
   ...
 </picture>`
@@ -21,7 +25,7 @@ const sourceWebp = `<source
   "
 >`
 
-const imgFallback = `<img
+const imgFallback = computed(() => `<img
   srcset="
     banner-400.png  400w,
     banner-800.png  800w,
@@ -32,8 +36,8 @@ const imgFallback = `<img
     50vw
   "
   src="banner-800.png"
-  alt="Bannière promo"
->`
+  alt="${t('slides.si.b2.codeAlt')}"
+>`)
 </script>
 
 <template>
@@ -43,7 +47,7 @@ const imgFallback = `<img
       metric="si"
       option="b"
     >
-      <div class="text-5xl text-center mb-10">Des images sur-mesure !</div>
+      <div class="text-5xl text-center mb-10">{{ $t('slides.si.b2.title') }}</div>
 
       <div
         v-click="1"

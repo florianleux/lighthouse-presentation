@@ -37,12 +37,12 @@ function answer(choice: PollChoice) {
       />
       <img
         src="/poll/newbie.webp"
-        alt="Matelot"
+        :alt="$t('vote.poll.newbie')"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Matelot</div>
+      >{{ $t('vote.poll.newbie') }}</div>
     </div>
 
 
@@ -57,12 +57,12 @@ function answer(choice: PollChoice) {
       />
       <img
         src="/poll/captain.webp"
-        alt="Capitaine"
+        :alt="$t('vote.poll.captain')"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Capitaine</div>
+      >{{ $t('vote.poll.captain') }}</div>
     </div>
 
     <div
@@ -76,12 +76,12 @@ function answer(choice: PollChoice) {
       />
       <img
         src="/poll/admiral.webp"
-        alt="Amiral"
+        :alt="$t('vote.poll.admiral')"
         class="absolute left-[50%]  -translate-x-1/2 m-auto h-[55%] top-[15%]"
       />
       <div
         class="absolute left-[50%] text-center text-3xl font-bold font-title text-black top-[69%] -translate-x-1/2 m-auto"
-      >Amiral</div>
+      >{{ $t('vote.poll.admiral') }}</div>
     </div>
   </div>
 </template>

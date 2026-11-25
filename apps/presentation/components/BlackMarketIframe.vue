@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { sessionStore } from '../setup/main'
 
 const props = withDefaults(defineProps<{
   url?: string
-  // Mode local (hors ligne) : capture affichée à la place de l'iframe
+  // Mode local : capture affichée tant que le site n'est pas joignable
   screenshot?: string
   scale?: number
   delay?: number
@@ -18,6 +18,22 @@ const props = withDefaults(defineProps<{
 const shouldLoad = ref(false)
 const container = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+
+// Mode local : on ne passe à l'iframe que si le site répond (sinon elle resterait vide)
+const isReachable = ref(false)
+
+async function probe() {
+  try {
+    await fetch(props.url, { mode: 'no-cors', cache: 'no-store', signal: AbortSignal.timeout(3000) })
+    isReachable.value = true
+  } catch {
+    // Hors ligne : on garde la capture
+  }
+}
+
+watch(() => sessionStore.localMode, (local) => {
+  if (local) probe()
+}, { immediate: true })
 
 onMounted(() => {
   if (!container.value) return
@@ -48,7 +64,7 @@ const scalePercent = 100 / props.scale
     class="w-full h-full"
   >
     <img
-      v-if="sessionStore.localMode"
+      v-if="shouldLoad && sessionStore.localMode && !isReachable"
       :src="screenshot"
       class="w-full h-full object-cover object-top"
       alt=""

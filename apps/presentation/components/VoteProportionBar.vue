@@ -133,7 +133,7 @@ async function edit(side: 'A' | 'B') {
         <div
           v-if="hasVotes || validated.A"
           class="-mt-2 text-xl"
-        >{{ countA }} voix</div>
+        >{{ $t('vote.voiceCount', { count: countA }) }}</div>
       </div>
     </div>
     <div class="absolute bottom-[10%] right-[11%] translate-x-1/2 text-option-b text-center">
@@ -156,7 +156,7 @@ async function edit(side: 'A' | 'B') {
         <div
           v-if="hasVotes || validated.B"
           class="-mt-2 text-xl"
-        >{{ countB }} voix</div>
+        >{{ $t('vote.voiceCount', { count: countB }) }}</div>
       </div>
     </div>
   </div>

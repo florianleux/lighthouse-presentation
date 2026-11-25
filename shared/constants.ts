@@ -67,4 +67,6 @@ export const STORAGE_KEYS = {
   // Vote app
   CREW_MEMBER: "lighthouse-pirates-crew",
   VOTE_STATE: "lighthouse-pirates-vote-state",
+  // Dernière langue reçue de la présentation (affichée avant la 1re session)
+  LANG: "lighthouse-pirates-lang",
 } as const;

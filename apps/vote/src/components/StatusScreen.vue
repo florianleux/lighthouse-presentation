@@ -18,22 +18,22 @@ defineEmits<{
       alt=""
       class=" animate-[spin_3s_linear_infinite] mx-auto mb-4"
     />
-    <p v-if="variant === 'connecting'">Connexion...</p>
-    <p v-else-if="variant === 'waiting'">En attente du capitaine...</p>
-    <p v-else-if="variant === 'error'">Erreur de connexion</p>
+    <p v-if="variant === 'connecting'">{{ $t('vote.status.connecting') }}</p>
+    <p v-else-if="variant === 'waiting'">{{ $t('vote.status.waiting') }}</p>
+    <p v-else-if="variant === 'error'">{{ $t('vote.status.error') }}</p>
     <p
       v-if="variant === 'waiting'"
       class="text-sm opacity-60 mt-2"
-    >La présentation n'a pas encore commencé</p>
+    >{{ $t('vote.status.notStarted') }}</p>
     <p
       v-if="variant === 'error'"
       class="text-sm opacity-60 mt-2"
-    >Vérifiez votre connexion internet ou désactivez votre bloqueur de pubs</p>
+    >{{ $t('vote.status.checkConnection') }}</p>
     <button
       v-if="variant === 'error'"
       type="button"
       class="mt-6 px-6 py-3 text-2xl rounded-xl bg-white/15 hover:bg-white/25 transition-colors"
       @click="$emit('retry')"
-    >Réessayer</button>
+    >{{ $t('vote.status.retry') }}</button>
   </div>
 </template>

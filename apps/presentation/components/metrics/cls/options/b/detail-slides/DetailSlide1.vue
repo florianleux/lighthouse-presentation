@@ -13,19 +13,19 @@ const codeExample = `.ad-container {
       option="b"
     >
       <div class="text-5xl text-center mb-20">
-        Pas de placeholder : décalage à l'injection.
+        {{ $t('slides.cls.b1.title') }}
       </div>
 
       <img
         src="/images/cls-ads-before.gif"
         class="absolute left-[21%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
-        alt="CLS publicités avant correction"
+        :alt="$t('slides.cls.b1.altBefore')"
       />
       <img
         v-click="1"
         src="/images/cls-ads-after.gif"
         class="absolute left-[83%] top-[65%] -translate-1/2 rounded shadow-lg w-[36%]"
-        alt="CLS publicités après correction"
+        :alt="$t('slides.cls.b1.altAfter')"
       />
 
       <CodeSnippet

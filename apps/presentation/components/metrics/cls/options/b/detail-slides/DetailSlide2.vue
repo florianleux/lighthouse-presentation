@@ -13,20 +13,21 @@ const stickyPositionCodeExample = `.banner-container {
       metric="cls"
       option="b"
     >
-      <div class="text-5xl text-center mb-20">
-        Le CLS a lieu<br>dans le flux.
-      </div>
+      <div
+        class="text-5xl text-center mb-20"
+        v-html="$t('slides.cls.b2.title')"
+      />
 
       <img
         src="/images/cls-banner-before.gif"
         class="absolute left-[20%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
-        alt="CLS bannière avant correction"
+        :alt="$t('slides.cls.b2.altBefore')"
       />
       <img
         v-click="1"
         src="/images/cls-banner-after.gif"
         class="absolute right-[0%] top-[54%] -translate-1/2 rounded shadow-lg h-[67%]"
-        alt="CLS bannière après correction"
+        :alt="$t('slides.cls.b2.altAfter')"
       />
 
       <CodeSnippet

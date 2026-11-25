@@ -18,7 +18,7 @@ const emit = defineEmits<{
       :value="modelValue"
       @input="emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       type="text"
-      placeholder="Votre nom"
+      :placeholder="$t('vote.name.placeholder')"
       maxlength="20"
       @keyup.enter="emit('submit')"
       class="appearance-none py-6 px-5 text-3xl border-2 border-white rounded-xl bg-white text-black outline-none transition-colors duration-200 focus:border-black placeholder:text-black/40 font-title text-center shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)]"
@@ -29,7 +29,7 @@ const emit = defineEmits<{
       :disabled="!canSubmit"
       class="appearance-none mt-3 py-6 px-8 text-3xl font-semibold text-black bg-[#E9BB23] shadow-[0_0_32px_-3px_rgba(0,0,0,0.62)] border-none rounded-xl cursor-pointer transition-all duration-200 hover:enabled:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed w-full font-title"
     >
-      REJOINDRE L'ÉQUIPAGE
+      {{ $t('vote.joinCrew') }}
     </button>
   </div>
 </template>

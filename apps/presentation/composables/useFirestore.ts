@@ -11,6 +11,7 @@ import type {
   PollChoice,
   SessionPhase,
 } from '../../../shared/types'
+import type { Lang } from '../../../shared/i18n/types'
 import {
   doc,
   collection,
@@ -105,7 +106,7 @@ async function deleteAllPresentations(excludeId?: string): Promise<void> {
   }
 }
 
-async function createPresentation(keynoteId: string, sessionId: string): Promise<string | null> {
+async function createPresentation(keynoteId: string, sessionId: string, lang: Lang): Promise<string | null> {
   if (!db) return null
 
   presentationId = sessionId
@@ -117,6 +118,7 @@ async function createPresentation(keynoteId: string, sessionId: string): Promise
       createdAt: Date.now(),
       active: true,
       phase: 'lobby',
+      lang,
     }
     await setDoc(presRef, presData)
 

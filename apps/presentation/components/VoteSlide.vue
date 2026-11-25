@@ -344,7 +344,7 @@ async function stopVoteSession() {
         <span
           v-else-if="isClosing"
           class="text-3xl"
-        >Dépouillement...</span>
+        >{{ $t('common.counting') }}</span>
         <template v-else>{{ timeRemaining }}</template>
       </div>
 
@@ -352,7 +352,7 @@ async function stopVoteSession() {
       <div
         class="absolute bottom-[29%] text-[#17443e] text-shadow-md left-1/2 -translate-x-1/2 text-3xl uppercase font-title opacity-80"
       >
-        {{ totalVotes }}/{{ sessionStore.crew.length }} votes
+        {{ $t('vote.participation', { count: totalVotes, total: sessionStore.crew.length }) }}
       </div>
 
       <!-- Vote proportion bar -->

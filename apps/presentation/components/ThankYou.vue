@@ -34,18 +34,17 @@ watch(currentSlideNo, () => {
     style="background-image: url('/backgrounds/end-top-right.webp')"
   >
     <div class="absolute left-[77%] top-[30%] -translate-1/2 text-center z-10 pointer-events-none  w-[50%]">
-      <div class="text-8xl text-white font-bold font-title">Merci !</div>
+      <div class="text-8xl text-white font-bold font-title">{{ $t('thankYou.title') }}</div>
     </div>
 
     <!-- Rolling credits -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none z-20">
 
       <div class="credits-scroll absolute flex flex-col items-center gap-3 text-white text-xl w-[50%]">
-        <span class="text-5xl mb-24 text-center w-[70%] text-white font-title">Un grand merci à l'équipe Volcamp
-          !</span>
+        <span class="text-5xl mb-24 text-center w-[70%] text-white font-title">{{ $t('thankYou.organizers') }}</span>
 
         <template v-if="crewNames.length > 0">
-          <span class="text-5xl text-white font-title">L'ÉQUIPAGE</span>
+          <span class="text-5xl text-white font-title">{{ $t('thankYou.crew') }}</span>
           <span
             v-for="(name, i) in crewNames"
             :key="i"

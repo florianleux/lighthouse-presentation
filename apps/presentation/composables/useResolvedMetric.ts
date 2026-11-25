@@ -1,4 +1,5 @@
 import { voteStore } from '../setup/main'
+import { t } from '../setup/i18n'
 import {
   getMetricByIndex,
   getMetricOption,
@@ -13,6 +14,14 @@ import {
  * Composable that resolves metric options accounting for derived options.
  * E.g., LCP option B dynamically becomes the FCP loser at runtime.
  */
+// Les titres/sous-titres de metrics-data sont des clés i18n : on les traduit en sortie.
+// Appelé dans un rendu ou un computed, le résultat suit la langue courante.
+function translateOption<T extends { title: string; subtitle?: string }>(opt: T): T {
+  const out = { ...opt, title: t(opt.title) }
+  if (opt.subtitle !== undefined) out.subtitle = t(opt.subtitle)
+  return out
+}
+
 export function useResolvedMetric() {
   const getWinner = (metricIndex: number) => voteStore.getChoice(metricIndex)
 
@@ -49,7 +58,7 @@ export function useResolvedMetric() {
       }
     }
 
-    return base
+    return { optionA: translateOption(base.optionA), optionB: translateOption(base.optionB) }
   }
 
   function getResolvedVoteProps(metricIndex: number) {
@@ -73,7 +82,7 @@ export function useResolvedMetric() {
       if (sourceOption) base.titleB = sourceOption.title
     }
 
-    return base
+    return { ...base, titleA: t(base.titleA), titleB: t(base.titleB) }
   }
 
   function getResolvedVoteData(metricIndex: number) {
@@ -97,7 +106,7 @@ export function useResolvedMetric() {
       if (sourceOption) base.B = { title: sourceOption.title }
     }
 
-    return base
+    return { A: translateOption(base.A), B: translateOption(base.B) }
   }
 
   function resolveSlideSource(

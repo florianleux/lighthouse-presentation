@@ -2,6 +2,9 @@
 // Shared types for Lighthouse Pirates
 // ===========================================
 
+
+import type { Lang } from "./i18n/types"
+
 // ===========================================
 // Pirate Avatar types
 // ===========================================
@@ -57,6 +60,8 @@ export interface SessionStateMessage {
   voteWinners?: Record<number, 'A' | 'B'>
   // Pre-resolved derived options (e.g., 'lcp:a' → FCP loser)
   resolvedDerived?: Record<string, ResolvedDerivedOption>
+  // Langue de la session (choisie dans l'admin de la présentation)
+  lang?: Lang
   timestamp: number
 }
 
@@ -90,6 +95,7 @@ export interface FirestorePresentation {
   pollResult?: { id: string; results: Record<string, number> }
   voteWinners?: Record<number, 'A' | 'B'>
   resolvedDerived?: Record<string, ResolvedDerivedOption>
+  lang?: Lang
 }
 
 export interface FirestoreParticipant {

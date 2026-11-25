@@ -18,8 +18,10 @@ const heroCSS = `.hero {
       <div class="grid grid-cols-2 items-start h-full">
         <!-- Left column: text + snippet -->
         <div class="flex flex-col gap-4">
-          <div class="text-5xl text-center mb-3">Et si on avait
-            <br>le meilleur des<br>deux mondes ?</div>
+          <div
+            class="text-5xl text-center mb-3"
+            v-html="$t('slides.lcp.b2.title')"
+          />
 
           <div v-click="1">
             <CodeSnippet

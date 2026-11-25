@@ -14,7 +14,8 @@
     "@slidev/cli": "^51.0.0",
     "@slidev/theme-default": "latest",
     "shiki": "^3.22.0",
-    "vue": "^3.5.0"
+    "vue": "^3.5.0",
+    "vue-i18n": "^11.4.23"
   },
   "devDependencies": {
     "@slidev/types": "^51.0.0"

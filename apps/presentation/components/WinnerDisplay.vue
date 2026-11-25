@@ -30,8 +30,7 @@ const winner = computed(() => {
       class="flex flex-col items-left h-full pt-5 text-center"
     >
       <div class="absolute left-[31%] top-[30%] w-[50%] -translate-1/2">
-        <div class="text-2xl">L'équipage a voté pour
-        </div>
+        <div class="text-2xl">{{ $t('winner.crewVotedFor') }}</div>
         <div class="font-bold font-title text-7xl">{{ winner.title }}</div>
       </div>
 
@@ -43,7 +42,7 @@ const winner = computed(() => {
       v-else
       class="mt-4 p-6 border rounded-lg text-center opacity-50"
     >
-      Aucun vote enregistré — retournez à la slide de vote
+      {{ $t('winner.noVote') }}
     </div>
   </div>
 </template>

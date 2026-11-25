@@ -7,7 +7,7 @@ import MetricIntro from '../../MetricIntro.vue'
     <template #right>
       <img
         src="/images/tbt.gif"
-        alt="démo SI"
+        :alt="$t('metricIntro.demoAlt', { metric: 'SI' })"
         class="absolute right-[10%] top-[12%] h-[75%] w-auto rounded shadow-md"
       />
     </template>

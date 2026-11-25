@@ -4,6 +4,8 @@ import { STORAGE_KEYS } from '../../../shared/constants'
 import type { SessionStateMessage, SessionPhase, PollChoice } from '../../../shared/types'
 import { getMetricByIndex } from '../../../shared/metrics-data'
 import { useFirestore } from './composables/useFirestore'
+import { setLang } from './i18n'
+import { useI18n } from 'vue-i18n'
 import { preloadAvatarPool } from './composables/useAvatar'
 import { preloadImage } from './utils/preloadImage'
 import AvatarStep from './components/AvatarStep.vue'
@@ -18,6 +20,7 @@ import DecorScene from './components/DecorScene.vue'
 import FadeInImg from './components/FadeInImg.vue'
 
 const { isConnected: firestoreConnected, hasConnectionError, hasReceivedSnapshot, connectionLost, connect, reconnect, onSessionState, watchConnection, registerParticipant, ensureParticipant, submitVote, submitPoll, submitFeedback } = useFirestore()
+const { t } = useI18n()
 
 // ===========================================
 // Persistence helpers
@@ -120,8 +123,8 @@ const isValid = computed(() => {
 const validationMessage = computed(() => {
   const trimmed = name.value.trim()
   if (trimmed.length === 0) return ''
-  if (trimmed.length < 2) return 'Minimum 2 caractères'
-  if (trimmed.length > 20) return 'Maximum 20 caractères'
+  if (trimmed.length < 2) return t('vote.name.min', { count: 2 })
+  if (trimmed.length > 20) return t('vote.name.max', { count: 20 })
   return ''
 })
 
@@ -136,6 +139,8 @@ const voteWinners = computed(() => sessionState.value?.voteWinners ?? {})
 
 function handleSessionState(msg: SessionStateMessage) {
   sessionState.value = msg
+  // La langue suit la présentation (aucun choix côté app de vote)
+  if (msg.lang) setLang(msg.lang)
 
   const isNewKeynote = msg.keynoteId !== keynoteId.value
 
@@ -473,7 +478,7 @@ onMounted(async () => {
       v-if="status === 'joined' && connectionLost"
       role="status"
       class="fixed top-3 left-1/2 -translate-x-1/2 z-[2000] m-0 px-4 py-2 rounded-xl bg-black/70 text-white text-base font-title"
-    >Reconnexion...</p>
+    >{{ $t('vote.reconnecting') }}</p>
 
   </div>
 </template>

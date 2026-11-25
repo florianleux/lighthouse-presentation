@@ -20,9 +20,10 @@ const subsetCode = `
       metric="si"
       option="a"
     >
-      <div class="text-5xl text-center mb-15">Les polices sont partout,
-        <br>il faut les compresser !
-      </div>
+      <div
+        class="text-5xl text-center mb-15"
+        v-html="$t('slides.si.a2.title')"
+      />
 
 
       <div :class="[clicks >= 4 ? 'grid grid-cols-2 gap-x-0' : '', 'transition-all duration-800 items-start']">
@@ -35,7 +36,7 @@ const subsetCode = `
           >
             <div class="text-2xl text-center opacity-70">1991</div>
             <div class="text-5xl text-center font-bold">TTF</div>
-            <div class="text-xl text-center opacity-70">Aucune compression</div>
+            <div class="text-xl text-center opacity-70">{{ $t('slides.si.a2.noCompression') }}</div>
             <div class="text-3xl text-center mt-5">~90 KB</div>
           </div>
 

@@ -17,19 +17,19 @@ const matchingMetricsCodeExample = `@font-face {
       option="a"
     >
       <div class="text-4xl text-center mb-20">
-        Chaque police a sa propre empreinte.
+        {{ $t('slides.cls.a2.title') }}
       </div>
 
       <img
         src="/images/cls-font-before.gif"
         class="absolute left-[20%] top-[60%] -translate-1/2 rounded shadow-lg w-[28%]"
-        alt="CLS police avant correction"
+        :alt="$t('slides.cls.a2.altBefore')"
       />
       <img
         v-click="1"
         src="/images/cls-font-after.gif"
         class="absolute -right-[12%] top-[60%] -translate-1/2 rounded shadow-lg w-[28%]"
-        alt="CLS police après correction"
+        :alt="$t('slides.cls.a2.altAfter')"
       />
 
       <CodeSnippet

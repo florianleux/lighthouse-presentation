@@ -297,7 +297,7 @@ const counters: { choice: PollChoice; style: string }[] = [
       <span
         v-if="isClosing"
         class="text-base"
-      >Dépouillement...</span>
+      >{{ $t('common.counting') }}</span>
       <template v-else>{{ timeRemaining }}</template>
     </div>
 
@@ -306,7 +306,7 @@ const counters: { choice: PollChoice; style: string }[] = [
       v-if="isPollActive"
       class="absolute -bottom-[3%] -right-[3%] -translate-1/2 text-xl font-bold font-title text-center text-white"
     >
-      {{ totalPollVotes }}/{{ sessionStore.crew.length }}<br>réponses
+      <span v-html="$t('poll.responses', { count: totalPollVotes, total: sessionStore.crew.length })" />
     </div>
 
     <button
@@ -314,7 +314,7 @@ const counters: { choice: PollChoice; style: string }[] = [
       class="absolute top-[89%] px-6 py-1 bg-yellow-500 text-white font-bold rounded-lg hover:bg-yellow-600 transition-all cursor-pointer text-lg"
       @click="stopPollSession()"
     >
-      Arrêter
+      {{ $t('poll.stop') }}
     </button>
   </div>
 </template>

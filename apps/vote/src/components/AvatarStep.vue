@@ -25,7 +25,7 @@ const { state, busy, run } = useSubmission()
     :disabled="busy"
   >
     <
-      Retour
+      {{ $t('common.back') }}
       </button
     >
       <p class="absolute top-[7.5%] left-[50%] z-1000 text-shadow-md text-shadow-black
@@ -45,7 +45,7 @@ const { state, busy, run } = useSubmission()
           alt=""
           class=" animate-[spin_3s_linear_infinite] mx-auto mb-4"
         />
-        <p>Embarquement...</p>
+        <p>{{ $t('vote.avatar.boarding') }}</p>
       </div>
 
 </template>

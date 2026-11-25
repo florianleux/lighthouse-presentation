@@ -172,15 +172,15 @@
         <div
           v-click="6"
           class="text-4xl font-bold"
-        >Éviter les redirections</div>
+        >{{ $t('slides.fcp.a2.redirects') }}</div>
         <div
           v-click="10"
           class="text-4xl font-bold"
-        >Utiliser un CDN</div>
+        >{{ $t('slides.fcp.a2.cdn') }}</div>
         <div
           v-click="10"
           class="text-4xl font-bold"
-        >Utiliser le cache</div>
+        >{{ $t('slides.fcp.a2.cache') }}</div>
       </div>
 
     </DetailSlide>

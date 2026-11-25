@@ -13,6 +13,7 @@ lighthouse-presentation/
 │   ├── types.ts              # Types partagés, Firestore, avatars
 │   ├── constants.ts          # Config Firestore, états de session
 │   ├── firebase.ts           # Initialisation Firebase
+│   ├── i18n/                 # Dictionnaires FR/EN, formats, images localisées
 │   └── avatars/              # Système d'avatars
 ├── pnpm-workspace.yaml
 └── package.json

@@ -2,6 +2,8 @@ import { reactive, ref, watch } from 'vue'
 import { defineAppSetup } from '@slidev/types'
 import { STORAGE_KEYS, POLL_CONFIG } from '../../../shared/constants'
 import { useFirestore } from '../composables/useFirestore'
+import { i18n, setLang, localizedBg } from './i18n'
+import { DEFAULT_LANG, isLang, type Lang } from '../../../shared/i18n/types'
 import type {
   CrewMember,
   VoteResults,
@@ -48,6 +50,7 @@ interface SessionData {
   voteResults: Record<number, VoteResults>
   pollResults: Record<string, PollResults>
   localMode?: boolean
+  lang?: Lang
 }
 
 function loadSessionData(): SessionData | null {
@@ -170,6 +173,9 @@ export const sessionStore = reactive({
   // Mode local : main levée, aucun accès réseau (choisi à la création de la session)
   localMode: initialSessionData?.localMode ?? false,
 
+  // Langue du contenu public (slides + app de vote), choisie à la création de la session
+  lang: (isLang(initialSessionData?.lang) ? initialSessionData?.lang : DEFAULT_LANG) as Lang,
+
   // Actions
   assignHandRaiseVote(voteIndex: number, side: 'A' | 'B', n: number) {
     const results = this.voteResults[voteIndex]
@@ -267,7 +273,7 @@ export const sessionStore = reactive({
     phaseData.value = {}
   },
 
-  async startNewSession(localMode = false) {
+  async startNewSession(localMode = false, lang: Lang = DEFAULT_LANG) {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(STORAGE_KEYS.SESSION_DATA)
     }
@@ -277,6 +283,8 @@ export const sessionStore = reactive({
     this.lastSlide = 1
     this.resetSession()
     this.localMode = localMode
+    this.lang = lang
+    setLang(lang)
     persistSession()
 
     firestore.disconnect()
@@ -289,7 +297,7 @@ export const sessionStore = reactive({
     // Create Firestore presentation document
     const connected = firestore.connect()
     if (connected && this.keynoteId) {
-      await firestore.createPresentation(this.keynoteId, this.keynoteId)
+      await firestore.createPresentation(this.keynoteId, this.keynoteId, this.lang)
       // Clean up all old presentations in background (keep only the new one)
       firestore.deleteAllPresentations(this.keynoteId)
       setupFirestoreListeners()
@@ -307,7 +315,7 @@ export const sessionStore = reactive({
 
     // Create Firestore presentation document
     if (firestore.isConnected.value && this.keynoteId) {
-      await firestore.createPresentation(this.keynoteId, this.keynoteId)
+      await firestore.createPresentation(this.keynoteId, this.keynoteId, this.lang)
       setupFirestoreListeners()
     }
 
@@ -327,6 +335,7 @@ function persistSession() {
     voteResults: sessionStore.voteResults,
     pollResults: sessionStore.pollResults,
     localMode: sessionStore.localMode,
+    lang: sessionStore.lang,
   })
 }
 
@@ -341,6 +350,12 @@ export function getFakeCrewIds(): string[] {
 // ===========================================
 
 export default defineAppSetup(({ app }) => {
+  // i18n : la langue restaurée de la session s'applique dès le premier rendu
+  setLang(sessionStore.lang)
+  app.use(i18n)
+  // Global : chaque slide de slides.md est un composant isolé (pas d'accès au <script setup>)
+  app.config.globalProperties.localizedBg = localizedBg
+
   // Connect to Firestore — jamais en mode local (toutes ses fonctions font `if (!db) return`)
   const connected = sessionStore.localMode ? false : firestore.connect()
   sessionStore.isRealtimeConnected = connected

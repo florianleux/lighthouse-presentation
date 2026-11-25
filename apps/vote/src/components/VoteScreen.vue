@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { MetricConfig } from '../../../../shared/metrics-data'
 import { getMetricByIndex, resolveDerivedOption } from '../../../../shared/metrics-data'
 import { FLOOR_POSITIONS } from '../../../../shared/floor-positions'
@@ -16,6 +17,7 @@ const props = defineProps<{
 }>()
 
 const { state, busy, run } = useSubmission()
+const { t } = useI18n()
 
 function resolveOption(option: 'a' | 'b') {
   const resolved = resolveDerivedOption(
@@ -26,8 +28,9 @@ function resolveOption(option: 'a' | 'b') {
   const sourceMetric = getMetricByIndex(resolved.metricIndex)
   const sourceOption = sourceMetric?.options[resolved.option]
   return {
-    title: sourceOption?.title ?? '',
-    subtitle: sourceOption?.subtitle ?? '',
+    // metrics-data contient des clés i18n
+    title: sourceOption ? t(sourceOption.title) : '',
+    subtitle: sourceOption ? t(sourceOption.subtitle) : '',
     metricName: resolved.metricName,
     option: resolved.option,
   }

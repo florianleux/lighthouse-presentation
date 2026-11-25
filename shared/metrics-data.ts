@@ -11,8 +11,8 @@
  * A single choice option (A or B) for a metric
  */
 export interface MetricOption {
-  title: string;
-  subtitle: string;
+  title: string; // clé i18n (ex. "metrics.cls.options.a.title")
+  subtitle: string; // clé i18n
 }
 
 /**
@@ -22,12 +22,6 @@ export interface MetricOptions {
   a: MetricOption;
   b: MetricOption;
 }
-
-/**
- * Threshold values for metric scoring
- * Can be numbers (e.g., 0.1) or strings (e.g., '1.8 sec')
- */
-export type ThresholdValue = number | string;
 
 /**
  * Complete metric configuration
@@ -40,11 +34,10 @@ export interface MetricConfig {
   weight: number; // Percentage (25, 10, 25, 30, 10)
 
   // For MetricIntro component
-  thresholds: [ThresholdValue, ThresholdValue]; // [good, poor] boundaries
-  thresholdsMs: [number, number]; // numeric thresholds in ms (or raw for CLS)
+  thresholdsMs: [number, number]; // [good, poor] in ms (or raw for CLS) — formatés via shared/i18n/format
   baseline: number; // baseline value in ms (or raw for CLS)
-  formula: string; // h3 prop - description/formula
-  tags: string[]; // Key points (up to 4)
+  formula: string; // clé i18n — description/formula
+  tags: string[]; // clés i18n — key points (up to 4)
   // Vote options
   options: MetricOptions;
 }
@@ -71,19 +64,18 @@ export const METRICS: MetricsData = {
     name: "CLS",
     fullName: "Cumulative Layout Shift",
     weight: 25,
-    thresholds: [0.1, 0.25],
     thresholdsMs: [0.1, 0.25],
     baseline: 0.35,
-    formula: "Instabilité du contenu pendant le chargement",
-    tags: ["Tueur de confiance", "Impacte le SEO !"],
+    formula: "metrics.cls.formula",
+    tags: ["metrics.cls.tags.0", "metrics.cls.tags.1"],
     options: {
       a: {
-        title: "Contenu",
-        subtitle: "Maîtriser ce que l'on publie",
+        title: "metrics.cls.options.a.title",
+        subtitle: "metrics.cls.options.a.subtitle",
       },
       b: {
-        title: "Ads",
-        subtitle: "Dompter les injections",
+        title: "metrics.cls.options.b.title",
+        subtitle: "metrics.cls.options.b.subtitle",
       },
     },
   },
@@ -93,19 +85,18 @@ export const METRICS: MetricsData = {
     name: "FCP",
     fullName: "First Contentful Paint",
     weight: 10,
-    thresholds: ["1.8 sec", "3.0 sec"],
     thresholdsMs: [1800, 3000],
     baseline: 6000,
-    formula: "Texte, image, SVG ou canvas",
-    tags: ["Quelque chose se passe-t-il ?", "Un FCP bas est rassurant"],
+    formula: "metrics.fcp.formula",
+    tags: ["metrics.fcp.tags.0", "metrics.fcp.tags.1"],
     options: {
       a: {
-        title: "TTFB",
-        subtitle: "Livrer le premier octet au plus vite",
+        title: "metrics.fcp.options.a.title",
+        subtitle: "metrics.fcp.options.a.subtitle",
       },
       b: {
-        title: "Le chemin de rendu critique",
-        subtitle: "Fluidifier l'affichage",
+        title: "metrics.fcp.options.b.title",
+        subtitle: "metrics.fcp.options.b.subtitle",
       },
     },
   },
@@ -115,22 +106,18 @@ export const METRICS: MetricsData = {
     name: "LCP",
     fullName: "Largest Contentful Paint",
     weight: 25,
-    thresholds: ["2.5 sec", "4.0 sec"],
     thresholdsMs: [2500, 4000],
     baseline: 15000,
-    formula: "Temps de rendu du plus grand élément",
-    tags: [
-      "Core Web Vital : impacte le SEO !",
-      "Mesure la vitesse de chargement perçue",
-    ],
+    formula: "metrics.lcp.formula",
+    tags: ["metrics.lcp.tags.0", "metrics.lcp.tags.1"],
     options: {
       a: {
-        title: "[PLACEHOLDER Option A]",
-        subtitle: "[PLACEHOLDER sous-titre]",
+        title: "metrics.lcp.options.a.title",
+        subtitle: "metrics.lcp.options.a.subtitle",
       },
       b: {
-        title: "Focus sur le LCP",
-        subtitle: "Jouer avec la zone grise...",
+        title: "metrics.lcp.options.b.title",
+        subtitle: "metrics.lcp.options.b.subtitle",
       },
     },
   },
@@ -140,19 +127,18 @@ export const METRICS: MetricsData = {
     name: "TBT",
     fullName: "Total Blocking Time",
     weight: 30,
-    thresholds: ["200 ms", "600 ms"],
     thresholdsMs: [200, 600],
     baseline: 750,
-    formula: "Somme des temps de blocage au-delà de 50 ms",
-    tags: ["Parsing JSON", "Calculs de mise en page"],
+    formula: "metrics.tbt.formula",
+    tags: ["metrics.tbt.tags.0", "metrics.tbt.tags.1"],
     options: {
       a: {
-        title: "Diète des données",
-        subtitle: "Envoyer le strict nécessaire",
+        title: "metrics.tbt.options.a.title",
+        subtitle: "metrics.tbt.options.a.subtitle",
       },
       b: {
-        title: "Sobriété du design",
-        subtitle: "La fantaisie a un coût",
+        title: "metrics.tbt.options.b.title",
+        subtitle: "metrics.tbt.options.b.subtitle",
       },
     },
   },
@@ -162,22 +148,18 @@ export const METRICS: MetricsData = {
     name: "SI",
     fullName: "Speed Index",
     weight: 10,
-    thresholds: ["3.4 sec", "5.8 sec"],
     thresholdsMs: [3400, 5800],
     baseline: 6500,
-    formula: "Rapidité moyenne de l'affichage du contenu",
-    tags: [
-      "Vitesse totale de remplissage, pas un instant",
-      "Mesuré en labo uniquement, pas sur le terrain",
-    ],
+    formula: "metrics.si.formula",
+    tags: ["metrics.si.tags.0", "metrics.si.tags.1"],
     options: {
       a: {
-        title: "Texte",
-        subtitle: "Polices et fichiers textes",
+        title: "metrics.si.options.a.title",
+        subtitle: "metrics.si.options.a.subtitle",
       },
       b: {
-        title: "Images",
-        subtitle: "Sur-mesure, compressées, intactes",
+        title: "metrics.si.options.b.title",
+        subtitle: "metrics.si.options.b.subtitle",
       },
     },
   },

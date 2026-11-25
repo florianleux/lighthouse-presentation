@@ -13,8 +13,8 @@ const emit = defineEmits<{
 }>()
 
 const genders: { value: Gender; label: string }[] = [
-  { value: 'male', label: 'Homme' },
-  { value: 'female', label: 'Femme' },
+  { value: 'male', label: 'vote.avatar.gender.male' },
+  { value: 'female', label: 'vote.avatar.gender.female' },
 ]
 
 function handleClick(gender: Gender) {
@@ -39,7 +39,7 @@ function handleClick(gender: Gender) {
         :disabled="disabled"
         @click="handleClick(gender.value)"
       >
-        {{ gender.label }}
+        {{ $t(gender.label) }}
       </button>
     </div>
   </div>

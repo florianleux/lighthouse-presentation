@@ -37,7 +37,7 @@ const jsCodeExample = `document.write()`
           class="absolute top-[50%] left-[20%] text-2xl text-[#FF2626] font-bold origin-left"
           style="transform: rotate(-30deg)"
         >
-          stop !
+          {{ $t('slides.fcp.b1.stop') }}
         </div>
 
       </div>
@@ -59,7 +59,7 @@ const jsCodeExample = `document.write()`
       </div>
 
       <div class="absolute text-center text-5xl top-[85%] left-[50%]">
-        FCP <div class="text-2xl -mt-3"> (pixels interactifs)</div>
+        FCP <div class="text-2xl -mt-3"> ({{ $t('slides.fcp.b1.interactivePixels') }})</div>
       </div>
 
 
@@ -106,7 +106,7 @@ const jsCodeExample = `document.write()`
           style="transform: rotate(90deg);"
         ></div>
         <div class="absolute italic text-2xl top-[66%] left-[62%]">
-          Rendu
+          {{ $t('slides.fcp.b1.rendering') }}
         </div>
 
       </div>

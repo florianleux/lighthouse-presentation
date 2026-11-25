@@ -13,9 +13,9 @@ const emit = defineEmits<{
 }>()
 
 const tones: { value: SkinTone; color: string; label: string }[] = [
-  { value: 'light', color: 'rgb(252 215 195)', label: 'Clair' },
-  { value: 'mid', color: 'rgb(209 133 89)', label: 'Moyen' },
-  { value: 'dark', color: 'rgb(85 63 48)', label: 'Foncé' },
+  { value: 'light', color: 'rgb(252 215 195)', label: 'vote.avatar.skin.light' },
+  { value: 'mid', color: 'rgb(209 133 89)', label: 'vote.avatar.skin.mid' },
+  { value: 'dark', color: 'rgb(85 63 48)', label: 'vote.avatar.skin.dark' },
 ]
 
 function handleClick(tone: SkinTone) {
@@ -37,6 +37,7 @@ function handleClick(tone: SkinTone) {
         class="size-15 rounded-full border-5 bg-transparent shadow-lg cursor-pointer p-1 transition-all duration-200 flex items-center justify-center hover:enabled:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
         :class="modelValue === tone.value ? 'border-[#ffd700]' : 'border-none'"
         type="button"
+        :aria-label="$t(tone.label)"
         :disabled="disabled"
         @click="handleClick(tone.value)"
       >

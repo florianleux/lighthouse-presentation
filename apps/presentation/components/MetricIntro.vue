@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { METRICS, type MetricName } from '../../../shared/metrics-data'
+import { formatMetric } from '../setup/i18n'
 
 const props = defineProps<{
   metric: MetricName
@@ -24,12 +25,11 @@ const baselinePosition = computed(() => {
   return Math.min(97, 66 + ((v - poor) / (poor - good)) * 33)
 })
 
-const baselineLabel = computed(() => {
-  const v = metricData.value.baseline
-  if (metricData.value.name === 'CLS') return v.toFixed(2)
-  if (v >= 1000) return (v / 1000).toFixed(1) + ' s'
-  return v + ' ms'
-})
+const baselineLabel = computed(() => formatMetric(metricData.value.name, metricData.value.baseline))
+
+const thresholdLabels = computed(() =>
+  metricData.value.thresholdsMs.map(v => formatMetric(metricData.value.name, v, { compactCls: true })),
+)
 </script>
 
 <template :key="metricData.name">
@@ -50,7 +50,7 @@ const baselineLabel = computed(() => {
         <div
           v-click="formulaClick"
           class="mt-25 text-5xl font-bold text-center"
-        >{{ metricData.formula }}</div>
+        >{{ $t(metricData.formula) }}</div>
 
         <div
           v-click="thresholdClick"
@@ -59,22 +59,22 @@ const baselineLabel = computed(() => {
           <div class="flex rounded overflow-hidden h-8 mt-8">
             <div
               class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 text-bold flex-1 flex items-center justify-center text-2xl"
-            >Bon</div>
+            >{{ $t('metricIntro.good') }}</div>
             <div
               class="bg-orange-500 border-y-1 border-orange-800 text-orange-900 font-bold flex-1 flex items-center justify-center text-2xl"
-            >Moyen</div>
+            >{{ $t('metricIntro.average') }}</div>
             <div
               class="bg-red-500 border-1 border-l-0 border-red-800 text-red-900 font-bold flex-1 flex items-center justify-center text-2xl"
-            >Mauvais</div>
+            >{{ $t('metricIntro.poor') }}</div>
           </div>
           <span
             class="absolute text-black text-shadow- font-title font-bold text-3xl"
             style="left: 33%; top: 180%; transform: translate(-50%, -50%)"
-          >{{ metricData.thresholds[0] }}</span>
+          >{{ thresholdLabels[0] }}</span>
           <span
             class="absolute text-black font-title font-bold text-3xl"
             style="left: 66%; top: 180%; transform: translate(-50%, -50%)"
-          >{{ metricData.thresholds[1] }}</span>
+          >{{ thresholdLabels[1] }}</span>
 
           <!-- Baseline logo marker -->
           <div

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { useNav } from '@slidev/client'
-import { sessionStore, voteStore, firestore } from '../setup/main'
+import { sessionStore, firestore } from '../setup/main'
 import { createFakeCrewMembers } from '../composables/useFirestore'
-import { METRICS_LIST } from '../../../shared/metrics-data'
+import type { Lang } from '../../../shared/i18n/types'
 
 const { go } = useNav()
 
@@ -20,6 +20,8 @@ const crewCount = computed(() => sessionStore.crew.length)
 const isGenerating = ref(false)
 // Mode de la prochaine session : appliqué au clic sur « Nouvelle session »
 const nextLocalMode = ref(sessionStore.localMode)
+// Langue de la prochaine session (slides + app de vote) : appliquée au même moment
+const nextLang = ref<Lang>(sessionStore.lang)
 const fakeCrewCount = ref(25)
 
 async function generateFakeParticipants() {
@@ -38,26 +40,7 @@ async function generateFakeParticipants() {
   }
 }
 const activeCrewCount = computed(() => sessionStore.activeCrew.length)
-const pollResults = computed(() => {
-  const raw = sessionStore.pollResults['knowledge-level']
-  return {
-    newbie: raw?.newbie ?? [],
-    captain: raw?.captain ?? [],
-    admiral: raw?.admiral ?? [],
-  }
-})
-
-const totalPollVotes = computed(() =>
-  pollResults.value.newbie.length +
-  pollResults.value.captain.length +
-  pollResults.value.admiral.length
-)
-
-const isPollDone = computed(() => sessionStore.pollPhase === 'ended')
 const isFirestoreConnected = computed(() => firestore.isConnected.value)
-
-// Get vote names from metrics data (CLS, FCP, LCP, TBT, SI)
-const voteNames = METRICS_LIST.map(m => m.name)
 
 async function startNewSession() {
   if (confirm('Démarrer une nouvelle session ? Cela réinitialisera l\'équipage et tous les votes.')) {
@@ -68,7 +51,7 @@ async function startNewSession() {
     await nextTick()
 
     // Reset session (await Firestore doc creation before navigating)
-    await sessionStore.startNewSession(nextLocalMode.value)
+    await sessionStore.startNewSession(nextLocalMode.value, nextLang.value)
 
     // Navigate to slide 1 (this will trigger publishSessionState via the watch in global-top)
     go(1)
@@ -80,142 +63,121 @@ async function startNewSession() {
   <Teleport to="body">
     <Transition name="slide">
       <div v-if="visible" class="side-panel-overlay" @click.self="$emit('close')">
-        <div class="side-panel">
-          <div class="panel-header">
-            <h2>Panneau d'administration</h2>
-            <button class="close-btn" @click="$emit('close')">×</button>
-          </div>
+        <aside class="side-panel">
+          <!-- Header -->
+          <header class="panel-header">
+            <div>
+              <h2>Administration</h2>
+              <div class="header-status">
+                <span class="badge" :class="sessionStore.localMode ? 'badge-local' : 'badge-classic'">
+                  {{ sessionStore.localMode ? 'Local' : 'Classique' }}
+                </span>
+                <span class="badge badge-classic">{{ sessionStore.lang.toUpperCase() }}</span>
+                <!-- Local : aucune connexion attendue, donc pas de voyant -->
+                <span v-if="sessionStore.localMode" class="status-text">Aucune connexion requise</span>
+                <template v-else>
+                  <span class="status-dot" :class="isFirestoreConnected ? 'ok' : 'ko'" />
+                  <span class="status-text">
+                    {{ isFirestoreConnected ? 'App de vote connectée' : 'App de vote déconnectée' }}
+                  </span>
+                </template>
+              </div>
+            </div>
+            <button class="close-btn" aria-label="Fermer" @click="$emit('close')">×</button>
+          </header>
 
           <div class="panel-content">
-            <!-- Vote Mode -->
-            <div class="section">
-              <label>Mode de la session</label>
-              <div class="radio-group">
-                <label class="radio-row">
+            <!-- Nouvelle session -->
+            <section class="card card-danger">
+              <h3 class="card-title">Nouvelle session</h3>
+              <div class="segmented" role="radiogroup" aria-label="Mode de la session">
+                <label class="segment" :class="{ active: !nextLocalMode }">
                   <input
                     type="radio"
                     name="vote-mode"
                     :checked="!nextLocalMode"
                     @change="nextLocalMode = false"
                   />
-                  <span class="toggle-label">Classique</span>
+                  <span class="segment-title">Classique</span>
+                  <span class="segment-desc">Vote sur l'app, minuteur</span>
                 </label>
-                <label class="radio-row">
+                <label class="segment" :class="{ active: nextLocalMode }">
                   <input
                     type="radio"
                     name="vote-mode"
                     :checked="nextLocalMode"
                     @change="nextLocalMode = true"
                   />
-                  <span class="toggle-label">Local</span>
+                  <span class="segment-title">Local</span>
+                  <span class="segment-desc">Main levée, sans réseau</span>
                 </label>
               </div>
-              <p class="toggle-hint">
-                {{ nextLocalMode ? 'Saisie à main levée, aucun accès réseau' : 'L\'audience vote depuis l\'app avec un minuteur (bots aléatoires)' }}<br>
-                Appliqué à la prochaine « Nouvelle session ».
-              </p>
-            </div>
-
-            <!-- Session Info -->
-            <div class="section">
-              <label>Session</label>
-              <div class="session-id">{{ keynoteId }}</div>
-              <button
-                class="panel-btn danger full-width"
-                style="margin-top: 8px"
-                @click="startNewSession"
-              >
-                Nouvelle session (tout réinitialiser)
-              </button>
-            </div>
-
-            <!-- Connection Status -->
-            <div class="section">
-              <label>Connexion</label>
-              <div class="connection-status">
-                <span
-                  class="connection-dot"
-                  :class="isFirestoreConnected || sessionStore.localMode ? 'connected' : 'disconnected'"
-                ></span>
-                <span class="connection-label">
-                  {{ sessionStore.localMode ? 'Local (hors ligne)' : `Firestore : ${isFirestoreConnected ? 'Connecté' : 'Hors ligne'}` }}
-                </span>
+              <div class="segmented" role="radiogroup" aria-label="Langue de la session">
+                <label class="segment" :class="{ active: nextLang === 'fr' }">
+                  <input
+                    type="radio"
+                    name="session-lang"
+                    :checked="nextLang === 'fr'"
+                    @change="nextLang = 'fr'"
+                  />
+                  <span class="segment-title">Français</span>
+                  <span class="segment-desc">Slides et app de vote en FR</span>
+                </label>
+                <label class="segment" :class="{ active: nextLang === 'en' }">
+                  <input
+                    type="radio"
+                    name="session-lang"
+                    :checked="nextLang === 'en'"
+                    @change="nextLang = 'en'"
+                  />
+                  <span class="segment-title">English</span>
+                  <span class="segment-desc">Slides et app de vote en EN</span>
+                </label>
               </div>
-            </div>
-
-            <!-- Crew Section -->
-            <div class="section">
-              <label>Équipage</label>
+              <button class="btn btn-danger full-width" @click="startNewSession">
+                Réinitialiser et démarrer en {{ nextLocalMode ? 'Local' : 'Classique' }} · {{ nextLang.toUpperCase() }}
+              </button>
+              <p class="hint">Efface l'équipage et tous les votes.</p>
+              <div class="session-id" :title="keynoteId ?? ''">{{ keynoteId ?? 'Aucune session' }}</div>
+            </section>
+            <!-- Équipage -->
+            <section class="card">
+              <h3 class="card-title">Équipage</h3>
               <div class="stats">
                 <div class="stat">
                   <span class="stat-value">{{ crewCount }}</span>
-                  <span class="stat-label">Total</span>
+                  <span class="stat-label">Membres</span>
                 </div>
-                <div class="stat">
+                <div v-if="!sessionStore.localMode" class="stat">
                   <span class="stat-value">{{ activeCrewCount }}</span>
-                  <span class="stat-label">Actifs</span>
+                  <span class="stat-label">Connectés</span>
                 </div>
               </div>
-              <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+              <div class="inline-form">
                 <input
                   v-model.number="fakeCrewCount"
                   type="number"
                   min="1"
                   max="500"
-                  class="crew-count-input"
+                  class="number-input"
+                  aria-label="Nombre de bots"
                 />
                 <button
-                  class="panel-btn secondary"
-                  style="flex: 1"
+                  class="btn btn-secondary grow"
                   :disabled="isGenerating || (!isFirestoreConnected && !sessionStore.localMode)"
                   @click="generateFakeParticipants"
                 >
-                  {{ isGenerating ? 'Génération...' : 'Générer un faux équipage' }}
+                  {{ isGenerating ? 'Génération…' : '+ Ajouter des bots' }}
                 </button>
               </div>
-            </div>
+            </section>
 
-            <!-- Votes Section -->
-            <div class="section">
-              <label>Votes</label>
-              <div class="vote-results">
-                <!-- Poll row -->
-                <div class="vote-row">
-                  <span class="vote-index">SONDAGE</span>
-                  <span class="vote-counts">{{ totalPollVotes }} votes</span>
-                  <span
-                    class="vote-status"
-                    :class="isPollDone ? 'done' : 'pending'"
-                  >
-                    {{ isPollDone ? 'TERMINÉ' : 'EN COURS' }}
-                  </span>
-                </div>
-                <!-- Vote rows -->
-                <div
-                  v-for="(results, index) in sessionStore.voteResults"
-                  :key="index"
-                  class="vote-row"
-                >
-                  <span class="vote-index">{{ voteNames[index] }}</span>
-                  <span class="vote-counts">
-                    A: {{ results.A.length }} | B: {{ results.B.length }}
-                    <span v-if="voteStore.path[index]" class="vote-winner">→ {{ voteStore.path[index] }}</span>
-                  </span>
-                  <span
-                    class="vote-status"
-                    :class="voteStore.path[index] !== null ? 'done' : 'pending'"
-                  >
-                    {{ voteStore.path[index] !== null ? 'TERMINÉ' : 'EN COURS' }}
-                  </span>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div class="panel-footer">
-            Appuyez sur <kbd>K</kbd> pour fermer
-          </div>
-        </div>
+          <footer class="panel-footer">
+            <kbd>K</kbd> ou <kbd>Échap</kbd> pour fermer
+          </footer>
+        </aside>
       </div>
     </Transition>
   </Teleport>
@@ -225,290 +187,332 @@ async function startNewSession() {
 .side-panel-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(2, 6, 23, 0.55);
+  backdrop-filter: blur(2px);
   z-index: 9999;
 }
 
 .side-panel {
+  --bg: #232e47;
+  --card: #2c3955;
+  --border: rgba(255, 255, 255, 0.1);
+  --text: #f1f5f9;
+  --muted: #a5b1c7;
+  --subtle: #7d8aa5;
+  --accent: #ffd700;
+  --accent-soft: rgba(255, 215, 0, 0.1);
+  --ok: #22c55e;
+  --ko: #ef4444;
+  --soft: rgba(255, 255, 255, 0.07);
+  --a: #3b82f6;
+  --b: #f59e0b;
+
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 500px;
-  background: #1e293b;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+  width: 440px;
+  max-width: 100vw;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
 }
 
+/* Header */
 .panel-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: flex-start;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
 .panel-header h2 {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 18px;
-  color: #ffd700;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  font-size: 24px;
-  cursor: pointer;
-  padding: 4px 8px;
-  line-height: 1;
-}
-
-.close-btn:hover {
-  color: white;
-}
-
-.panel-content {
-  padding: 20px;
-  overflow-y: auto;
-  flex: 1;
-}
-
-.section {
-  margin-bottom: 24px;
-}
-
-.section:last-child {
-  margin-bottom: 0;
-}
-
-.section label {
-  display: block;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-
-.stats {
-  display: flex;
-  gap: 24px;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-value {
-  font-size: 28px;
-  font-weight: bold;
-  color: white;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #64748b;
-}
-
-.vote-results {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.vote-row {
-  display: grid;
-  grid-template-columns: 120px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  font-size: 13px;
-}
-
-.vote-status {
-  font-size: 10px;
   font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  text-transform: uppercase;
+  color: var(--text);
 }
 
-.vote-status.done {
-  background: rgba(34, 197, 94, 0.2);
-  color: #22c55e;
-}
-
-.vote-status.pending {
-  background: rgba(148, 163, 184, 0.2);
-  color: #94a3b8;
-}
-
-.vote-index {
-  font-weight: 500;
-  color: white;
-}
-
-.vote-counts {
-  color: white;
-}
-
-.vote-winner {
-  color: #22c55e;
-  font-weight: 500;
-  margin-left: 8px;
-}
-
-.connection-status {
+.header-status {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
 }
 
-.connection-dot {
+.badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.badge-classic {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.badge-local {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.status-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
 }
 
-.connection-dot.connected {
-  background: #22c55e;
+.status-dot.ok {
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
 }
 
-.connection-dot.disconnected {
-  background: #ef4444;
+.status-dot.ko {
+  background: var(--ko);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
 }
 
-.connection-label {
-  color: #94a3b8;
-  font-size: 13px;
+.status-text {
+  font-size: 12px;
+  color: var(--muted);
 }
 
-.session-id {
-  font-family: monospace;
-  font-size: 11px;
-  color: #64748b;
-  word-break: break-all;
-}
-
-.panel-btn {
-  padding: 10px 14px;
+.close-btn {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.15s, color 0.15s;
 }
 
-.panel-btn.primary {
-  background: #ffd700;
-  color: #1e293b;
+.close-btn:hover {
+  background: var(--soft);
+  color: var(--text);
 }
 
-.panel-btn.primary:hover:not(:disabled) {
-  background: #ffc700;
+/* Content */
+.panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.panel-btn.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
 }
 
-.panel-btn.secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
+.card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.panel-btn.danger {
+.card-danger {
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+.card-title {
+  margin: 0 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Crew */
+.stats {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.inline-form {
+  display: flex;
+  gap: 8px;
+}
+
+.number-input {
+  width: 72px;
+  padding: 0 10px;
+  height: 38px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.number-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Buttons */
+.btn {
+  height: 38px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--soft);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.btn-danger {
   background: #dc2626;
   color: white;
 }
 
-.panel-btn.danger:hover:not(:disabled) {
+.btn-danger:hover:not(:disabled) {
   background: #ef4444;
 }
 
-.panel-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.actions {
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+.grow {
+  flex: 1;
 }
 
 .full-width {
   width: 100%;
 }
 
-.crew-count-input {
-  width: 70px;
-  padding: 8px 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: white;
-  font-size: 13px;
+/* New session */
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.segment {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.segment:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.segment.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.segment input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segment-title {
+  font-weight: 600;
+}
+
+.segment.active .segment-title {
+  color: var(--accent);
+}
+
+.segment-desc {
+  font-size: 12px;
+  color: var(--subtle);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--subtle);
   text-align: center;
 }
 
-/* Vote mode radios */
-.radio-group {
-  display: flex;
-  gap: 20px;
-}
-
-.section .radio-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 8px 0;
-  cursor: pointer;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.radio-row input {
-  accent-color: #ffd700;
-  cursor: pointer;
-}
-
-.toggle-label {
-  color: white;
-  font-size: 14px;
-}
-
-.toggle-hint {
-  margin-top: 4px;
+.session-id {
+  margin-top: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  color: #64748b;
+  color: var(--subtle);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* Footer */
 .panel-footer {
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border);
   font-size: 12px;
-  color: #64748b;
+  color: var(--subtle);
   text-align: center;
   flex-shrink: 0;
 }
 
 .panel-footer kbd {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
   border-radius: 4px;
+  background: var(--card);
   font-family: inherit;
+  font-size: 11px;
 }
 
 /* Slide transition */
@@ -519,7 +523,7 @@ async function startNewSession() {
 
 .slide-enter-active .side-panel,
 .slide-leave-active .side-panel {
-  transition: transform 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .slide-enter-from,

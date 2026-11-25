@@ -7,7 +7,7 @@ import MetricIntro from '../../MetricIntro.vue'
     <template #right>
       <img
         src="/images/cls.gif"
-        alt="démo CLS"
+        :alt="$t('metricIntro.demoAlt', { metric: 'CLS' })"
         class="absolute right-[10%] top-[12%] h-[75%]  w-auto rounded shadow-md"
       />
     </template>

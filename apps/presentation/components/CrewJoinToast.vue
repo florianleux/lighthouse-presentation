@@ -64,10 +64,10 @@ watch(
     class="flex flex-col text-center w-[5%] -rotate-34 items-center absolute right-[11.2%] -translate-1/2 top-[14.1%] text-white text-md font-bold font-title"
   >
     <span class="text-[#36A300] mr-1 text-3xl">{{ sessionStore.crew.length }}</span>
-    <span class="-mt-1 -rotate-6 mr-1.5 uppercase line-height-3 text-[#36A300] text-xs">membre{{
-      sessionStore.crew.length > 1 ?
-        's' : ''
-    }}<br>d'équipage</span>
+    <span
+      class="-mt-1 -rotate-6 mr-1.5 uppercase line-height-3 text-[#36A300] text-xs"
+      v-html="$t('crewToast.counter', sessionStore.crew.length)"
+    />
   </div>
   <div class="absolute top-35 -right-2 z-100 flex flex-col gap-0 pointer-events-none">
     <div
@@ -90,7 +90,7 @@ watch(
             />
           </div>
           <span class="font-bold text-[#36A300] text-md">{{ slot.member.name }}</span>
-          <span class="text-[#36A300] text-md">est à bord !</span>
+          <span class="text-[#36A300] text-md">{{ $t('crewToast.onBoard') }}</span>
         </div>
       </Transition>
     </div>

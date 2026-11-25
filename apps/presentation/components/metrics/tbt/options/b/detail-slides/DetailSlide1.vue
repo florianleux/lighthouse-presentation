@@ -36,13 +36,12 @@ items.forEach(item => {
           <img
             src="/images/masonry-screenshot.webp"
             class="w-full ml-20 max-h-[375px] object-contain rounded-sm -rotate-1 shadow-sm"
-            alt="Mise en page Masonry"
+            :alt="$t('slides.tbt.b1.alt')"
           />
         </div>
 
         <div class="flex flex-col">
-          <div class="text-5xl text-center mb-2 -mt-2">Layouts sophistiqués
-            = JS lourd !</div>
+          <div class="text-5xl text-center mb-2 -mt-2">{{ $t('slides.tbt.b1.title') }}</div>
 
           <div v-if="clicks >= 1">
             <CodeSnippet

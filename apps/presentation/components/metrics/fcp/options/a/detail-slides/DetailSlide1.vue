@@ -9,8 +9,7 @@
       option="a"
     >
       <div class="flex flex-col items-center">
-        <div class="text-center text-5xl transition-all duration-800 mt-15">La base de toutes les métriques.
-        </div>
+        <div class="text-center text-5xl transition-all duration-800 mt-15">{{ $t('slides.fcp.a1.title') }}</div>
 
         <div
           v-click="1"
@@ -19,13 +18,13 @@
           <div class="flex rounded mx-auto overflow-hidden h-8">
             <div
               class="bg-green-500 border-1 border-r-0 border-green-800 font-bold text-green-900 flex-1 flex items-center justify-center text-2xl"
-            >Bon</div>
+            >{{ $t('metricIntro.good') }}</div>
             <div
               class="bg-orange-500 border-y-1 border-orange-800 text-orange-900 font-bold flex-1 flex items-center justify-center text-2xl"
-            >Moyen</div>
+            >{{ $t('metricIntro.average') }}</div>
             <div
               class="bg-red-500 border-1 border-l-0 border-red-800 text-red-900 font-bold flex-1 flex items-center justify-center text-2xl"
-            >Mauvais</div>
+            >{{ $t('metricIntro.poor') }}</div>
           </div>
           <span
             class="absolute text-black font-title font-bold text-3xl"
